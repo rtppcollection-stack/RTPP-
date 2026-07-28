@@ -1,0 +1,6 @@
+{
+  "name": "RTPP Crypto Trading Terminal",
+  "description": "Crypto DEX trading terminal with risk calculator, PnL tracking, AI chat, and market analytics",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,211 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
+@import "@fontsource/jetbrains-mono/400.css";
+@import "@fontsource/jetbrains-mono/500.css";
+@import "@fontsource/jetbrains-mono/600.css";
+@import "@fontsource-variable/noto-sans-myanmar";
+
+@custom-variant dark (&:is(.dark *));
+@custom-variant light (&:is(.light *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+
+  --font-sans: "Inter", "Noto Sans Myanmar Variable", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+:root {
+  --radius: 0.5rem;
+
+  /* Dark trading terminal matching RTPP electric blue logo */
+  --background: oklch(0.12 0.03 255); /* #060913 */
+  --foreground: oklch(0.97 0.01 250); /* #f0f6fc */
+  --surface: oklch(0.16 0.04 255); /* #0c1328 */
+  --surface-2: oklch(0.2 0.05 255); /* #101a35 */
+  --card: oklch(0.16 0.04 255);
+  --card-foreground: oklch(0.97 0.01 250);
+  --popover: oklch(0.16 0.04 255);
+  --popover-foreground: oklch(0.97 0.01 250);
+
+  --primary: oklch(0.64 0.24 252); /* #0066FF vivid RTPP royal blue */
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.22 0.05 255);
+  --secondary-foreground: oklch(0.97 0.01 250);
+  --muted: oklch(0.22 0.04 255);
+  --muted-foreground: oklch(0.68 0.03 250);
+  --accent: oklch(0.72 0.2 230); /* bright cyan blue */
+  --accent-foreground: oklch(0.12 0.03 255);
+
+  --success: oklch(0.78 0.18 160); /* vibrant neon green */
+  --warning: oklch(0.82 0.16 85); /* amber */
+  --danger: oklch(0.68 0.22 25); /* red */
+  --destructive: oklch(0.68 0.22 25);
+  --destructive-foreground: oklch(0.97 0.01 250);
+
+  --border: oklch(0.26 0.05 255);
+  --input: oklch(0.22 0.04 255);
+  --ring: oklch(0.64 0.24 252);
+
+  --grid-line: color-mix(in oklab, oklch(0.64 0.24 252) 10%, transparent);
+  --shadow-glow: 0 0 45px -8px color-mix(in oklab, oklch(0.64 0.24 252) 45%, transparent);
+}
+
+html.light,
+.light {
+  color-scheme: light;
+
+  /* High-Contrast Light Mode for daytime readability */
+  --background: oklch(0.97 0.01 250); /* Crisp light background */
+  --foreground: oklch(0.18 0.04 255); /* High-contrast charcoal text */
+  --surface: oklch(0.99 0.005 250); /* Pure white surface cards */
+  --surface-2: oklch(0.94 0.015 250); /* Light slate secondary surface */
+  --card: oklch(0.99 0.005 250);
+  --card-foreground: oklch(0.18 0.04 255);
+  --popover: oklch(0.99 0.005 250);
+  --popover-foreground: oklch(0.18 0.04 255);
+
+  --primary: oklch(0.52 0.24 252); /* Deep RTPP royal blue for high legibility */
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.93 0.02 250);
+  --secondary-foreground: oklch(0.18 0.04 255);
+  --muted: oklch(0.92 0.02 250);
+  --muted-foreground: oklch(0.4 0.04 250);
+  --accent: oklch(0.55 0.2 230);
+  --accent-foreground: oklch(0.99 0 0);
+
+  --success: oklch(0.52 0.18 160); /* Emerald green */
+  --warning: oklch(0.58 0.18 85); /* Crisp amber */
+  --danger: oklch(0.55 0.22 25); /* Crimson red */
+  --destructive: oklch(0.55 0.22 25);
+  --destructive-foreground: oklch(0.99 0 0);
+
+  --border: oklch(0.82 0.03 250); /* Crisp subtle slate border */
+  --input: oklch(0.85 0.02 250);
+  --ring: oklch(0.52 0.24 252);
+
+  --grid-line: color-mix(in oklab, oklch(0.52 0.24 252) 10%, transparent);
+  --shadow-glow: 0 10px 30px -5px rgba(0, 102, 255, 0.15);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html {
+    color-scheme: dark;
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    background-image:
+      radial-gradient(
+        1200px 600px at 10% -10%,
+        color-mix(in oklab, var(--primary) 8%, transparent),
+        transparent 60%
+      ),
+      radial-gradient(
+        900px 500px at 110% 10%,
+        color-mix(in oklab, var(--primary) 6%, transparent),
+        transparent 60%
+      ),
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size:
+      auto,
+      auto,
+      48px 48px,
+      48px 48px;
+    background-attachment: fixed;
+  }
+  .font-mono,
+  .num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+  :lang(my) {
+    font-family: "Noto Sans Myanmar Variable", "Inter", sans-serif;
+  }
+}
+
+@utility panel {
+  background: color-mix(in oklab, var(--surface) 85%, transparent);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+@utility glow {
+  box-shadow: var(--shadow-glow);
+}
+
+@utility text-up {
+  color: var(--success);
+}
+@utility text-down {
+  color: var(--danger);
+}
+@utility bg-up {
+  background-color: color-mix(in oklab, var(--success) 15%, transparent);
+  color: var(--success);
+}
+@utility bg-down {
+  background-color: color-mix(in oklab, var(--danger) 15%, transparent);
+  color: var(--danger);
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.4);
+  }
+}
+.live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--success);
+  box-shadow: 0 0 10px var(--success);
+  animation: pulse-dot 1.6s ease-in-out infinite;
+}
