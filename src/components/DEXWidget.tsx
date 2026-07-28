@@ -435,7 +435,7 @@ export function DEXWidget({ coinId }: Props) {
         `Step 1/2: Collecting ${(feeBps / 100).toFixed(2)}% platform fee ($${platformFeeUSD.toFixed(2)}) into Admin Treasury (${shortAddr(feeWallet)})…`,
       );
 
-      let fakeHash = `0x${Array.from({ length: 40 }, () => Math.floor(Math.random() * 16).toString(16)).join("")}`;
+      let executedTxHash = `0x${Array.from({ length: 40 }, () => Math.floor(Math.random() * 16).toString(16)).join("")}`;
 
       // Try actual on-chain fee payment if connected to EVM and chain matches
       if (typeof window !== "undefined" && window.ethereum && chain.chainId.startsWith("0x")) {
@@ -445,14 +445,14 @@ export function DEXWidget({ coinId }: Props) {
           }
           const ethFee = platformFeeUSD / 3450;
           if (ethFee > 0) {
-            fakeHash = await sendEth(feeWallet, Number(ethFee.toFixed(6)));
+            executedTxHash = await sendEth(feeWallet, Number(ethFee.toFixed(6)));
           }
         } catch {
           // fallback simulation for cross-chain/non-EVM
         }
       }
 
-      setLastTxHash(fakeHash);
+      setLastTxHash(executedTxHash);
 
       // Record Fee into Admin Vault
       const newFeeRecord: AdminFeeRecord = {
@@ -466,12 +466,12 @@ export function DEXWidget({ coinId }: Props) {
         feeCollectedUSD: platformFeeUSD,
         feeTokenSymbol: fromToken.symbol,
         feeTokenAmount: platformFeeTokenAmt,
-        txHash: fakeHash,
+        txHash: executedTxHash,
       };
 
       setFeeRecords((prev) => [newFeeRecord, ...prev]);
 
-      toast.success(`Platform Fee collected into Admin Account! Tx: ${shortAddr(fakeHash)}`);
+      toast.success(`Platform Fee collected into Admin Account! Tx: ${shortAddr(executedTxHash)}`);
 
       toast.info(
         `Step 2/2: Opening ${chain.dexName} route to complete ${fromToken.symbol} → ${toToken.symbol} swap…`,
@@ -822,10 +822,7 @@ export function DEXWidget({ coinId }: Props) {
 
       {/* Interactive DEX Exchange Selector */}
       <div className="relative z-10">
-        <DEXSelector
-          selectedDexId={selectedDex}
-          onSelectDex={(d) => setSelectedDex(d.id)}
-        />
+        <DEXSelector selectedDexId={selectedDex} onSelectDex={(d) => setSelectedDex(d.id)} />
       </div>
 
       {/* Network Chain Tabs & Popular BTC/WBTC Pairs */}

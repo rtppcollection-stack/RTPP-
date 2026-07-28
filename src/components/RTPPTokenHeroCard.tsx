@@ -18,6 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { RTPPLogoMark } from "@/components/Logo";
 import {
   AreaChart,
   Area,
@@ -75,11 +76,14 @@ export function RTPPTokenHeroCard({ onSelectToken }: { onSelectToken?: (id: stri
       {/* Top Banner Header */}
       <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 border-b border-border/60 pb-3.5">
         <div className="flex items-center gap-3">
-          <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 via-primary to-blue-600 shadow-md ring-2 ring-amber-400/50">
-            <Flame className="h-7 w-7 text-white animate-bounce" />
-            <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-amber-400 text-[9px] font-black text-black">
-              ★
-            </span>
+          <div className="relative flex items-center gap-2 p-1.5 rounded-2xl bg-gradient-to-br from-amber-500/20 via-orange-500/20 to-red-600/20 border border-amber-500/40 shadow-[0_0_20px_rgba(245,158,11,0.25)]">
+            <RTPPLogoMark className="h-12 w-12" />
+            <div className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-tr from-amber-500 via-orange-500 to-red-500 shadow-md shadow-orange-500/40 ring-1 ring-amber-300/60">
+              <Flame className="h-6 w-6 text-white animate-pulse drop-shadow-[0_0_8px_rgba(255,255,255,0.9)]" />
+              <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-amber-300 text-[9px] font-black text-black shadow">
+                🔥
+              </span>
+            </div>
           </div>
 
           <div>
@@ -110,6 +114,17 @@ export function RTPPTokenHeroCard({ onSelectToken }: { onSelectToken?: (id: stri
             <Zap className="h-4 w-4 fill-black" />
             <span>Instant Swap RTPP</span>
           </Button>
+
+          <a
+            href={`https://app.uniswap.org/#/swap?chain=mainnet&outputCurrency=${contractAddress}`}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center justify-center h-9 px-3.5 text-xs font-extrabold bg-pink-600/90 text-white hover:bg-pink-500 rounded-xl gap-1.5 shadow-md transition-all border border-pink-400/40"
+          >
+            <ExternalLink className="h-3.5 w-3.5" />
+            <span>Official Uniswap V3 Swap</span>
+          </a>
+
           {onSelectToken && (
             <Button
               size="sm"

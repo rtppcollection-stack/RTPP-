@@ -51,8 +51,7 @@ export interface AdminFeeRecord {
 }
 
 const ADMIN_FEE_STORAGE_KEY = "rtpp_admin_fee_records_v1";
-const ADMIN_ACCESS_KEY_STORAGE = "rtpp_admin_passcode_hash";
-const DEFAULT_PASSCODE = "admin123";
+const ADMIN_ACCESS_KEY_STORAGE = "rtpp_admin_passcode_custom_v2";
 const STATIC_BASE_TIME = 1770000000000;
 
 const DEFAULT_FEE_RECORDS: AdminFeeRecord[] = [
@@ -103,6 +102,9 @@ export function AdminControlPanel() {
 
   // Authentication State
   const [passcode, setPasscode] = useState("");
+  const [newPasscode, setNewPasscode] = useState("");
+  const [confirmPasscode, setConfirmPasscode] = useState("");
+  const [savedPasscode, setSavedPasscode] = useState<string | null>(null);
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [showPasscode, setShowPasscode] = useState(false);
 
@@ -116,6 +118,10 @@ export function AdminControlPanel() {
   useEffect(() => {
     setMounted(true);
     if (typeof window !== "undefined") {
+      const savedPass = localStorage.getItem(ADMIN_ACCESS_KEY_STORAGE);
+      if (savedPass) {
+        setSavedPasscode(savedPass);
+      }
       const saved = localStorage.getItem(ADMIN_FEE_STORAGE_KEY);
       if (saved) {
         try {
@@ -134,13 +140,44 @@ export function AdminControlPanel() {
   }, [feeWallet, feeBps]);
 
   // Check if wallet address matches admin address
-  const isAdminWalletConnected =
-    address && feeWallet && address.toLowerCase() === feeWallet.toLowerCase();
+  const isAdminWalletConnected = Boolean(
+    address && feeWallet && address.toLowerCase() === feeWallet.toLowerCase(),
+  );
+
+  // Auto-unlock when connected wallet matches designated Admin Wallet
+  useEffect(() => {
+    if (isAdminWalletConnected && !isUnlocked) {
+      setIsUnlocked(true);
+      toast.success(`Admin Wallet Verified (${shortAddr(address)})! Unlocked Admin Panel.`);
+    }
+  }, [isAdminWalletConnected, address, isUnlocked]);
+
+  // Set initial passcode
+  const handleSetPasscode = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!newPasscode || newPasscode.trim().length < 4) {
+      toast.error("Passcode must be at least 4 characters long.");
+      return;
+    }
+    if (newPasscode !== confirmPasscode) {
+      toast.error("Passcodes do not match.");
+      return;
+    }
+    localStorage.setItem(ADMIN_ACCESS_KEY_STORAGE, newPasscode.trim());
+    setSavedPasscode(newPasscode.trim());
+    setIsUnlocked(true);
+    toast.success("New Admin Security Passcode saved! Admin Panel Unlocked.");
+  };
 
   // Unlock check
   const handleUnlock = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (passcode === DEFAULT_PASSCODE || isAdminWalletConnected) {
+    if (isAdminWalletConnected) {
+      setIsUnlocked(true);
+      toast.success("Admin Treasury Wallet Verified! Unlocked Admin Control Panel.");
+      return;
+    }
+    if (savedPasscode && passcode === savedPasscode) {
       setIsUnlocked(true);
       toast.success("Gated Admin Control Panel Unlocked!");
     } else {
@@ -205,56 +242,139 @@ export function AdminControlPanel() {
             <Lock className="h-7 w-7" />
           </div>
           <h2 className="text-lg font-extrabold uppercase tracking-wide text-foreground">
-            Restricted Admin Control Panel
+            Private Admin Control Gate
           </h2>
           <p className="text-xs text-muted-foreground max-w-md mx-auto">
-            Gated security route. Sensitive platform swap fee analytics and treasury settings
-            require administrator authorization.
+            Protected private route. Only the authorized Platform Treasury Admin Wallet Address is
+            granted access.
           </p>
         </div>
 
-        {/* Unlock Form */}
-        <form
-          onSubmit={handleUnlock}
-          className="p-4 rounded-xl bg-surface/80 border border-border/80 space-y-3"
-        >
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-foreground flex items-center justify-between">
-              <span>Admin Access Passcode:</span>
-              <span className="text-[10px] text-muted-foreground">Default: admin123</span>
-            </label>
-            <div className="relative">
-              <Input
-                type={showPasscode ? "text" : "password"}
-                value={passcode}
-                onChange={(e) => setPasscode(e.target.value)}
-                placeholder="Enter admin passcode..."
-                className="font-mono text-xs bg-surface-2 border-border pr-10"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPasscode(!showPasscode)}
-                className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground"
-              >
-                {showPasscode ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </div>
+        {/* Primary Wallet Verification Status Card */}
+        <div className="p-4 rounded-xl bg-surface/90 border border-border/80 space-y-3">
+          <div className="flex items-center justify-between text-xs border-b border-border/60 pb-2">
+            <span className="text-muted-foreground">Designated Admin Wallet:</span>
+            <span className="font-bold text-amber-400 font-mono text-[11px] bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">
+              {shortAddr(feeWallet)}
+            </span>
           </div>
 
-          <Button
-            type="submit"
-            className="w-full bg-primary text-primary-foreground font-bold text-xs gap-2 h-10 uppercase"
-          >
-            <Key className="h-4 w-4" /> Unlock Admin Panel
-          </Button>
-
-          {isAdminWalletConnected && (
-            <div className="p-2 rounded-lg bg-success/15 border border-success/30 text-[11px] text-success font-bold text-center">
-              🟢 Connected Wallet ({shortAddr(address)}) matches Admin Treasury! You can unlock
-              directly.
+          <div className="space-y-2 text-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Connected Wallet Status:</span>
+              {isAdminWalletConnected ? (
+                <span className="text-success font-bold flex items-center gap-1 text-[11px] bg-success/15 px-2 py-0.5 rounded border border-success/30">
+                  <ShieldCheck className="h-3.5 w-3.5" /> Verified Admin Wallet (
+                  {shortAddr(address)})
+                </span>
+              ) : address ? (
+                <span className="text-destructive font-bold text-[11px] bg-destructive/10 px-2 py-0.5 rounded border border-destructive/30">
+                  ⛔ Connected ({shortAddr(address)}) — Not Admin Wallet
+                </span>
+              ) : (
+                <span className="text-muted-foreground font-bold text-[11px] bg-surface-2 px-2 py-0.5 rounded border border-border">
+                  ⚪ No Wallet Connected
+                </span>
+              )}
             </div>
-          )}
-        </form>
+
+            {isAdminWalletConnected ? (
+              <Button
+                onClick={() => setIsUnlocked(true)}
+                className="w-full bg-success text-success-foreground hover:bg-success/90 font-bold text-xs gap-2 h-10 uppercase shadow-md mt-2"
+              >
+                <Unlock className="h-4 w-4" /> Enter Admin Panel (Wallet Verified)
+              </Button>
+            ) : (
+              <div className="pt-1">
+                <p className="text-[11px] text-muted-foreground mb-2 text-center">
+                  Connect the Web3 wallet holding the admin address (
+                  <strong className="text-foreground">{shortAddr(feeWallet)}</strong>) to
+                  automatically gain access:
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Secondary Passcode Authentication */}
+        {!savedPasscode ? (
+          <form
+            onSubmit={handleSetPasscode}
+            className="p-4 rounded-xl bg-surface/80 border border-primary/40 space-y-3"
+          >
+            <div className="p-2.5 rounded-lg bg-primary/10 border border-primary/30 text-xs text-primary font-semibold">
+              🔒 <strong>First-Time Admin Setup:</strong> Please set a secure Admin Access Passcode
+              for your platform control panel.
+            </div>
+            <div className="space-y-2">
+              <div>
+                <label className="text-xs font-bold text-foreground">
+                  New Admin Security Passcode:
+                </label>
+                <Input
+                  type="password"
+                  value={newPasscode}
+                  onChange={(e) => setNewPasscode(e.target.value)}
+                  placeholder="Enter new admin passcode..."
+                  className="font-mono text-xs bg-surface-2 border-border mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-foreground">Confirm Admin Passcode:</label>
+                <Input
+                  type="password"
+                  value={confirmPasscode}
+                  onChange={(e) => setConfirmPasscode(e.target.value)}
+                  placeholder="Confirm admin passcode..."
+                  className="font-mono text-xs bg-surface-2 border-border mt-1"
+                />
+              </div>
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full bg-primary text-primary-foreground font-bold text-xs gap-2 h-10 uppercase"
+            >
+              <Key className="h-4 w-4" /> Save Passcode &amp; Unlock
+            </Button>
+          </form>
+        ) : (
+          <form
+            onSubmit={handleUnlock}
+            className="p-4 rounded-xl bg-surface/80 border border-border/80 space-y-3"
+          >
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-foreground flex items-center justify-between">
+                <span>Admin Passcode Verification:</span>
+                <span className="text-[10px] text-muted-foreground">Protected Route</span>
+              </label>
+              <div className="relative">
+                <Input
+                  type={showPasscode ? "text" : "password"}
+                  value={passcode}
+                  onChange={(e) => setPasscode(e.target.value)}
+                  placeholder="Enter custom admin passcode..."
+                  className="font-mono text-xs bg-surface-2 border-border pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPasscode(!showPasscode)}
+                  className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground"
+                >
+                  {showPasscode ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full bg-primary text-primary-foreground font-bold text-xs gap-2 h-10 uppercase"
+            >
+              <Key className="h-4 w-4" /> Unlock Admin Panel
+            </Button>
+          </form>
+        )}
       </div>
     );
   }

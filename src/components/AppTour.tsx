@@ -48,7 +48,7 @@ const TOUR_STEPS: TourStep[] = [
   },
   {
     id: "wallet",
-    tab: "dashboard",
+    tab: "portfolio",
     category: "PORTFOLIO TRACKING",
     title: "Global Multi-Chain Wallet Portfolio",
     description:
@@ -64,7 +64,7 @@ const TOUR_STEPS: TourStep[] = [
   },
   {
     id: "gas",
-    tab: "dashboard",
+    tab: "portfolio",
     category: "NETWORK OPTIMIZATION",
     title: "Real-Time Network Gas Fee Tracker",
     description:
@@ -124,7 +124,7 @@ const TOUR_STEPS: TourStep[] = [
       "P2P profit/loss & fee breakdown scenario tables",
     ],
     icon: Calculator,
-    targetLabel: "Position Sizer & P2P Calculator",
+    targetLabel: "Position Sizer &  Calculator",
   },
 ];
 

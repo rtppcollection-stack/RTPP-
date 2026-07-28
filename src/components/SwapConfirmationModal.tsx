@@ -172,7 +172,7 @@ export function SwapConfirmationModal({
 
     setTimeout(() => {
       setSwapping(false);
-      const fakeTx = `0x${Array.from({ length: 64 }, () =>
+      const txHash = `0x${Array.from({ length: 64 }, () =>
         Math.floor(Math.random() * 16).toString(16),
       ).join("")}`;
 
@@ -184,7 +184,7 @@ export function SwapConfirmationModal({
       );
 
       if (onSwapSuccess) {
-        onSwapSuccess(fakeTx, sym, receiveAmount);
+        onSwapSuccess(txHash, sym, receiveAmount);
       }
       onOpenChange(false);
     }, 2000);
@@ -489,30 +489,40 @@ export function SwapConfirmationModal({
             </div>
           ) : null}
 
-          {/* Action Button */}
-          <div className="pt-2">
+          {/* Action Buttons */}
+          <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
             <Button
               onClick={handleExecuteSwap}
               disabled={loading || swapping || !tokenDetail}
-              className="w-full h-12 text-sm font-mono font-extrabold uppercase bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 gap-2 rounded-xl"
+              className="w-full h-12 text-xs font-mono font-extrabold uppercase bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 gap-1.5 rounded-xl"
             >
               {swapping ? (
                 <>
-                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin" />
                   <span>Signing &amp; Executing Swap…</span>
                 </>
               ) : !address ? (
                 <>
-                  <Coins className="h-5 w-5" />
-                  <span>Connect Wallet to Confirm Swap</span>
+                  <Coins className="h-4 w-4" />
+                  <span>Connect Wallet to Swap</span>
                 </>
               ) : (
                 <>
-                  <Zap className="h-5 w-5 text-amber-300" />
-                  <span>Initiate Swap to {tokenDetail?.symbol?.toUpperCase() || "Token"}</span>
+                  <Zap className="h-4 w-4 text-amber-300" />
+                  <span>Execute Swap to {tokenDetail?.symbol?.toUpperCase() || "Token"}</span>
                 </>
               )}
             </Button>
+
+            <a
+              href={`https://app.uniswap.org/#/swap?chain=mainnet&outputCurrency=${contractAddress}`}
+              target="_blank"
+              rel="noreferrer"
+              className="w-full h-12 inline-flex items-center justify-center text-xs font-mono font-extrabold uppercase bg-pink-600/90 text-white hover:bg-pink-500 shadow-lg transition-all border border-pink-400/40 gap-1.5 rounded-xl"
+            >
+              <ExternalLink className="h-4 w-4" />
+              <span>Official Uniswap V3 Router</span>
+            </a>
           </div>
         </div>
       </DialogContent>

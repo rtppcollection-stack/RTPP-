@@ -17,7 +17,6 @@ import { NFTGallery } from "@/components/NFTGallery";
 import { DEXWidget } from "@/components/DEXWidget";
 import { TransactionHistory } from "@/components/TransactionHistory";
 import { WhaleAndNewsRadar } from "@/components/WhaleAndNewsRadar";
-import { AdminControlPanel } from "@/components/AdminControlPanel";
 import { RiskBadge } from "@/components/RiskGauge";
 import { RTPPTokenHeroCard } from "@/components/RTPPTokenHeroCard";
 import { AIChat } from "@/components/AIChat";
@@ -35,6 +34,7 @@ import {
   Radar,
   ShieldCheck,
   Loader2,
+  Wallet,
 } from "lucide-react";
 import { Toaster } from "sonner";
 
@@ -83,15 +83,19 @@ function Home() {
   return (
     <div className="min-h-screen text-foreground bg-[radial-gradient(ellipse_at_top,hsl(var(--primary)/0.08),transparent_60%)]">
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2.5">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 sm:gap-3 px-2.5 sm:px-4 py-2 sm:py-2.5">
           <Logo />
-          <div className="flex items-center gap-2">
-            <div className="hidden md:inline-flex items-center gap-1.5 rounded-full border border-success/30 bg-success/10 px-2.5 py-1 text-[10px] font-mono font-semibold text-success">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="hidden lg:inline-flex items-center gap-1.5 rounded-full border border-success/30 bg-success/10 px-2.5 py-1 text-[10px] font-mono font-semibold text-success">
               <span className="live-dot" /> {t("live.badge")}
             </div>
-            <SocialLinks compact />
+            <div className="hidden sm:flex">
+              <SocialLinks compact />
+            </div>
             <ThemeToggle />
-            <AppTour currentTab={tab} onTabChange={setTab} />
+            <div className="hidden md:block">
+              <AppTour currentTab={tab} onTabChange={setTab} />
+            </div>
             <WalletButton />
             <LanguageSwitcher />
           </div>
@@ -101,11 +105,16 @@ function Home() {
       <main className="mx-auto max-w-7xl px-4 py-5 space-y-5">
         <Tabs value={tab} onValueChange={setTab} className="space-y-5">
           <div className="sticky top-[52px] z-30 -mx-4 px-4 py-2 bg-background/70 backdrop-blur-xl border-b border-border/40">
-            <TabsList className="mx-auto grid w-full max-w-5xl grid-cols-3 sm:grid-cols-6 gap-1 bg-surface/70 p-1 h-auto rounded-xl border border-border/60">
+            <TabsList className="mx-auto grid w-full max-w-6xl grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-1 bg-surface/70 p-1 h-auto rounded-xl border border-border/60">
               <TabTrig
                 value="dashboard"
                 icon={<LayoutDashboard className="h-4 w-4" />}
                 label="Dashboard"
+              />
+              <TabTrig
+                value="portfolio"
+                icon={<Wallet className="h-4 w-4 text-cyan-400" />}
+                label="Portfolio & Gas"
               />
               <TabTrig
                 value="swap"
@@ -119,19 +128,11 @@ function Home() {
               />
               <TabTrig value="calc" icon={<Calculator className="h-4 w-4" />} label="P2P Calc" />
               <TabTrig value="nft" icon={<Images className="h-4 w-4" />} label="NFT Market" />
-              <TabTrig
-                value="admin"
-                icon={<ShieldCheck className="h-4 w-4 text-emerald-400" />}
-                label="Admin Panel"
-              />
             </TabsList>
           </div>
 
           <TabsContent value="dashboard" className="space-y-4 mt-0">
-            <GlobalWalletBalance />
-            <NetworkGasTracker />
-
-            {/* Official Primary Native Token Spotlight Card */}
+            {/* Official Primary Native RTPP Collection Token Spotlight Card & Live Chart (FIRST ON DASHBOARD) */}
             <RTPPTokenHeroCard onSelectToken={setCoinId} />
 
             {/* Instant DEX Swap Terminal */}
@@ -162,6 +163,15 @@ function Home() {
               <PopularTokens onSelect={setCoinId} activeId={coinId} />
               <TokenPanel coinId={coinId} hideCalc />
             </div>
+          </TabsContent>
+
+          <TabsContent value="portfolio" className="space-y-4 mt-0">
+            <SectionHeader
+              title="Global Wallet Portfolio & Network Gas Tracker"
+              subtitle="Real-time multi-chain wallet balances, asset allocations, and live gas prices across ETH, SOL, BSC & Polygon."
+            />
+            <GlobalWalletBalance />
+            <NetworkGasTracker />
           </TabsContent>
 
           <TabsContent value="swap" className="space-y-4 mt-0">
@@ -210,10 +220,6 @@ function Home() {
               subtitle="List, buy and sell NFTs on Base / Zora with ultra-low gas."
             />
             <NFTGallery />
-          </TabsContent>
-
-          <TabsContent value="admin" className="space-y-4 mt-0">
-            <AdminControlPanel />
           </TabsContent>
         </Tabs>
 

@@ -171,8 +171,8 @@ export function NetworkGasTracker() {
       {/* Header Bar */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 pb-3">
         <div className="flex items-center gap-2.5">
-          <div className="h-10 w-10 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center font-bold border border-amber-500/30">
-            <Flame className="h-5 w-5 animate-bounce" />
+          <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-amber-500 via-orange-500 to-red-500 text-white flex items-center justify-center font-bold border border-amber-300/50 shadow-[0_0_15px_rgba(245,158,11,0.4)]">
+            <Flame className="h-5 w-5 animate-pulse drop-shadow-[0_0_6px_rgba(255,255,255,0.8)]" />
           </div>
           <div>
             <div className="flex items-center gap-2">

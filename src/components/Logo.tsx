@@ -1,22 +1,61 @@
+export function RTPPLogoMark({ className = "h-10 w-10" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 200 200"
+      className={`${className} shrink-0 drop-shadow-[0_0_12px_rgba(0,80,255,0.6)]`}
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <defs>
+        <linearGradient id="rtppBlueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#0018FF" />
+          <stop offset="50%" stopColor="#0043FE" />
+          <stop offset="100%" stopColor="#0072FF" />
+        </linearGradient>
+      </defs>
+      {/* Blue Circle Base */}
+      <circle cx="100" cy="100" r="96" fill="url(#rtppBlueGrad)" />
+
+      {/* White Crescent Arc on Left */}
+      <path d="M 125,8 A 92,92 0 1,0 125,192 A 80,80 0 1,1 125,8 Z" fill="#FFFFFF" />
+
+      {/* Black Text "RTPP" */}
+      <text
+        x="105"
+        y="108"
+        fill="#000000"
+        fontSize="50"
+        fontWeight="900"
+        fontFamily="ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+        textAnchor="middle"
+        letterSpacing="-1"
+      >
+        RTPP
+      </text>
+
+      {/* Black Text "collection" */}
+      <text
+        x="105"
+        y="146"
+        fill="#000000"
+        fontSize="32"
+        fontWeight="700"
+        fontFamily="ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+        textAnchor="middle"
+        letterSpacing="-0.5"
+      >
+        collection
+      </text>
+    </svg>
+  );
+}
+
 export function Logo({ className = "" }: { className?: string }) {
   return (
     <div className={`flex items-center gap-2.5 ${className}`}>
       <div className="relative shrink-0">
-        {/* RTPP Collection Logo Circle */}
-        <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-gradient-to-tr from-[#0030d8] via-[#005eff] to-[#00c8ff] p-0.5 shadow-[0_0_15px_rgba(0,102,255,0.6)] ring-1 ring-white/20">
-          {/* White Crescent Arc */}
-          <div className="absolute inset-0 rounded-full border-[2.5px] border-white/90 border-t-transparent border-r-transparent -rotate-45" />
-
-          {/* Internal Content */}
-          <div className="relative z-10 flex flex-col items-center justify-center text-center leading-none">
-            <span className="font-extrabold tracking-tight text-black text-[10px] font-sans drop-shadow-[0_1px_1px_rgba(255,255,255,0.4)]">
-              RTPP
-            </span>
-            <span className="text-[6.5px] font-bold text-black tracking-tighter opacity-90 -mt-0.5">
-              collection
-            </span>
-          </div>
-        </div>
+        {/* RTPP Collection Logo Circle SVG */}
+        <RTPPLogoMark className="h-10 w-10" />
 
         {/* Live dot indicator */}
         <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-success ring-2 ring-background shadow-[0_0_8px_var(--success)] animate-pulse" />

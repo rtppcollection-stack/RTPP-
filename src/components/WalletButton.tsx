@@ -130,10 +130,13 @@ export function WalletButton() {
           <Button
             size="sm"
             disabled={connecting}
-            className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90 font-mono font-semibold shadow-[0_0_15px_-3px_rgba(20,184,166,0.5)] transition-all"
+            className="gap-1.5 px-2.5 sm:px-3 text-xs bg-primary text-primary-foreground hover:bg-primary/90 font-mono font-semibold shadow-[0_0_15px_-3px_rgba(20,184,166,0.5)] transition-all"
           >
-            <Wallet className="h-4 w-4" />
-            {!mounted ? "Connect Wallet" : connecting ? "Connecting..." : "Connect Wallet"}
+            <Wallet className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">
+              {!mounted ? "Connect Wallet" : connecting ? "Connecting..." : "Connect Wallet"}
+            </span>
+            <span className="sm:hidden">{connecting ? "Connecting..." : "Connect"}</span>
           </Button>
         </DialogTrigger>
 

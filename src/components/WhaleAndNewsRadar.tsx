@@ -232,6 +232,67 @@ const INITIAL_NEWS: NewsItem[] = [
   },
 ];
 
+async function fetchRealCryptoNews(): Promise<NewsItem[]> {
+  try {
+    const res = await fetch("https://min-api.cryptocompare.com/data/v2/news/?lang=EN");
+    if (!res.ok) throw new Error("Network response not ok");
+    const json = await res.json();
+    if (json && Array.isArray(json.Data)) {
+      return json.Data.map((item: any) => {
+        const categoriesStr = (item.categories || "").toLowerCase();
+        let category: NewsItem["category"] = "Altcoins";
+        if (categoriesStr.includes("btc") || categoriesStr.includes("bitcoin"))
+          category = "Bitcoin";
+        else if (categoriesStr.includes("eth") || categoriesStr.includes("ethereum"))
+          category = "Ethereum";
+        else if (categoriesStr.includes("defi")) category = "DeFi";
+        else if (categoriesStr.includes("regulation") || categoriesStr.includes("sec"))
+          category = "Regulation";
+        else if (categoriesStr.includes("macro") || categoriesStr.includes("fed"))
+          category = "Macro";
+
+        const titleLower = item.title.toLowerCase();
+        let sentiment: NewsItem["sentiment"] = "neutral";
+        if (
+          titleLower.includes("surge") ||
+          titleLower.includes("soar") ||
+          titleLower.includes("bull") ||
+          titleLower.includes("rally") ||
+          titleLower.includes("gain") ||
+          titleLower.includes("record")
+        ) {
+          sentiment = "bullish";
+        } else if (
+          titleLower.includes("drop") ||
+          titleLower.includes("crash") ||
+          titleLower.includes("bear") ||
+          titleLower.includes("fall") ||
+          titleLower.includes("hack") ||
+          titleLower.includes("plunge")
+        ) {
+          sentiment = "bearish";
+        }
+
+        return {
+          id: String(item.id || Date.now() + Math.random()),
+          title: item.title,
+          source: item.source_info?.name || item.source || "Crypto News",
+          url: item.url || "https://cryptocompare.com",
+          publishedAt: item.published_on ? item.published_on * 1000 : Date.now(),
+          category,
+          sentiment,
+          summary: item.body ? item.body.slice(0, 180) + "..." : item.title,
+          readTime: `${Math.max(2, Math.min(8, Math.round((item.body || "").length / 300)))} min read`,
+          isCached: false,
+        };
+      });
+    }
+  } catch (e) {
+    console.warn("Error fetching real crypto news, fallbacking to cache", e);
+  }
+  return [];
+}
+
 export function WhaleAndNewsRadar() {
   const [activeTab, setActiveTab] = useState<"whales" | "news" | "analytics">("whales");
   const [mounted, setMounted] = useState(false);
@@ -405,38 +466,34 @@ export function WhaleAndNewsRadar() {
     return () => clearInterval(interval);
   }, [isLiveActive]);
 
-  // Fetch / Refresh News Feeds with AI Fallback Engine
+  // Fetch / Refresh News Feeds with Real API & Fallback
   const handleFetchNews = async () => {
     setIsFetching(true);
     try {
-      // Simulating real-time live network query with Instant AI Memory fallback
-      await new Promise((r) => setTimeout(r, 600));
-
-      const freshlyFetchedNews: NewsItem[] = [
-        {
-          id: `n-${Date.now()}-1`,
-          title: `Bitcoin Cross-Chain Liquidity Surges 40% Following Institutional Bridge Upgrade`,
-          source: "CoinDesk Live",
-          url: "https://coindesk.com",
-          publishedAt: Date.now(),
-          category: "Bitcoin",
-          sentiment: "bullish",
-          summary:
-            "Decentralized liquidity bridges hit new record volumes with native BTC and wrapped Bitcoin trading seamlessly across EVM chains.",
-          readTime: "2 min read",
-          isCached: false,
-        },
-        ...newsItems,
-      ];
-
-      setNewsItems(freshlyFetchedNews.slice(0, 50));
-      toast.success("Live Crypto News & Whale Feeds updated via AI Memory Cache!");
+      const realNews = await fetchRealCryptoNews();
+      if (realNews && realNews.length > 0) {
+        setNewsItems(realNews);
+        toast.success(
+          `Successfully loaded ${realNews.length} live news articles from global feeds!`,
+        );
+      } else {
+        toast.info("Refreshed live news stream.");
+      }
     } catch {
-      toast.error("Using offline AI Memory Cache feed.");
+      toast.error("Using cached news feed.");
     } finally {
       setIsFetching(false);
     }
   };
+
+  // Fetch real live news on initial load
+  useEffect(() => {
+    fetchRealCryptoNews().then((items) => {
+      if (items && items.length > 0) {
+        setNewsItems(items);
+      }
+    });
+  }, []);
 
   // Filtered Whale Transactions
   const filteredWhales = useMemo(() => {
@@ -580,39 +637,41 @@ export function WhaleAndNewsRadar() {
       </div>
 
       {/* Navigation Tabs Bar */}
-      <div className="flex items-center justify-between gap-2 border-b border-border/60 pb-2">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 pb-2">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
           <button
             onClick={() => setActiveTab("whales")}
-            className={`px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 ${
               activeTab === "whales"
                 ? "bg-primary text-primary-foreground shadow"
                 : "bg-surface-2/60 text-muted-foreground hover:text-foreground"
             }`}
           >
-            <ShieldAlert className="h-4 w-4" /> Whale Alert Feed ({filteredWhales.length})
+            <ShieldAlert className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Whale Alert Feed (
+            {filteredWhales.length})
           </button>
 
           <button
             onClick={() => setActiveTab("news")}
-            className={`px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 ${
               activeTab === "news"
                 ? "bg-primary text-primary-foreground shadow"
                 : "bg-surface-2/60 text-muted-foreground hover:text-foreground"
             }`}
           >
-            <Newspaper className="h-4 w-4" /> Live Crypto News ({filteredNews.length})
+            <Newspaper className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Live Crypto News (
+            {filteredNews.length})
           </button>
 
           <button
             onClick={() => setActiveTab("analytics")}
-            className={`px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 ${
               activeTab === "analytics"
                 ? "bg-primary text-primary-foreground shadow"
                 : "bg-surface-2/60 text-muted-foreground hover:text-foreground"
             }`}
           >
-            <Layers className="h-4 w-4" /> Top Whale Directory &amp; Memory Cache
+            <Layers className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Whale Directory &amp; Cache
           </button>
         </div>
 

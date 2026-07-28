@@ -12,18 +12,18 @@ interface I18nCtx {
 const Ctx = createContext<I18nCtx | null>(null);
 
 function detect(): LangCode {
-  if (typeof window === "undefined") return "my";
+  if (typeof window === "undefined") return "en";
   const saved = localStorage.getItem("rtpp.lang") as LangCode | null;
   if (saved && LANG_MAP[saved]) return saved;
   const nav = navigator.language.toLowerCase();
-  const codes: LangCode[] = ["my", "zh", "vi", "ru", "es", "tr", "ar", "id", "hi", "en"];
+  const codes: LangCode[] = ["en", "my", "zh", "vi", "ru", "es", "tr", "ar", "id", "hi"];
   for (const c of codes) if (nav.startsWith(c)) return c;
   if (nav.startsWith("in")) return "id";
-  return "my";
+  return "en";
 }
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<LangCode>("my");
+  const [lang, setLangState] = useState<LangCode>("en");
 
   useEffect(() => {
     setLangState(detect());

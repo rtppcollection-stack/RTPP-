@@ -29,6 +29,7 @@ export interface DEXOption {
   avgFee: string;
   status: "Optimal" | "Active" | "High Traffic";
   description: string;
+  officialUrl: string;
 }
 
 export const SUPPORTED_DEXES: DEXOption[] = [
@@ -41,7 +42,8 @@ export const SUPPORTED_DEXES: DEXOption[] = [
     volume24h: "$1.45B",
     avgFee: "0.05% - 0.30%",
     status: "Optimal",
-    description: "Leading concentrated liquidity protocol across EVM chains.",
+    description: "Official Uniswap V3 concentrated liquidity smart contract router.",
+    officialUrl: "https://app.uniswap.org/#/swap?chain=mainnet",
   },
   {
     id: "pancakeswap",
@@ -52,7 +54,8 @@ export const SUPPORTED_DEXES: DEXOption[] = [
     volume24h: "$620M",
     avgFee: "0.01% - 0.25%",
     status: "Active",
-    description: "High-speed, low-cost decentralized exchange on BNB & EVM.",
+    description: "Official PancakeSwap V3 router interface on BNB Chain.",
+    officialUrl: "https://pancakeswap.finance/swap",
   },
   {
     id: "raydium",
@@ -63,7 +66,8 @@ export const SUPPORTED_DEXES: DEXOption[] = [
     volume24h: "$890M",
     avgFee: "0.25%",
     status: "Optimal",
-    description: "Next-gen central order book AMM on ultra-fast Solana.",
+    description: "Official Raydium Protocol AMM router on Solana.",
+    officialUrl: "https://raydium.io/swap/",
   },
   {
     id: "sushiswap",
@@ -74,7 +78,8 @@ export const SUPPORTED_DEXES: DEXOption[] = [
     volume24h: "$210M",
     avgFee: "0.30%",
     status: "Active",
-    description: "Cross-chain community-driven liquidity router.",
+    description: "Official SushiSwap multi-chain liquidity router.",
+    officialUrl: "https://www.sushi.com/swap",
   },
   {
     id: "traderjoe",
@@ -85,7 +90,8 @@ export const SUPPORTED_DEXES: DEXOption[] = [
     volume24h: "$180M",
     avgFee: "0.15% - 0.20%",
     status: "Active",
-    description: "Liquidity Book architecture with zero slippage bins.",
+    description: "Official Trader Joe Liquidity Book architecture on Avalanche.",
+    officialUrl: "https://traderjoexyz.com/avalanche/trade",
   },
   {
     id: "orca",
@@ -96,7 +102,8 @@ export const SUPPORTED_DEXES: DEXOption[] = [
     volume24h: "$340M",
     avgFee: "0.07%",
     status: "Optimal",
-    description: "User-friendly, climate-neutral concentrated liquidity on Solana.",
+    description: "Official Orca concentrated liquidity protocol on Solana.",
+    officialUrl: "https://www.orca.so/",
   },
 ];
 
@@ -113,8 +120,7 @@ export function DEXSelector({
 }: DEXSelectorProps) {
   const [currentDexId, setCurrentDexId] = useState<string>(selectedDexId);
 
-  const activeDex =
-    SUPPORTED_DEXES.find((d) => d.id === currentDexId) || SUPPORTED_DEXES[0];
+  const activeDex = SUPPORTED_DEXES.find((d) => d.id === currentDexId) || SUPPORTED_DEXES[0];
 
   const handleSelect = (dex: DEXOption) => {
     setCurrentDexId(dex.id);
@@ -177,22 +183,16 @@ export function DEXSelector({
                   <div>
                     <div className="font-bold flex items-center gap-1.5">
                       <span>{dex.name}</span>
-                      {currentDexId === dex.id && (
-                        <Check className="h-3.5 w-3.5 text-primary" />
-                      )}
+                      {currentDexId === dex.id && <Check className="h-3.5 w-3.5 text-primary" />}
                     </div>
-                    <span className="text-[10px] text-muted-foreground block">
-                      {dex.chain}
-                    </span>
+                    <span className="text-[10px] text-muted-foreground block">{dex.chain}</span>
                   </div>
                 </div>
                 <div className="text-right">
                   <span className="text-[10px] font-bold text-foreground block">
                     {dex.volume24h}
                   </span>
-                  <span className="text-[9px] text-success font-semibold">
-                    {dex.status}
-                  </span>
+                  <span className="text-[9px] text-success font-semibold">{dex.status}</span>
                 </div>
               </DropdownMenuItem>
             ))}
@@ -220,9 +220,7 @@ export function DEXSelector({
                 <div className="flex items-center gap-2">
                   <div
                     className={`h-9 w-9 rounded-xl flex items-center justify-center text-xl shadow-sm border ${
-                      isSelected
-                        ? "bg-surface border-primary/50"
-                        : "bg-surface-2 border-border"
+                      isSelected ? "bg-surface border-primary/50" : "bg-surface-2 border-border"
                     }`}
                   >
                     {dex.logo}
@@ -257,20 +255,12 @@ export function DEXSelector({
               {/* Bottom Metrics Bar */}
               <div className="pt-2 border-t border-border/40 grid grid-cols-2 gap-1 text-[10px] font-mono">
                 <div>
-                  <span className="text-muted-foreground block text-[9px]">
-                    24H VOLUME
-                  </span>
-                  <span className="font-bold text-foreground">
-                    {dex.volume24h}
-                  </span>
+                  <span className="text-muted-foreground block text-[9px]">24H VOLUME</span>
+                  <span className="font-bold text-foreground">{dex.volume24h}</span>
                 </div>
                 <div className="text-right">
-                  <span className="text-muted-foreground block text-[9px]">
-                    FEE TIER
-                  </span>
-                  <span className="font-bold text-amber-400">
-                    {dex.avgFee}
-                  </span>
+                  <span className="text-muted-foreground block text-[9px]">FEE TIER</span>
+                  <span className="font-bold text-amber-400">{dex.avgFee}</span>
                 </div>
               </div>
             </button>
