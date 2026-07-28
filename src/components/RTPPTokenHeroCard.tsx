@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchCoinDetail, fetchChart } from "@/lib/coingecko";
 import {
-  Flame,
   Copy,
   ExternalLink,
   Zap,
@@ -76,14 +75,8 @@ export function RTPPTokenHeroCard({ onSelectToken }: { onSelectToken?: (id: stri
       {/* Top Banner Header */}
       <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 border-b border-border/60 pb-3.5">
         <div className="flex items-center gap-3">
-          <div className="relative flex items-center gap-2 p-1.5 rounded-2xl bg-gradient-to-br from-amber-500/20 via-orange-500/20 to-red-600/20 border border-amber-500/40 shadow-[0_0_20px_rgba(245,158,11,0.25)]">
+          <div className="relative flex items-center gap-2 p-1.5 rounded-2xl bg-primary/10 border border-primary/30 shadow-md">
             <RTPPLogoMark className="h-12 w-12" />
-            <div className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-tr from-amber-500 via-orange-500 to-red-500 shadow-md shadow-orange-500/40 ring-1 ring-amber-300/60">
-              <Flame className="h-6 w-6 text-white animate-pulse drop-shadow-[0_0_8px_rgba(255,255,255,0.9)]" />
-              <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-amber-300 text-[9px] font-black text-black shadow">
-                🔥
-              </span>
-            </div>
           </div>
 
           <div>

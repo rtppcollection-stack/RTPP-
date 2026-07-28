@@ -56,9 +56,25 @@ export interface SwapToken {
   chain: string;
   priceUSD: number;
   icon: string;
+  logoUrl?: string;
   address: string;
   decimals: number;
   isNativeBTC?: boolean;
+}
+
+export function TokenAvatar({ token, className = "h-6 w-6" }: { token: SwapToken; className?: string }) {
+  const [failed, setFailed] = useState(false);
+  if (token.logoUrl && !failed) {
+    return (
+      <img
+        src={token.logoUrl}
+        alt={token.symbol}
+        className={`${className} rounded-full object-contain shrink-0 bg-background/80 ring-1 ring-border/50`}
+        onError={() => setFailed(true)}
+      />
+    );
+  }
+  return <span className={`${className} flex items-center justify-center shrink-0`}>{token.icon}</span>;
 }
 
 export interface AdminFeeRecord {
@@ -83,6 +99,7 @@ const SUPPORTED_SWAP_TOKENS: SwapToken[] = [
     chain: "Ethereum / EVM",
     priceUSD: 0.25,
     icon: "🔥",
+    logoUrl: "https://assets.coingecko.com/coins/images/279/small/ethereum.png",
     address: "0x90f0712eddc36f4e42c0f8a6a6739ce5b113d9b8",
     decimals: 18,
   },
@@ -92,6 +109,7 @@ const SUPPORTED_SWAP_TOKENS: SwapToken[] = [
     chain: "Bitcoin Network",
     priceUSD: 68500.0,
     icon: "₿",
+    logoUrl: "https://assets.coingecko.com/coins/images/1/small/bitcoin.png",
     address: "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
     decimals: 8,
     isNativeBTC: true,
@@ -102,6 +120,7 @@ const SUPPORTED_SWAP_TOKENS: SwapToken[] = [
     chain: "Ethereum / Base / Arb",
     priceUSD: 68480.0,
     icon: "₿",
+    logoUrl: "https://assets.coingecko.com/coins/images/7598/small/wrapped_bitcoin_wbtc.png",
     address: "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
     decimals: 8,
   },
@@ -111,6 +130,7 @@ const SUPPORTED_SWAP_TOKENS: SwapToken[] = [
     chain: "Base / Ethereum",
     priceUSD: 68495.0,
     icon: "🔵",
+    logoUrl: "https://assets.coingecko.com/coins/images/39939/small/cbbtc.png",
     address: "0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf",
     decimals: 8,
   },
@@ -120,6 +140,7 @@ const SUPPORTED_SWAP_TOKENS: SwapToken[] = [
     chain: "BSC (BEP-20)",
     priceUSD: 68490.0,
     icon: "🟡",
+    logoUrl: "https://assets.coingecko.com/coins/images/14108/small/binance-bitcoin.png",
     address: "0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c",
     decimals: 18,
   },
@@ -129,6 +150,7 @@ const SUPPORTED_SWAP_TOKENS: SwapToken[] = [
     chain: "Ethereum / Base / Arb",
     priceUSD: 3450.0,
     icon: "💎",
+    logoUrl: "https://assets.coingecko.com/coins/images/279/small/ethereum.png",
     address: "0x0000000000000000000000000000000000000000",
     decimals: 18,
   },
@@ -138,6 +160,7 @@ const SUPPORTED_SWAP_TOKENS: SwapToken[] = [
     chain: "Solana Network",
     priceUSD: 185.0,
     icon: "🟣",
+    logoUrl: "https://assets.coingecko.com/coins/images/4128/small/solana.png",
     address: "So11111111111111111111111111111111111111112",
     decimals: 9,
   },
@@ -147,6 +170,7 @@ const SUPPORTED_SWAP_TOKENS: SwapToken[] = [
     chain: "BNB Smart Chain",
     priceUSD: 580.0,
     icon: "🟡",
+    logoUrl: "https://assets.coingecko.com/coins/images/825/small/bnb-icon2_2x.png",
     address: "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c",
     decimals: 18,
   },
@@ -156,6 +180,7 @@ const SUPPORTED_SWAP_TOKENS: SwapToken[] = [
     chain: "Polygon POS",
     priceUSD: 0.55,
     icon: "💜",
+    logoUrl: "https://assets.coingecko.com/coins/images/4713/small/polygon.png",
     address: "0x0000000000000000000000000000000000000000",
     decimals: 18,
   },
@@ -165,6 +190,7 @@ const SUPPORTED_SWAP_TOKENS: SwapToken[] = [
     chain: "Multi-Chain Stablecoin",
     priceUSD: 1.0,
     icon: "💵",
+    logoUrl: "https://assets.coingecko.com/coins/images/325/small/Tether.png",
     address: "0xdac17f958d2ee523a2206206994597c13d831ec7",
     decimals: 6,
   },
@@ -174,6 +200,7 @@ const SUPPORTED_SWAP_TOKENS: SwapToken[] = [
     chain: "Multi-Chain Stablecoin",
     priceUSD: 1.0,
     icon: "🔵",
+    logoUrl: "https://assets.coingecko.com/coins/images/6319/small/usdc.png",
     address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
     decimals: 6,
   },
@@ -183,6 +210,7 @@ const SUPPORTED_SWAP_TOKENS: SwapToken[] = [
     chain: "Base Network",
     priceUSD: 1.3,
     icon: "🚀",
+    logoUrl: "https://assets.coingecko.com/coins/images/31745/small/aerodrome.png",
     address: "0x940181a94a35a4569e4529a3cdfb74e38fd98631",
     decimals: 18,
   },
@@ -192,6 +220,7 @@ const SUPPORTED_SWAP_TOKENS: SwapToken[] = [
     chain: "BNB Smart Chain",
     priceUSD: 2.9,
     icon: "🥞",
+    logoUrl: "https://assets.coingecko.com/coins/images/12632/small/pancakeswap-cake-logo.png",
     address: "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
     decimals: 18,
   },
@@ -201,6 +230,7 @@ const SUPPORTED_SWAP_TOKENS: SwapToken[] = [
     chain: "Ethereum",
     priceUSD: 8.4,
     icon: "🦄",
+    logoUrl: "https://assets.coingecko.com/coins/images/12504/small/uniswap-uni.png",
     address: "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
     decimals: 18,
   },
@@ -273,47 +303,7 @@ const CHAINS: ChainCfg[] = [
 const ADMIN_FEE_STORAGE_KEY = "rtpp_admin_fee_records_v1";
 const STATIC_BASE_TIME = 1770000000000;
 
-const DEFAULT_DEX_FEE_RECORDS: AdminFeeRecord[] = [
-  {
-    id: "fee-101",
-    timestamp: STATIC_BASE_TIME - 1000 * 60 * 18,
-    userAddress: "0x3f4...8e12",
-    adminWallet: "0x752f726410B3e276DAE704B6E4671C50ea199798",
-    fromChain: "Bitcoin / Cross-Chain",
-    pair: "BTC → ETH",
-    swapValueUSD: 6850,
-    feeCollectedUSD: 20.55,
-    feeTokenSymbol: "BTC",
-    feeTokenAmount: 0.0003,
-    txHash: "0x9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b",
-  },
-  {
-    id: "fee-102",
-    timestamp: STATIC_BASE_TIME - 1000 * 60 * 120,
-    userAddress: "0x892...110f",
-    adminWallet: "0x752f726410B3e276DAE704B6E4671C50ea199798",
-    fromChain: "Base L2",
-    pair: "ETH → AERO",
-    swapValueUSD: 3450,
-    feeCollectedUSD: 10.35,
-    feeTokenSymbol: "ETH",
-    feeTokenAmount: 0.003,
-    txHash: "0x2f1a0b9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e",
-  },
-  {
-    id: "fee-103",
-    timestamp: STATIC_BASE_TIME - 1000 * 60 * 300,
-    userAddress: "Sol...99xK",
-    adminWallet: "0x752f726410B3e276DAE704B6E4671C50ea199798",
-    fromChain: "Solana",
-    pair: "SOL → USDC",
-    swapValueUSD: 1850,
-    feeCollectedUSD: 5.55,
-    feeTokenSymbol: "SOL",
-    feeTokenAmount: 0.03,
-    txHash: "5K8mP2qR9sT1uV3wX5yZ7aB9cD1eF3gH5iJ7kL9mN0p",
-  },
-];
+const DEFAULT_DEX_FEE_RECORDS: AdminFeeRecord[] = [];
 
 interface Props {
   coinId?: string;
@@ -365,7 +355,12 @@ export function DEXWidget({ coinId }: Props) {
       const saved = localStorage.getItem(ADMIN_FEE_STORAGE_KEY);
       if (saved) {
         try {
-          setFeeRecords(JSON.parse(saved));
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) {
+            // Filter out old mock records
+            const realRecords = parsed.filter((r: any) => !r.id?.startsWith("fee-10"));
+            setFeeRecords(realRecords);
+          }
         } catch {
           /* ignore */
         }
@@ -578,181 +573,6 @@ export function DEXWidget({ coinId }: Props) {
             <Search className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Paste Address to Swap</span>
           </Button>
-
-          {/* Admin Vault Stats Trigger */}
-          <Dialog open={adminModalOpen} onOpenChange={setAdminModalOpen}>
-            <DialogTrigger asChild>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                  setEditWalletInput(feeWallet);
-                  setEditBpsInput(String(feeBps));
-                }}
-                className="h-8 gap-1.5 font-mono text-xs border-amber-500/40 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 hover:border-amber-500 transition-all shadow-sm"
-              >
-                <Building2 className="h-3.5 w-3.5" />
-                <span>Admin Fee Account: ${totalAdminFeesUSD.toFixed(2)}</span>
-                <Settings className="h-3 w-3 ml-1" />
-              </Button>
-            </DialogTrigger>
-
-            {/* Admin Vault Modal */}
-            <DialogContent className="bg-surface/95 border-border text-foreground max-w-xl font-mono text-xs backdrop-blur-2xl">
-              <DialogHeader className="border-b border-border/60 pb-3">
-                <DialogTitle className="flex items-center justify-between text-amber-400 font-mono text-base">
-                  <span className="flex items-center gap-2">
-                    <Building2 className="h-5 w-5" /> Admin Platform Fee Treasury Account
-                  </span>
-                  <Badge
-                    variant="outline"
-                    className="bg-success/15 text-success border-success/30 text-[10px]"
-                  >
-                    {(feeBps / 100).toFixed(2)}% LIVE FEE RATE
-                  </Badge>
-                </DialogTitle>
-              </DialogHeader>
-
-              <div className="space-y-4 py-2">
-                {/* Metrics Bar */}
-                <div className="grid grid-cols-3 gap-2 p-3 rounded-xl bg-surface-2/80 border border-border">
-                  <div>
-                    <span className="text-[10px] text-muted-foreground uppercase block">
-                      Total Fees Collected
-                    </span>
-                    <span className="text-base font-extrabold text-success block">
-                      ${formatCurrency(totalAdminFeesUSD)}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-muted-foreground uppercase block">
-                      Total Swaps Processed
-                    </span>
-                    <span className="text-base font-extrabold text-foreground block">
-                      {feeRecords.length} Swaps
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-muted-foreground uppercase block">
-                      Platform Fee Rate
-                    </span>
-                    <span className="text-base font-extrabold text-primary block">
-                      {(feeBps / 100).toFixed(2)}% ({feeBps} BPS)
-                    </span>
-                  </div>
-                </div>
-
-                {/* Admin Wallet Settings Form */}
-                <div className="space-y-3 p-3.5 rounded-xl bg-surface/60 border border-amber-500/30">
-                  <span className="font-bold text-amber-400 block text-xs">
-                    ⚙️ Admin Fee Recipient Wallet Configuration
-                  </span>
-                  <p className="text-[11px] text-muted-foreground">
-                    All platform fees collected from users swapping BTC, ETH, SOL, BNB, or USDT are
-                    directly routed into this Admin Wallet.
-                  </p>
-
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-foreground">
-                      Admin Wallet Address (EVM / Multi-Chain):
-                    </label>
-                    <div className="flex gap-2">
-                      <Input
-                        value={editWalletInput}
-                        onChange={(e) => setEditWalletInput(e.target.value)}
-                        placeholder="0x..."
-                        className="font-mono text-xs bg-surface-2 border-border flex-1"
-                      />
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          navigator.clipboard.writeText(editWalletInput);
-                          toast.success("Admin Wallet address copied!");
-                        }}
-                        className="h-9 px-2 font-mono text-xs border-border"
-                      >
-                        <Copy className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-foreground">
-                      Platform Fee Rate (BPS - e.g. 30 BPS = 0.30% per swap):
-                    </label>
-                    <Input
-                      type="number"
-                      value={editBpsInput}
-                      onChange={(e) => setEditBpsInput(e.target.value)}
-                      placeholder="30"
-                      className="font-mono text-xs bg-surface-2 border-border"
-                    />
-                  </div>
-
-                  <Button
-                    onClick={saveAdminSettings}
-                    className="w-full bg-amber-500 text-black font-extrabold text-xs gap-1.5 hover:bg-amber-400"
-                  >
-                    <Check className="h-4 w-4" /> Save Admin Treasury Settings
-                  </Button>
-                </div>
-
-                {/* Recent Fee Deposits Table */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-xs font-bold text-foreground">
-                    <span>Recent Fee Earnings Received in Admin Account</span>
-                    <span className="text-[10px] text-muted-foreground">
-                      {feeRecords.length} Transactions
-                    </span>
-                  </div>
-
-                  <div className="max-h-48 overflow-y-auto border border-border rounded-xl">
-                    <Table>
-                      <TableHeader className="bg-surface-2 text-[10px] uppercase">
-                        <TableRow>
-                          <TableHead className="py-2 px-2.5">Time / Chain</TableHead>
-                          <TableHead className="py-2 px-2.5">Swap Pair</TableHead>
-                          <TableHead className="py-2 px-2.5 text-right">Fee Collected</TableHead>
-                          <TableHead className="py-2 px-2.5 text-center">Tx</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody className="text-[11px] font-mono divide-y divide-border/40">
-                        {feeRecords.map((r) => (
-                          <TableRow key={r.id} className="hover:bg-surface-2/50">
-                            <TableCell className="py-2 px-2.5">
-                              <div>
-                                {new Date(r.timestamp).toLocaleTimeString([], {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })}
-                              </div>
-                              <div className="text-[9px] text-muted-foreground">{r.fromChain}</div>
-                            </TableCell>
-                            <TableCell className="py-2 px-2.5 font-bold text-primary">
-                              {r.pair}
-                            </TableCell>
-                            <TableCell className="py-2 px-2.5 text-right font-extrabold text-success">
-                              +${r.feeCollectedUSD.toFixed(2)} ({r.feeTokenAmount.toFixed(4)}{" "}
-                              {r.feeTokenSymbol})
-                            </TableCell>
-                            <TableCell className="py-2 px-2.5 text-center">
-                              <span
-                                className="text-[10px] text-muted-foreground underline cursor-pointer"
-                                title={r.txHash}
-                              >
-                                {shortAddr(r.txHash)}
-                              </span>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
         </div>
       </div>
 
@@ -925,7 +745,7 @@ export function DEXWidget({ coinId }: Props) {
               onClick={() => setSelectTokenMode("from")}
               className="h-10 gap-2 font-mono text-sm border-primary/40 bg-surface hover:bg-surface-2 text-foreground font-bold rounded-xl px-3 shrink-0 shadow-sm"
             >
-              <span className="text-base">{fromToken.icon}</span>
+              <TokenAvatar token={fromToken} className="h-5 w-5" />
               <span>{fromToken.symbol}</span>
               <ChevronDown className="h-4 w-4 text-muted-foreground" />
             </Button>
@@ -980,7 +800,7 @@ export function DEXWidget({ coinId }: Props) {
               onClick={() => setSelectTokenMode("to")}
               className="h-10 gap-2 font-mono text-sm border-primary/40 bg-surface hover:bg-surface-2 text-foreground font-bold rounded-xl px-3 shrink-0 shadow-sm"
             >
-              <span className="text-base">{toToken.icon}</span>
+              <TokenAvatar token={toToken} className="h-5 w-5" />
               <span>{toToken.symbol}</span>
               <ChevronDown className="h-4 w-4 text-muted-foreground" />
             </Button>
@@ -1088,7 +908,7 @@ export function DEXWidget({ coinId }: Props) {
                   className="flex items-center justify-between p-2.5 rounded-xl border border-border/50 bg-surface-2/40 hover:bg-surface-2 hover:border-primary/50 transition-all cursor-pointer group"
                 >
                   <div className="flex items-center gap-2.5">
-                    <span className="text-xl">{t.icon}</span>
+                    <TokenAvatar token={t} className="h-7 w-7" />
                     <div>
                       <div className="font-extrabold text-foreground text-sm group-hover:text-primary transition-colors">
                         {t.symbol}

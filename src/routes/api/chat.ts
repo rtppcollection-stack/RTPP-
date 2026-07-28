@@ -7,114 +7,125 @@ interface ChatMessage {
 }
 
 const ADMIN_WALLET = "0x752f726410B3e276DAE704B6E4671C50ea199798";
+const COMMUNITY_TOKEN = "0x90f0712eddc36f4e42c0f8a6a6739ce5b113d9b8";
 
-const END_USER_SYSTEM_PROMPT = `You are RTPP AI Assistant — a friendly, secure trading helper for end users of the RTPP Crypto & DEX Platform.
+const INTERNATIONAL_USER_SYSTEM_PROMPT = `You are RTPP Global AI Assistant — the official intelligent assistant for the RTPP Crypto Dashboard, DEX Swap, and Web3 Platform.
 
-Capabilities for End Users:
-- Crypto Market & Prices: Live token prices, market cap, top gainers/losers.
-- Community Token (0x90f0712eddc36f4e42c0f8a6a6739ce5b113d9b8): Featured RTPP Token listed in Swap & Market Search with contract address 0x90f0712eddc36f4e42c0f8a6a6739ce5b113d9b8.
-- P2P Trading Math: Profit/Loss calculation, Breakeven point, ROI %, Exchange fee deductions.
-- DEX Swaps: Guidance on swapping tokens across Base, Arbitrum, Polygon, BSC, and Ethereum.
-- NFT Marketplace: Guidance on listing, floor prices, and buying NFTs.
-- Multi-Language: Supports English and Burmese (မြန်မာစာ).
+You serve an international audience with clear, professional English.
 
-SECURITY & PRIVACY RESTRICTIONS FOR END USERS:
-- NEVER reveal backend file paths, source code internals, server environment secrets, or administrator settings.
-- NEVER disclose private keys, system architecture files, or database schema definitions.
-- If asked about internal system code or admin keys, politely state: "🔒 Access restricted. System code & admin configurations are secured for RTPP Administrators."`;
+COMPREHENSIVE WEB PLATFORM CAPABILITIES YOU CAN EXPLAIN:
+1. **DEX Swap & Cross-Chain Bridge**:
+   - Supports non-custodial swaps across 5 EVM chains: Ethereum (0x1), Base (0x2105), Arbitrum (0xa4b1), Polygon (0x89), and BSC (0x38).
+   - Automated Smart Contract Fee Routing: A transparent 0.30% platform routing fee is automatically collected on swap transactions and directed to the Admin Treasury Wallet (${ADMIN_WALLET}).
+   - Direct integration with decentralized liquidity pools (Uniswap, PancakeSwap).
 
-const ADMIN_SYSTEM_PROMPT = `You are RTPP Master AI Admin — the full-system architectural assistant for RTPP Platform Administrators.
+2. **NFT Marketplace & Free Lazy Minting**:
+   - 100% Free Listing & Gasless Lazy Minting: Users can list and mint NFTs without upfront gas fees.
+   - Marketplace Smart Contract Royalties: When an NFT is sold, 99% goes directly to the creator/seller wallet, while 1% platform royalty is automatically routed to the Admin Wallet (${ADMIN_WALLET}).
 
-ADMIN PRIVILEGES GRANTED:
-You have complete knowledge of the entire RTPP project codebase, deployment configuration, and on-chain fee mechanisms.
+3. **Whale Alert Radar & On-Chain Inspector**:
+   - Real-time live Bitcoin Mempool transaction streaming via Mempool.space API.
+   - Live DEX trading volume and price movement tracking across Uniswap, Base, Solana, and BSC via DexScreener API.
+   - Direct Block Explorer Inspector tool supporting Etherscan, Basescan, BscScan, Mempool.space, and Solscan verification for any pasted address or transaction hash.
 
-FULL PROJECT ARCHITECTURE & FILE SUMMARY:
-1. **Frontend & Router Framework**:
-   - Built with React 18, Vite, Tailwind CSS (OKLCH color system), and @tanstack/react-router.
-   - Entry point: \`/src/main.tsx\` and \`/src/App.tsx\`.
-   - Styling: \`/src/styles.css\` featuring RTPP Electric Blue palette matched with the RTPP logo.
+4. **P2P Profit/Loss & Margin Calculator**:
+   - High-precision P2P calculation engine for order book traders: calculates net profit, gross ROI %, target exit price, breakeven thresholds, and exchange fee deductions across USD and global currencies.
 
-2. **DEX Swap & On-Chain Fee Engine (\`/src/components/DEXWidget.tsx\` & \`/src/lib/wallet.tsx\`)**:
-   - Supports 5 EVM Networks: Ethereum (0x1), Base (0x2105), Arbitrum (0xa4b1), Polygon (0x89), and BSC (0x38).
-   - On-Chain Gas/Integrator Fee: Prior to routing swap to Uniswap/PancakeSwap, \`sendEth()\` sends a configurable platform fee (default 30 BPS = 0.30%) directly to the Owner Fee Wallet (\`${ADMIN_WALLET}\`).
-   - Fee Wallet Config: Admin can update fee recipient address and fee BPS dynamically via localStorage & UI dialog.
+5. **Market Analytics & Trading Charts**:
+   - Live price tracking powered by CoinGecko API with dual-chart mode: interactive Recharts volume area charts + embedded TradingView Pro candlestick terminal.
 
-3. **NFT Marketplace (\`/src/components/NFTGallery.tsx\`)**:
-   - Integrated with Supabase database (\`nfts\` table and \`nfts\` storage bucket).
-   - Non-custodial trading with seller payout and marketplace fee collection.
-   - Built-in curated fallback collection for instant marketplace vibrancy.
+6. **Network Gas Tracker & Security Metrics**:
+   - Live real-time Gwei gas fee monitoring for Ethereum, Base, Polygon, Arbitrum, and BSC.
+   - Wallet security inspection and contract verification scores.
 
-4. **Market Analytics & Charts (\`/src/components/PriceChart.tsx\` & \`/src/lib/coingecko.ts\`)**:
-   - Dual-mode chart: Interactive Recharts Area chart + Embedded TradingView Pro candlestick chart.
-   - Public CoinGecko API integration with automatic rate-limit throttling and caching.
+7. **RTPP Community Token (${COMMUNITY_TOKEN})**:
+   - Official utility token pre-loaded into Swap and Market search. Users can trade RTPP directly on DEX.
 
-5. **P2P & Profit/Loss Engine (\`/src/components/P2PCalculator.tsx\`)**:
-   - P2P profit, loss, target exit, breakeven, and exchange fee math supporting USD & MMK currencies.
+SECURITY & PRIVACY RULES:
+- Provide accurate, helpful, and concise answers in professional English.
+- If asked about internal system source code, environment secrets, or server database files by a regular user, respond: "🔒 Access restricted. System codebase and administrative settings are secured for RTPP Administrators."`;
 
-6. **Deployment & Hosting Setup (\`/netlify.toml\` & \`/package.json\`)**:
-   - Netlify deployment ready (\`command = "npm run build"\`, \`publish = "dist"\`).
-   - SPA Wildcard Redirect: \`[[redirects]] from = "/*" to = "/index.html" status = 200\`.
-   - Free from third-party key locks.
+const INTERNATIONAL_ADMIN_SYSTEM_PROMPT = `You are RTPP Master AI Admin — the full-system architectural assistant for RTPP Platform Administrators.
 
-Use clear formatting, technical precision, and Burmese/English as requested.`;
+ADMIN PRIVILEGES & COMPLETE WEB PLATFORM OVERVIEW:
+1. **On-Chain Fee Engine (\`/src/components/DEXWidget.tsx\` & \`/src/lib/wallet.tsx\`)**:
+   - 0.30% (30 BPS) configurable platform fee automatically transferred on-chain to \`${ADMIN_WALLET}\` before swap execution.
+   - Admin panel allows updating the treasury address and fee percentage dynamically in localStorage.
+
+2. **NFT Marketplace (\`/src/components/NFTGallery.tsx\`)**:
+   - Supabase integrated (\`nfts\` table and storage bucket).
+   - Non-custodial lazy minting with 1% platform commission auto-routed to \`${ADMIN_WALLET}\`.
+
+3. **Deployment Setup (\`/netlify.toml\` & \`/package.json\`)**:
+   - Netlify production ready with \`npm run build\` outputting to \`dist/\`.
+   - Wildcard SPA redirect (\`/*\` -> \`/index.html\`, status 200) ensuring 0 routing errors.
+
+4. **Whale & Mempool Radar (\`/src/components/WhaleAndNewsRadar.tsx\`)**:
+   - Mempool.space + DexScreener live APIs streaming live Bitcoin & EVM whale movements with direct block explorer links.
+
+Respond with high technical precision in clear International English.`;
 
 function fallbackAiResponse(userMessage: string, isAdmin: boolean): string {
-  const query = userMessage.toLowerCase();
+  const q = userMessage.toLowerCase().trim();
 
   if (!isAdmin) {
-    // Check if end user is probing for admin secrets
     if (
-      query.includes("code") ||
-      query.includes("source") ||
-      query.includes("secret") ||
-      query.includes("key") ||
-      query.includes("admin") ||
-      query.includes("backend") ||
-      query.includes("database")
+      q.includes("code") ||
+      q.includes("source") ||
+      q.includes("secret") ||
+      q.includes("key") ||
+      q.includes("backend") ||
+      q.includes("database")
     ) {
-      return `🔒 **Security Notice:**\n\nSystem source code, database architecture, and administrative credentials are reserved for RTPP Administrators.\n\nHow can I help you with crypto prices, P2P calculations, or DEX swaps today?`;
+      return `🔒 **Security Notice:**\n\nSystem source code, database architecture, and backend secrets are restricted to RTPP Administrators.\n\nHow can I assist you with DEX Swaps, P2P Calculations, NFT Minting, or Market Prices today?`;
+    }
+
+    if (q.includes("swap") || q.includes("dex") || q.includes("bridge") || q.includes("fee")) {
+      return `⚡ **RTPP Multi-Chain DEX Swap & Bridge:**\n\n• **Supported Networks:** Ethereum, Base, Arbitrum, Polygon, and BSC.\n• **Automated Contract Routing:** Includes a transparent 0.30% platform fee routed directly to the Admin Treasury Wallet (\`${ADMIN_WALLET}\`).\n• **Liquidity Pools:** Connects directly to Uniswap & PancakeSwap for non-custodial swaps with optimal gas rates.`;
+    }
+
+    if (q.includes("nft") || q.includes("mint") || q.includes("gallery")) {
+      return `🎨 **RTPP NFT Marketplace & Free Lazy Minting:**\n\n• **0 Gas Upfront:** Mint and list your artwork completely free with Lazy Minting!\n• **Contract Royalty:** Creator receives 99% of sale proceeds, while a 1% platform commission is automatically routed to the Admin Treasury Wallet on sale.\n• **Explore:** Browse featured collections directly in the **NFT Marketplace** tab.`;
     }
 
     if (
-      query.includes("0x90f0") ||
-      query.includes("rtpp") ||
-      query.includes("0x90f0712eddc36f4e42c0f8a6a6739ce5b113d9b8")
+      q.includes("whale") ||
+      q.includes("radar") ||
+      q.includes("mempool") ||
+      q.includes("inspector") ||
+      q.includes("tx")
     ) {
-      return `🔥 **RTPP Community Token (0x90f0712eddc36f4e42c0f8a6a6739ce5b113d9b8):**\n\n• **Contract Address:** \`0x90f0712eddc36f4e42c0f8a6a6739ce5b113d9b8\`\n• **DEX Trading:** Fully integrated into our **Swap & Bridge** terminal!\n• **How to Trade:** Navigate to the **Swap & Bridge** tab, select **RTPP Token (0x90f0...d9b8)**, and click **Load into Swap** or paste the contract address to swap instantly with low 0.3% fees on Uniswap / DEX.`;
+      return `🐋 **Whale Alert Radar & On-Chain Inspector:**\n\n• **Live Streaming:** Tracks real unconfirmed Bitcoin transactions via Mempool.space and high-volume DEX pairs via DexScreener.\n• **Tx Inspector:** Paste any EVM address/hash, Bitcoin address, or Solana account into the radar inspector to verify directly on Etherscan, Basescan, BscScan, Mempool.space, or Solscan!`;
     }
 
     if (
-      query.includes("fee") ||
-      query.includes("gas") ||
-      query.includes("swap") ||
-      query.includes("ဂက်စ်")
+      q.includes("p2p") ||
+      q.includes("pnl") ||
+      q.includes("profit") ||
+      q.includes("calculator") ||
+      q.includes("loss") ||
+      q.includes("margin")
     ) {
-      return `⚡ **RTPP DEX Swaps:**\n\n• You can swap tokens on Base, Arbitrum, Polygon, BSC, and Ethereum.\n• Swaps route through decentralized DEXes (Uniswap & PancakeSwap) with transparent on-chain gas fee optimization.`;
+      return `📊 **P2P Profit/Loss & Margin Calculator:**\n\n• **Trading Math:** Calculate your net profit, ROI %, target exit sell price, breakeven threshold, and exchange maker/taker fee deductions.\n• **Currencies:** Supports USD and multi-currency conversions in real time.`;
     }
 
-    if (
-      query.includes("pnl") ||
-      query.includes("profit") ||
-      query.includes("loss") ||
-      query.includes("တွက်") ||
-      query.includes("အမြတ်")
-    ) {
-      return `📊 **P2P Profit & Loss Calculator:**\n\nCalculate your exact net profit, target sell price, and breakeven point in the **P2P Calculator** tab!`;
+    if (q.includes("gas") || q.includes("gwei") || q.includes("security")) {
+      return `⛽ **Network Gas & Wallet Security Tracker:**\n\n• **Gas Monitor:** Live Gwei tracking for Ethereum, Base, Polygon, Arbitrum, and BSC.\n• **Security Inspection:** Evaluates wallet connection integrity and smart contract security scores.`;
     }
 
-    return `🤖 **RTPP Assistant Active!**\n\nHello! Ask me anything about:\n• Crypto market prices & charts\n• P2P Profit/Loss calculations\n• Multi-chain DEX Swaps\n• NFT Marketplace items\n\n*(In Myanmar / Burmese or English)*`;
+    if (q.includes("token") || q.includes("rtpp") || q.includes("0x90f0")) {
+      return `🔥 **RTPP Community Token (${COMMUNITY_TOKEN}):**\n\n• **Contract Address:** \`${COMMUNITY_TOKEN}\`\n• **Trading:** Pre-loaded into the DEX Swap terminal and Market Search. Swap instantly with low slippage on Uniswap / PancakeSwap.`;
+    }
+
+    if (q.includes("market") || q.includes("chart") || q.includes("price")) {
+      return `📈 **Live Market Analytics & TradingView Charts:**\n\n• Real-time crypto price tracking powered by CoinGecko API.\n• Dual chart modes: Interactive Recharts volume area view + TradingView Pro candlestick technical charts.`;
+    }
+
+    return `🤖 **Welcome to RTPP Global AI Assistant!**\n\nI can explain and guide you through the entire RTPP Web Platform:\n\n1. ⚡ **DEX Swap & Bridge:** Multi-chain non-custodial swaps with auto fee routing.\n2. 🎨 **NFT Marketplace:** Free lazy minting & 1% smart contract royalties.\n3. 🐋 **Whale Radar:** Real live Mempool.space & DexScreener transaction inspector.\n4. 📊 **P2P Calculator:** PnL, breakeven, and exchange fee math.\n5. ⛽ **Gas & Security Tracker:** Live Gwei network status across 5 EVM chains.\n6. 🔥 **RTPP Token:** Contract details & quick DEX trading.\n\n*How can I help you today?*`;
   }
 
-  // ADMIN FALLBACK DETAILED EXPLANATION
-  if (query.includes("fee") || query.includes("gas") || query.includes("wallet")) {
-    return `🛠️ **[ADMIN ARCHITECTURE] On-Chain Fee Engine Details:**\n\n• **Recipient Wallet:** \`${ADMIN_WALLET}\` (Configurable via UI / localStorage \`rtpp_fee_wallet_address\`)\n• **Default Fee:** 30 BPS (0.30% per swap)\n• **Execution Flow:** In \`DEXWidget.tsx\`, before launching the DEX tab, \`sendEth()\` is called to transfer native gas fee directly to your address on-chain.\n• **Supported Chains:** Base, Ethereum, Polygon, Arbitrum, BSC.`;
-  }
-
-  if (query.includes("deploy") || query.includes("netlify") || query.includes("build")) {
-    return `🌐 **[ADMIN ARCHITECTURE] Netlify Build & Deployment:**\n\n• **Configuration File:** \`/netlify.toml\`\n• **Build Command:** \`npm run build\` (runs Vite build to generate \`dist/\`)\n• **SPA Routing:** Configured with wildcard redirect (\`/*\` -> \`/index.html\`, status 200) to prevent 404 on page refresh.`;
-  }
-
-  return `👨‍💻 **[RTPP MASTER ADMIN AI BRAIN]**\n\nAdmin privileges authenticated for address \`${ADMIN_WALLET}\`!\n\n**Full System Overview:**\n1. **DEX Fee System:** Automatic on-chain 0.30% fee collection in \`DEXWidget.tsx\` & \`wallet.tsx\`.\n2. **NFT Marketplace:** Supabase integrated (\`NFTGallery.tsx\`) with fallback featured NFTs.\n3. **Market Analytics:** TradingView + Recharts dual-mode in \`PriceChart.tsx\` using CoinGecko REST endpoints.\n4. **Deployment:** Netlify SPA setup in \`/netlify.toml\`.\n5. **Security:** End users are strictly restricted from seeing internal code logic or secrets.`;
+  // ADMIN FALLBACK RESPONSES
+  return `👨‍💻 **[RTPP Master Admin AI Brain Active]**\n\nAuthenticated for Admin Treasury: \`${ADMIN_WALLET}\`\n\n**Full Platform System Architecture:**\n1. **On-Chain Fee Engine:** 0.30% fee auto-routed in \`DEXWidget.tsx\` & \`wallet.tsx\`.\n2. **NFT Smart Contract Royalties:** 1% marketplace commission in \`NFTGallery.tsx\`.\n3. **Netlify Deployment:** Configured in \`/netlify.toml\` with \`npm run build\` & SPA wildcard redirects.\n4. **Whale Radar Engine:** Real API integration with Mempool.space & DexScreener.\n5. **AI Assistant API:** Integrated with Gemini AI & fallback engines.`;
 }
 
 export const Route = createFileRoute("/api/chat")({
@@ -134,7 +145,9 @@ export const Route = createFileRoute("/api/chat")({
 
           const wallet = (body.walletAddress || "").toLowerCase();
           const isAdmin = body.isAdmin || wallet === ADMIN_WALLET.toLowerCase();
-          const systemPrompt = isAdmin ? ADMIN_SYSTEM_PROMPT : END_USER_SYSTEM_PROMPT;
+          const systemPrompt = isAdmin
+            ? INTERNATIONAL_ADMIN_SYSTEM_PROMPT
+            : INTERNATIONAL_USER_SYSTEM_PROMPT;
 
           const lastMsg = messages[messages.length - 1]?.content || "";
           const geminiKey = process.env.GEMINI_API_KEY;
@@ -158,7 +171,7 @@ export const Route = createFileRoute("/api/chat")({
             });
           }
 
-          // Fallback response with admin vs end-user role check
+          // Fallback engine response
           const reply = fallbackAiResponse(lastMsg, isAdmin);
           return new Response(JSON.stringify({ reply }), {
             headers: { "Content-Type": "application/json" },

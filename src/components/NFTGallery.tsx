@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useWallet, shortAddr, PLATFORM_FEE_WALLET, PLATFORM_FEE_PCT } from "@/lib/wallet";
+import { MintingComponent } from "@/components/MintingComponent";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -257,14 +258,9 @@ export function NFTGallery() {
               <Plus className="h-4 w-4" /> Mint &amp; List NFT
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-lg bg-surface border-border">
-            <DialogHeader>
-              <DialogTitle className="font-mono text-primary">
-                Mint &amp; List a New NFT
-              </DialogTitle>
-            </DialogHeader>
-            <UploadForm
-              onDone={() => {
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-2 sm:p-4 bg-surface border-border">
+            <MintingComponent
+              onSuccess={() => {
                 setUploadOpen(false);
                 load();
               }}
@@ -683,12 +679,34 @@ function UploadForm({ onDone }: { onDone: () => void }) {
           className="mt-1 text-xs bg-surface border-border"
         />
       </div>
+      {/* Smart Contract Fee & Security Banner */}
+      <div className="p-2.5 rounded-lg bg-surface-2/80 border border-emerald-500/30 text-xs space-y-1.5 font-mono">
+        <div className="flex items-center justify-between text-[11px] font-bold text-emerald-400">
+          <span className="flex items-center gap-1">
+            <ShieldCheck className="h-3.5 w-3.5" /> 100% Free Listing &amp; On-Chain Mint
+          </span>
+          <span className="text-muted-foreground">Gas Cost: 0 ETH (Lazy Mint)</span>
+        </div>
+        <div className="text-[10px] text-muted-foreground leading-relaxed">
+          • <strong className="text-foreground">Listing Cost:</strong> Completely Free (No upfront
+          Gas required).
+          <br />• <strong className="text-foreground">Automated Contract Royalty:</strong> On
+          marketplace sale, 99.0% goes directly to your wallet &amp; 1.0% platform commission is
+          automatically routed to Admin Wallet (
+          <span className="text-amber-400 font-bold">{shortAddr(PLATFORM_FEE_WALLET)}</span>).
+        </div>
+      </div>
+
       <Button
         onClick={submit}
         disabled={busy}
-        className="w-full bg-primary text-primary-foreground font-bold"
+        className="w-full bg-primary text-primary-foreground font-bold shadow-md"
       >
-        {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Mint & List NFT"}
+        {busy ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          "⚡ Free Mint & List on Smart Contract"
+        )}
       </Button>
     </div>
   );

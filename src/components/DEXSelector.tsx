@@ -24,6 +24,7 @@ export interface DEXOption {
   name: string;
   chain: string;
   logo: string;
+  logoUrl?: string;
   color: string;
   volume24h: string;
   avgFee: string;
@@ -38,6 +39,7 @@ export const SUPPORTED_DEXES: DEXOption[] = [
     name: "Uniswap V3",
     chain: "Ethereum / Arbitrum / Polygon",
     logo: "🦄",
+    logoUrl: "https://assets.coingecko.com/coins/images/12504/small/uniswap-uni.png",
     color: "from-pink-500/20 to-purple-600/20 border-pink-500/40",
     volume24h: "$1.45B",
     avgFee: "0.05% - 0.30%",
@@ -50,6 +52,7 @@ export const SUPPORTED_DEXES: DEXOption[] = [
     name: "PancakeSwap V3",
     chain: "BNB Chain / Ethereum",
     logo: "🥞",
+    logoUrl: "https://assets.coingecko.com/coins/images/12632/small/pancakeswap-cake-logo.png",
     color: "from-amber-500/20 to-yellow-600/20 border-amber-500/40",
     volume24h: "$620M",
     avgFee: "0.01% - 0.25%",
@@ -62,6 +65,7 @@ export const SUPPORTED_DEXES: DEXOption[] = [
     name: "Raydium Protocol",
     chain: "Solana Network",
     logo: "⚡",
+    logoUrl: "https://assets.coingecko.com/coins/images/15804/small/raydium.png",
     color: "from-cyan-500/20 to-blue-600/20 border-cyan-500/40",
     volume24h: "$890M",
     avgFee: "0.25%",
@@ -74,6 +78,7 @@ export const SUPPORTED_DEXES: DEXOption[] = [
     name: "SushiSwap V3",
     chain: "Multi-Chain (15+ Chains)",
     logo: "🍣",
+    logoUrl: "https://assets.coingecko.com/coins/images/12271/small/512x512_Logo_no_shadow.png",
     color: "from-indigo-500/20 to-pink-600/20 border-indigo-500/40",
     volume24h: "$210M",
     avgFee: "0.30%",
@@ -86,6 +91,7 @@ export const SUPPORTED_DEXES: DEXOption[] = [
     name: "Trader Joe XYZ",
     chain: "Avalanche / Arbitrum",
     logo: "🔺",
+    logoUrl: "https://assets.coingecko.com/coins/images/17702/small/traderjoe_200x200.png",
     color: "from-red-500/20 to-orange-600/20 border-red-500/40",
     volume24h: "$180M",
     avgFee: "0.15% - 0.20%",
@@ -98,6 +104,7 @@ export const SUPPORTED_DEXES: DEXOption[] = [
     name: "Orca DEX",
     chain: "Solana Network",
     logo: "🐋",
+    logoUrl: "https://assets.coingecko.com/coins/images/17547/small/orca.png",
     color: "from-teal-500/20 to-emerald-600/20 border-teal-500/40",
     volume24h: "$340M",
     avgFee: "0.07%",
@@ -144,21 +151,32 @@ export function DEXSelector({
         {/* Dropdown Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-9 px-3 bg-surface border-border hover:bg-surface-2 font-mono text-xs font-bold gap-2 text-foreground"
-            >
-              <span className="text-base">{activeDex.logo}</span>
-              <span>{activeDex.name}</span>
-              <Badge
+              <Button
                 variant="outline"
-                className="text-[9px] px-1.5 py-0 bg-primary/10 border-primary/30 text-primary font-bold"
+                size="sm"
+                className="h-9 px-3 bg-surface border-border hover:bg-surface-2 font-mono text-xs font-bold gap-2 text-foreground"
               >
-                {activeDex.chain.split("/")[0]}
-              </Badge>
-              <ChevronDown className="h-3.5 w-3.5 text-muted-foreground ml-1" />
-            </Button>
+                {activeDex.logoUrl ? (
+                  <img
+                    src={activeDex.logoUrl}
+                    alt={activeDex.name}
+                    className="h-4 w-4 rounded-full object-contain shrink-0"
+                    onError={(e) => {
+                      (e.target as HTMLElement).style.display = "none";
+                    }}
+                  />
+                ) : (
+                  <span className="text-base">{activeDex.logo}</span>
+                )}
+                <span>{activeDex.name}</span>
+                <Badge
+                  variant="outline"
+                  className="text-[9px] px-1.5 py-0 bg-primary/10 border-primary/30 text-primary font-bold"
+                >
+                  {activeDex.chain.split("/")[0]}
+                </Badge>
+                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground ml-1" />
+              </Button>
           </DropdownMenuTrigger>
 
           <DropdownMenuContent
@@ -179,7 +197,18 @@ export function DEXSelector({
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-lg">{dex.logo}</span>
+                  {dex.logoUrl ? (
+                    <img
+                      src={dex.logoUrl}
+                      alt={dex.name}
+                      className="h-5 w-5 rounded-full object-contain shrink-0"
+                      onError={(e) => {
+                        (e.target as HTMLElement).style.display = "none";
+                      }}
+                    />
+                  ) : (
+                    <span className="text-lg">{dex.logo}</span>
+                  )}
                   <div>
                     <div className="font-bold flex items-center gap-1.5">
                       <span>{dex.name}</span>
@@ -219,11 +248,22 @@ export function DEXSelector({
               <div className="flex items-start justify-between gap-2 mb-2">
                 <div className="flex items-center gap-2">
                   <div
-                    className={`h-9 w-9 rounded-xl flex items-center justify-center text-xl shadow-sm border ${
+                    className={`h-9 w-9 rounded-xl flex items-center justify-center text-xl shadow-sm border overflow-hidden shrink-0 ${
                       isSelected ? "bg-surface border-primary/50" : "bg-surface-2 border-border"
                     }`}
                   >
-                    {dex.logo}
+                    {dex.logoUrl ? (
+                      <img
+                        src={dex.logoUrl}
+                        alt={dex.name}
+                        className="h-6 w-6 object-contain"
+                        onError={(e) => {
+                          (e.target as HTMLElement).style.display = "none";
+                        }}
+                      />
+                    ) : (
+                      dex.logo
+                    )}
                   </div>
                   <div>
                     <div className="font-extrabold text-foreground text-xs flex items-center gap-1">

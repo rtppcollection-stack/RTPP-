@@ -54,47 +54,7 @@ const ADMIN_FEE_STORAGE_KEY = "rtpp_admin_fee_records_v1";
 const ADMIN_ACCESS_KEY_STORAGE = "rtpp_admin_passcode_custom_v2";
 const STATIC_BASE_TIME = 1770000000000;
 
-const DEFAULT_FEE_RECORDS: AdminFeeRecord[] = [
-  {
-    id: "fee-101",
-    timestamp: STATIC_BASE_TIME - 1000 * 60 * 18,
-    userAddress: "0x3f4...8e12",
-    adminWallet: "0x752f726410B3e276DAE704B6E4671C50ea199798",
-    fromChain: "Bitcoin / Cross-Chain",
-    pair: "BTC → ETH",
-    swapValueUSD: 6850,
-    feeCollectedUSD: 20.55,
-    feeTokenSymbol: "BTC",
-    feeTokenAmount: 0.0003,
-    txHash: "0x9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b",
-  },
-  {
-    id: "fee-102",
-    timestamp: STATIC_BASE_TIME - 1000 * 60 * 120,
-    userAddress: "0x892...110f",
-    adminWallet: "0x752f726410B3e276DAE704B6E4671C50ea199798",
-    fromChain: "Base L2",
-    pair: "ETH → AERO",
-    swapValueUSD: 3450,
-    feeCollectedUSD: 10.35,
-    feeTokenSymbol: "ETH",
-    feeTokenAmount: 0.003,
-    txHash: "0x2f1a0b9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e",
-  },
-  {
-    id: "fee-103",
-    timestamp: STATIC_BASE_TIME - 1000 * 60 * 300,
-    userAddress: "Sol...99xK",
-    adminWallet: "0x752f726410B3e276DAE704B6E4671C50ea199798",
-    fromChain: "Solana",
-    pair: "SOL → USDC",
-    swapValueUSD: 1850,
-    feeCollectedUSD: 5.55,
-    feeTokenSymbol: "SOL",
-    feeTokenAmount: 0.03,
-    txHash: "5K8mP2qR9sT1uV3wX5yZ7aB9cD1eF3gH5iJ7kL9mN0p",
-  },
-];
+const DEFAULT_FEE_RECORDS: AdminFeeRecord[] = [];
 
 export function AdminControlPanel() {
   const { address, feeWallet, setFeeWallet, feeBps, setFeeBps } = useWallet();
@@ -125,7 +85,11 @@ export function AdminControlPanel() {
       const saved = localStorage.getItem(ADMIN_FEE_STORAGE_KEY);
       if (saved) {
         try {
-          setFeeRecords(JSON.parse(saved));
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) {
+            const realRecords = parsed.filter((r: any) => !r.id?.startsWith("fee-10"));
+            setFeeRecords(realRecords);
+          }
         } catch {
           // ignore
         }

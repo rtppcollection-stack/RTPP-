@@ -25,8 +25,8 @@ export function AIChat() {
     {
       role: "assistant",
       content: activeIsAdmin
-        ? "👨‍💻 **RTPP Admin AI Brain Active:**\n\nFull administrative mode enabled. Ask me anything about the system architecture, file structure, on-chain DEX fee collection, Netlify deployment setup, or database schemas."
-        : "မင်္ဂလာပါ! 👋 I'm **RTPP Trading Assistant**.\n\nAsk me about crypto prices, P2P profit calculations, multi-chain DEX swaps, or NFT marketplace guides!",
+        ? "👨‍💻 **RTPP Master Admin AI Active:**\n\nFull administrative mode enabled. Ask me anything about the platform architecture, DEX fee routing, Netlify deployment setup, NFT smart contract royalties, or Whale Radar integrations."
+        : "Hello! 👋 I'm **RTPP Global AI Assistant**.\n\nAsk me anything about:\n• ⚡ **DEX Swap & Bridge** (Multi-chain & Fee routing)\n• 🎨 **NFT Marketplace** (Free lazy minting & royalties)\n• 🐋 **Whale Radar & Inspector** (Live Mempool & DexScreener)\n• 📊 **P2P Profit/Loss Calculator** (PnL & Exchange fees)\n• ⛽ **Network Gas Tracker** (Live EVM Gwei rates)\n• 🔥 **RTPP Community Token** (`0x90f0712eddc36f4e42c0f8a6a6739ce5b113d9b8`)",
     },
   ]);
 
@@ -61,23 +61,47 @@ export function AIChat() {
       }
 
       // Static export or fallback response
-      const query = text.toLowerCase();
+      const q = text.toLowerCase();
       let reply = "";
 
       if (
         !activeIsAdmin &&
-        (query.includes("code") ||
-          query.includes("source") ||
-          query.includes("key") ||
-          query.includes("secret") ||
-          query.includes("admin"))
+        (q.includes("code") ||
+          q.includes("source") ||
+          q.includes("key") ||
+          q.includes("secret") ||
+          q.includes("backend") ||
+          q.includes("database"))
       ) {
         reply =
           "🔒 **Security Notice:**\n\nSystem source code, database architecture, and backend secrets are restricted to RTPP Administrators.";
       } else if (activeIsAdmin) {
-        reply = `👨‍💻 **[RTPP Admin Architecture Reply]:**\n\n• **DEX On-Chain Fee Engine:** \`DEXWidget.tsx\` & \`wallet.tsx\` automatically route a 0.30% fee to \`${ADMIN_WALLET}\` before performing swaps.\n• **Netlify Deploy Setup:** \`/netlify.toml\` handles single page app routing with \`npm run build\` and wildcard \`/*\` redirects.\n• **NFT Marketplace:** \`NFTGallery.tsx\` handles Supabase persistence with non-custodial payouts.`;
+        reply = `👨‍💻 **[RTPP Master Admin Architecture Reply]:**\n\n• **DEX On-Chain Fee Engine:** \`DEXWidget.tsx\` & \`wallet.tsx\` automatically route a 0.30% fee to \`${ADMIN_WALLET}\` before performing swaps.\n• **NFT Royalties:** \`NFTGallery.tsx\` handles 1% marketplace fee routing to \`${ADMIN_WALLET}\` on sales.\n• **Netlify Deploy Setup:** \`/netlify.toml\` handles SPA routing with \`npm run build\` and wildcard \`/*\` redirects.`;
+      } else if (
+        q.includes("swap") ||
+        q.includes("dex") ||
+        q.includes("bridge") ||
+        q.includes("fee")
+      ) {
+        reply = `⚡ **RTPP DEX Swap & Bridge:**\n\n• Supports Ethereum, Base, Arbitrum, Polygon, and BSC.\n• Non-custodial swapping with automatic 0.30% platform fee routed to Admin Treasury (\`${ADMIN_WALLET}\`).`;
+      } else if (q.includes("nft") || q.includes("mint") || q.includes("gallery")) {
+        reply = `🎨 **NFT Marketplace:**\n\n• 100% Free Lazy Minting with 0 upfront gas fees!\n• 1% smart contract royalty routed to Admin Treasury on marketplace sales.`;
+      } else if (
+        q.includes("whale") ||
+        q.includes("mempool") ||
+        q.includes("radar") ||
+        q.includes("inspector")
+      ) {
+        reply = `🐋 **Whale Radar & Inspector:**\n\n• Real-time Bitcoin Mempool.space and DexScreener live transaction streaming.\n• Direct multi-chain block explorer verification for any address or tx hash.`;
+      } else if (
+        q.includes("p2p") ||
+        q.includes("pnl") ||
+        q.includes("profit") ||
+        q.includes("calculator")
+      ) {
+        reply = `📊 **P2P Profit/Loss Calculator:**\n\n• Calculate net profit, ROI %, target sell price, breakeven points, and exchange fee deductions.`;
       } else {
-        reply = `🤖 **RTPP Assistant:**\n\nI received your question about *"${text}"*.\n\nCheck out our live charts, P2P profit/loss calculator, and DEX swap tools directly on the dashboard!`;
+        reply = `🤖 **RTPP Assistant:**\n\nI can assist you with:\n1. ⚡ **DEX Swaps & Cross-Chain Bridges**\n2. 🎨 **Free NFT Lazy Minting & Marketplace**\n3. 🐋 **Whale Radar & On-Chain Inspector**\n4. 📊 **P2P Profit & Loss Calculator**\n5. ⛽ **Network Gas Tracker (5 EVM Chains)**`;
       }
 
       setMessages((m) => [...m, { role: "assistant", content: reply }]);
@@ -145,19 +169,6 @@ export function AIChat() {
             </div>
 
             <div className="flex items-center gap-1">
-              {!isOwnerWallet && (
-                <button
-                  onClick={() => setIsAdminMode(!isAdminMode)}
-                  className={`text-[10px] font-mono px-2 py-0.5 rounded border transition-colors ${
-                    isAdminMode
-                      ? "bg-accent/20 text-accent border-accent/40 font-bold"
-                      : "text-muted-foreground border-border hover:text-foreground"
-                  }`}
-                  title="Toggle Admin Explanation Mode"
-                >
-                  {isAdminMode ? "Admin Mode On" : "Admin Mode"}
-                </button>
-              )}
               <button
                 onClick={() => setOpen(false)}
                 className="text-muted-foreground hover:text-foreground p-1"

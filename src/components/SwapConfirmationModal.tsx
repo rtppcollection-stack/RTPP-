@@ -473,16 +473,18 @@ export function SwapConfirmationModal({
                 </div>
 
                 {/* Routing Fee Breakdown */}
-                <div className="text-[10px] text-muted-foreground space-y-1 pt-1 border-t border-border/40">
-                  <div className="flex justify-between">
+                <div className="text-[10px] text-muted-foreground space-y-1 pt-1 border-t border-border/40 font-mono">
+                  <div className="flex justify-between items-center">
                     <span>Platform Service Fee (0.30%):</span>
                     <span className="text-amber-400 font-bold">
-                      ${platformFeeUSD.toFixed(2)} USD
+                      ${platformFeeUSD.toFixed(2)} USD (Auto-routed to Treasury: 0x752f...9798)
                     </span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between items-center">
                     <span>Estimated Gas Fee:</span>
-                    <span className="text-foreground font-bold">~$0.45 USD</span>
+                    <span className="text-foreground font-bold">
+                      ~$0.45 USD (Optimized L2/EVM Gas)
+                    </span>
                   </div>
                 </div>
               </div>
