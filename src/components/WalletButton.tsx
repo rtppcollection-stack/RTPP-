@@ -154,9 +154,15 @@ export function WalletButton() {
           >
             <Wallet className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">
-              {!mounted ? t("wallet.connect") : connecting ? t("wallet.connecting") : t("wallet.connect")}
+              {!mounted
+                ? t("wallet.connect")
+                : connecting
+                  ? t("wallet.connecting")
+                  : t("wallet.connect")}
             </span>
-            <span className="sm:hidden">{connecting ? t("wallet.connecting") : t("wallet.connect")}</span>
+            <span className="sm:hidden">
+              {connecting ? t("wallet.connecting") : t("wallet.connect")}
+            </span>
           </Button>
         </DialogTrigger>
 

@@ -87,7 +87,7 @@ export function AdminControlPanel() {
         try {
           const parsed = JSON.parse(saved);
           if (Array.isArray(parsed)) {
-            const realRecords = parsed.filter((r: any) => !r.id?.startsWith("fee-10"));
+            const realRecords = parsed.filter((r: AdminFeeRecord) => !r.id?.startsWith("fee-10"));
             setFeeRecords(realRecords);
           }
         } catch {

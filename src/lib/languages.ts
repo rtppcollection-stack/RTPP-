@@ -1,16 +1,5 @@
 export type LangCode =
-  | "en"
-  | "my"
-  | "zh"
-  | "ja"
-  | "ko"
-  | "es"
-  | "vi"
-  | "ru"
-  | "tr"
-  | "ar"
-  | "id"
-  | "hi";
+  "en" | "my" | "zh" | "ja" | "ko" | "es" | "vi" | "ru" | "tr" | "ar" | "id" | "hi";
 
 export interface LangInfo {
   code: LangCode;

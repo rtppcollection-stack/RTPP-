@@ -224,9 +224,7 @@ export function AIChat() {
                   </span>
                 </div>
                 <div className="text-[10px] text-muted-foreground font-mono">
-                  {activeIsAdmin
-                    ? "Master Admin AI Active"
-                    : "RTPP Web Platform Assistant"}
+                  {activeIsAdmin ? "Master Admin AI Active" : "RTPP Web Platform Assistant"}
                 </div>
               </div>
             </div>
@@ -326,4 +324,3 @@ export function AIChat() {
     </>
   );
 }
-

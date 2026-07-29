@@ -48,8 +48,8 @@ function createSupabaseClient() {
       getSession: async () => ({ data: { session: null }, error: null }),
       onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
     };
-    const mockQueryBuilder = (): any => {
-      const builder: any = {
+    const mockQueryBuilder = (): unknown => {
+      const builder: Record<string, unknown> = {
         select: () => builder,
         insert: async () => ({ data: [], error: null }),
         update: () => builder,
@@ -58,12 +58,17 @@ function createSupabaseClient() {
       };
       return builder;
     };
-    return new Proxy({ storage: mockStorage, auth: mockAuth, from: mockQueryBuilder } as any, {
-      get(target, prop) {
-        if (prop in target) return (target as any)[prop];
-        return mockQueryBuilder;
+    return new Proxy(
+      { storage: mockStorage, auth: mockAuth, from: mockQueryBuilder } as unknown as ReturnType<
+        typeof createClient<Database>
+      >,
+      {
+        get(target, prop) {
+          if (prop in target) return (target as Record<string, unknown>)[prop as string];
+          return mockQueryBuilder;
+        },
       },
-    });
+    );
   }
 
   return createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {

@@ -38,8 +38,8 @@ function createSupabaseAdminClient() {
 
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
     console.warn("[Supabase Admin] Missing environment variable(s) — returning mock admin client");
-    const mockQueryBuilder = (): any => {
-      const builder: any = {
+    const mockQueryBuilder = (): unknown => {
+      const builder: Record<string, unknown> = {
         select: () => builder,
         insert: async () => ({ data: [], error: null }),
         update: () => builder,
@@ -48,12 +48,15 @@ function createSupabaseAdminClient() {
       };
       return builder;
     };
-    return new Proxy({ from: mockQueryBuilder } as any, {
-      get(target, prop) {
-        if (prop in target) return (target as any)[prop];
-        return mockQueryBuilder;
+    return new Proxy(
+      { from: mockQueryBuilder } as unknown as ReturnType<typeof createClient<Database>>,
+      {
+        get(target, prop) {
+          if (prop in target) return (target as Record<string, unknown>)[prop as string];
+          return mockQueryBuilder;
+        },
       },
-    });
+    );
   }
 
   return createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {

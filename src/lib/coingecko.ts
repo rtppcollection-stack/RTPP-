@@ -110,12 +110,13 @@ export async function fetchCoinDetail(id: string): Promise<CoinDetail> {
 
     if (gtPool && (gtPool.base_token_price_usd || gtPool.quote_token_price_usd)) {
       livePriceUsd =
-        parseFloat(gtPool.base_token_price_usd) ||
-        parseFloat(gtPool.quote_token_price_usd) ||
-        0.25;
+        parseFloat(gtPool.base_token_price_usd) || parseFloat(gtPool.quote_token_price_usd) || 0.25;
       change24h = parseFloat(gtPool.price_change_percentage?.h24) || 8.45;
       vol24h = parseFloat(gtPool.volume_usd?.h24) || 1450000;
-      mCap = parseFloat(gtPool.fdv_usd) || parseFloat(gtPool.reserve_in_usd || "5000000") * 5 || 25000000;
+      mCap =
+        parseFloat(gtPool.fdv_usd) ||
+        parseFloat(gtPool.reserve_in_usd || "5000000") * 5 ||
+        25000000;
       livePriceMmk = Math.round(livePriceUsd * 3500);
       if (gtPool.name) poolName = gtPool.name;
     } else {
@@ -304,8 +305,10 @@ export async function fetchCoinDetailByContract(
       symbol,
       name,
       image: {
-        large: dsPair.info?.imageUrl || "https://assets.coingecko.com/coins/images/1/large/bitcoin.png",
-        small: dsPair.info?.imageUrl || "https://assets.coingecko.com/coins/images/1/small/bitcoin.png",
+        large:
+          dsPair.info?.imageUrl || "https://assets.coingecko.com/coins/images/1/large/bitcoin.png",
+        small:
+          dsPair.info?.imageUrl || "https://assets.coingecko.com/coins/images/1/small/bitcoin.png",
       },
       market_cap_rank: 500,
       genesis_date: "2026-01-01",

@@ -74,7 +74,7 @@ function AnimatedCardSparkline({
   coinSymbol: string;
 }) {
   if (!sparklineData || sparklineData.length === 0) {
-    return <div className="h-9 w-28 bg-surface-2/40 rounded animate-pulse" />;
+    return <div className="h-9 w-24 sm:w-32 bg-surface-2/40 rounded animate-pulse" />;
   }
 
   // Downsample to ~30 points for ultra-smooth Recharts rendering
@@ -94,7 +94,7 @@ function AnimatedCardSparkline({
   const gradientId = `sparkGradient-${coinSymbol.toLowerCase()}-${isUp ? "up" : "down"}`;
 
   return (
-    <div className="relative h-9 w-28 sm:w-32 transition-all duration-300">
+    <div className="relative h-9 w-24 xs:w-28 sm:w-32 transition-all duration-300">
       {isHovered ? (
         <div className="h-full w-full animate-fadeIn">
           <ResponsiveContainer width="100%" height="100%">
@@ -302,8 +302,8 @@ export function MarketDashboard({ onSelectToken, activeTokenId }: MarketDashboar
       <MarketNewsTicker />
 
       {/* Top Overview Cards Banner */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="panel p-3.5 flex items-center justify-between bg-surface/80 border-border/70">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
+        <div className="panel p-3 sm:p-3.5 flex items-center justify-between bg-surface/80 border-border/70">
           <div>
             <div className="text-[10px] font-mono uppercase text-muted-foreground">
               Market Cap (Top 50)
@@ -312,12 +312,12 @@ export function MarketDashboard({ onSelectToken, activeTokenId }: MarketDashboar
               ${formatCompact(totalMarketCap)}
             </div>
           </div>
-          <div className="h-9 w-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold">
+          <div className="h-9 w-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold shrink-0">
             <Award className="h-5 w-5" />
           </div>
         </div>
 
-        <div className="panel p-3.5 flex items-center justify-between bg-surface/80 border-border/70">
+        <div className="panel p-3 sm:p-3.5 flex items-center justify-between bg-surface/80 border-border/70">
           <div>
             <div className="text-[10px] font-mono uppercase text-muted-foreground">
               24h Trading Volume
@@ -326,20 +326,22 @@ export function MarketDashboard({ onSelectToken, activeTokenId }: MarketDashboar
               ${formatCompact(total24hVolume)}
             </div>
           </div>
-          <div className="h-9 w-9 rounded-lg bg-accent/10 text-accent flex items-center justify-center font-bold">
+          <div className="h-9 w-9 rounded-lg bg-accent/10 text-accent flex items-center justify-center font-bold shrink-0">
             <BarChart2 className="h-5 w-5" />
           </div>
         </div>
 
-        <div className="panel p-3.5 flex items-center justify-between bg-surface/80 border-border/70">
+        <div className="panel p-3 sm:p-3.5 flex items-center justify-between bg-surface/80 border-border/70">
           <div>
             <div className="text-[10px] font-mono uppercase text-muted-foreground">
               Top 24h Gainer
             </div>
             {topGainer ? (
               <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="font-bold text-sm text-foreground">{topGainer.name}</span>
-                <span className="text-xs font-mono font-extrabold text-success bg-success/15 px-1.5 py-0.2 rounded">
+                <span className="font-bold text-sm text-foreground truncate max-w-[120px]">
+                  {topGainer.name}
+                </span>
+                <span className="text-xs font-mono font-extrabold text-success bg-success/15 px-1.5 py-0.2 rounded shrink-0">
                   +{topGainer.price_change_percentage_24h.toFixed(2)}%
                 </span>
               </div>
@@ -347,42 +349,42 @@ export function MarketDashboard({ onSelectToken, activeTokenId }: MarketDashboar
               <div className="text-xs font-mono text-muted-foreground">Loading...</div>
             )}
           </div>
-          <div className="h-9 w-9 rounded-lg bg-success/10 text-success flex items-center justify-center font-bold">
+          <div className="h-9 w-9 rounded-lg bg-success/10 text-success flex items-center justify-center font-bold shrink-0">
             <Flame className="h-5 w-5" />
           </div>
         </div>
       </div>
 
       {/* Control Bar: Search, Category Filters, Refresh, Grid/Table Switch */}
-      <div className="panel p-3 space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-2.5">
+      <div className="panel p-2.5 sm:p-3 space-y-2.5 sm:space-y-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-2.5">
           {/* Search Box */}
-          <div className="relative flex-1 min-w-[200px] max-w-md">
+          <div className="relative flex-1 w-full sm:max-w-md">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search coin name or symbol (e.g. BTC, Solana)..."
-              className="pl-8 h-9 text-xs font-mono bg-surface border-border"
+              placeholder="Search coin name or symbol..."
+              className="pl-8 h-9 text-xs font-mono bg-surface border-border w-full"
             />
           </div>
 
           {/* Controls: Refetch & View Toggle */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between sm:justify-end gap-2">
             <Button
               size="sm"
               variant="outline"
               onClick={() => refetch()}
               disabled={isRefetching}
-              className="h-9 gap-1.5 text-xs font-mono border-border hover:bg-surface-2"
+              className="h-9 gap-1.5 text-xs font-mono border-border hover:bg-surface-2 flex-1 sm:flex-none"
             >
               <RefreshCw
                 className={`h-3.5 w-3.5 ${isRefetching ? "animate-spin text-primary" : ""}`}
               />
-              <span className="hidden sm:inline">Live Sync</span>
+              <span>Live Sync</span>
             </Button>
 
-            <div className="flex rounded-lg bg-surface-2 p-0.5 border border-border">
+            <div className="flex rounded-lg bg-surface-2 p-0.5 border border-border shrink-0">
               <button
                 onClick={() => setViewMode("grid")}
                 className={`p-1.5 rounded-md transition-colors ${
@@ -410,7 +412,7 @@ export function MarketDashboard({ onSelectToken, activeTokenId }: MarketDashboar
         </div>
 
         {/* Category Filter Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs font-mono border-t border-border/40 pt-2.5">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs font-mono border-t border-border/40 pt-2.5 scrollbar-none">
           <FilterPill active={category === "all"} onClick={() => setCategory("all")}>
             🔥 All Top 50
           </FilterPill>

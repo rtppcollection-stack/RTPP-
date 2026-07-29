@@ -240,8 +240,9 @@ async function fetchRealCryptoNews(): Promise<NewsItem[]> {
     if (!res.ok) throw new Error("Network response not ok");
     const json = await res.json();
     if (json && Array.isArray(json.Data)) {
-      return json.Data.map((item: any) => {
-        const categoriesStr = (item.categories || "").toLowerCase();
+      return json.Data.map((itemObj: unknown) => {
+        const item = (itemObj as Record<string, unknown>) || {};
+        const categoriesStr = String(item.categories || "").toLowerCase();
         let category: NewsItem["category"] = "Altcoins";
         if (categoriesStr.includes("btc") || categoriesStr.includes("bitcoin"))
           category = "Bitcoin";
@@ -253,7 +254,8 @@ async function fetchRealCryptoNews(): Promise<NewsItem[]> {
         else if (categoriesStr.includes("macro") || categoriesStr.includes("fed"))
           category = "Macro";
 
-        const titleLower = item.title.toLowerCase();
+        const title = String(item.title || "");
+        const titleLower = title.toLowerCase();
         let sentiment: NewsItem["sentiment"] = "neutral";
         if (
           titleLower.includes("surge") ||
@@ -275,16 +277,20 @@ async function fetchRealCryptoNews(): Promise<NewsItem[]> {
           sentiment = "bearish";
         }
 
+        const sourceInfo = item.source_info as Record<string, unknown> | undefined;
+        const bodyStr = String(item.body || "");
+        const pubTime = Number(item.published_on) ? Number(item.published_on) * 1000 : Date.now();
+
         return {
           id: String(item.id || Date.now() + Math.random()),
-          title: item.title,
-          source: item.source_info?.name || item.source || "Crypto News",
-          url: item.url || "https://cryptocompare.com",
-          publishedAt: item.published_on ? item.published_on * 1000 : Date.now(),
+          title: title,
+          source: String(sourceInfo?.name || item.source || "Crypto News"),
+          url: String(item.url || "https://cryptocompare.com"),
+          publishedAt: pubTime,
           category,
           sentiment,
-          summary: item.body ? item.body.slice(0, 180) + "..." : item.title,
-          readTime: `${Math.max(2, Math.min(8, Math.round((item.body || "").length / 300)))} min read`,
+          summary: bodyStr ? bodyStr.slice(0, 180) + "..." : title,
+          readTime: `${Math.max(2, Math.min(8, Math.round(bodyStr.length / 300)))} min read`,
           isCached: false,
         };
       });
@@ -305,11 +311,12 @@ async function fetchRealLiveWhaleTxs(): Promise<WhaleTx[]> {
       const items = await res.json();
       if (Array.isArray(items)) {
         const btcPrice = 68500;
-        items.slice(0, 6).forEach((tx: any, idx: number) => {
-          const sats = tx.value || 25000000;
+        items.slice(0, 6).forEach((txObj: unknown, idx: number) => {
+          const tx = (txObj as Record<string, unknown>) || {};
+          const sats = Number(tx.value) || 25000000;
           const btcVal = sats / 100000000;
           const usdVal = Math.round(btcVal * btcPrice);
-          const txHash = tx.txid || `btc-${Date.now()}-${idx}`;
+          const txHash = String(tx.txid || `btc-${Date.now()}-${idx}`);
           if (usdVal >= 100000) {
             realTxs.push({
               id: `real-btc-${txHash.slice(0, 8)}`,
@@ -346,13 +353,16 @@ async function fetchRealLiveWhaleTxs(): Promise<WhaleTx[]> {
       const json = await res.json();
       if (json && Array.isArray(json.pairs)) {
         const topPairs = json.pairs.slice(0, 8);
-        topPairs.forEach((pair: any, idx: number) => {
-          const vol24 = pair.volume?.h24 || 5000000;
-          const priceUsd = parseFloat(pair.priceUsd) || 1;
-          const tokenSym = pair.baseToken?.symbol || "TOKEN";
-          const tokenName = pair.baseToken?.name || tokenSym;
-          const chainId = (pair.chainId || "ethereum").toLowerCase();
-          const pairAddr = pair.pairAddress || "";
+        topPairs.forEach((pairObj: unknown, idx: number) => {
+          const pair = (pairObj as Record<string, unknown>) || {};
+          const volume = pair.volume as Record<string, number> | undefined;
+          const vol24 = volume?.h24 || 5000000;
+          const priceUsd = parseFloat(String(pair.priceUsd || "1")) || 1;
+          const baseToken = pair.baseToken as Record<string, string> | undefined;
+          const tokenSym = baseToken?.symbol || "TOKEN";
+          const tokenName = baseToken?.name || tokenSym;
+          const chainId = String(pair.chainId || "ethereum").toLowerCase();
+          const pairAddr = String(pair.pairAddress || "");
           const txHash = pairAddr || `0x${Math.random().toString(16).slice(2)}`;
 
           let explorerUrl = pair.url || `https://dexscreener.com/${chainId}/${pairAddr}`;

@@ -24,6 +24,9 @@ import { SocialLinks } from "@/components/SocialLinks";
 import { AppTour } from "@/components/AppTour";
 import { PnLCalculator, PnLHistoryPanel, ScenariosTable } from "@/components/PnLCalculator";
 import { PositionSizeCalculator } from "@/components/PositionSizeCalculator";
+import { EditorPanel } from "@/components/EditorPanel";
+import { MonitorLogsPanel } from "@/components/MonitorLogsPanel";
+import { useUserRole } from "@/hooks/useUserRole";
 import { fetchCoinDetail } from "@/lib/coingecko";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
@@ -35,6 +38,8 @@ import {
   ShieldCheck,
   Loader2,
   Wallet,
+  FileEdit,
+  Activity,
 } from "lucide-react";
 import { Toaster } from "sonner";
 
@@ -79,6 +84,12 @@ function Home() {
   const { t } = useI18n();
   const [coinId, setCoinId] = useState<string>("bitcoin");
   const [tab, setTab] = useState<string>("dashboard");
+  const { role, isAdmin, isEditor, isMonitor } = useUserRole();
+
+  // Determine grid columns dynamically for nav tabs
+  const extraTabsCount =
+    (isAdmin ? 2 : 0) + (!isAdmin && isEditor ? 1 : 0) + (!isAdmin && isMonitor ? 1 : 0);
+  const totalTabs = 6 + extraTabsCount;
 
   return (
     <div className="min-h-screen text-foreground bg-[radial-gradient(ellipse_at_top,hsl(var(--primary)/0.08),transparent_60%)]">
@@ -89,6 +100,22 @@ function Home() {
             <div className="hidden lg:inline-flex items-center gap-1.5 rounded-full border border-success/30 bg-success/10 px-2.5 py-1 text-[10px] font-mono font-semibold text-success">
               <span className="live-dot" /> {t("live.badge")}
             </div>
+
+            {/* Role Badge Indicator */}
+            {role && role !== "user" && (
+              <div
+                className={`hidden md:inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-mono font-bold border uppercase ${
+                  role === "admin"
+                    ? "bg-amber-500/10 text-amber-400 border-amber-500/30"
+                    : role === "editor"
+                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                      : "bg-cyan-500/10 text-cyan-400 border-cyan-500/30"
+                }`}
+              >
+                Role: {role}
+              </div>
+            )}
+
             <div className="hidden sm:flex">
               <SocialLinks compact />
             </div>
@@ -105,7 +132,13 @@ function Home() {
       <main className="mx-auto max-w-7xl px-4 py-5 space-y-5">
         <Tabs value={tab} onValueChange={setTab} className="space-y-5">
           <div className="sticky top-[52px] z-30 -mx-4 px-4 py-2 bg-background/70 backdrop-blur-xl border-b border-border/40">
-            <TabsList className="mx-auto grid w-full max-w-6xl grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-1 bg-surface/70 p-1 h-auto rounded-xl border border-border/60">
+            <TabsList
+              className={`mx-auto grid w-full max-w-6xl gap-1 bg-surface/70 p-1 h-auto rounded-xl border border-border/60 ${
+                totalTabs > 6
+                  ? "grid-cols-2 sm:grid-cols-4 md:grid-cols-8"
+                  : "grid-cols-2 sm:grid-cols-3 md:grid-cols-6"
+              }`}
+            >
               <TabTrig
                 value="dashboard"
                 icon={<LayoutDashboard className="h-4 w-4" />}
@@ -126,8 +159,30 @@ function Home() {
                 icon={<Radar className="h-4 w-4 text-amber-400" />}
                 label={t("nav.radar")}
               />
-              <TabTrig value="calc" icon={<Calculator className="h-4 w-4" />} label={t("nav.calculator")} />
+              <TabTrig
+                value="calc"
+                icon={<Calculator className="h-4 w-4" />}
+                label={t("nav.calculator")}
+              />
               <TabTrig value="nft" icon={<Images className="h-4 w-4" />} label={t("nav.mint")} />
+
+              {/* Editor Role Navigation Feature */}
+              {(isEditor || isAdmin) && (
+                <TabTrig
+                  value="editor"
+                  icon={<FileEdit className="h-4 w-4 text-emerald-400" />}
+                  label="Content Studio"
+                />
+              )}
+
+              {/* Monitor Role Navigation Feature */}
+              {(isMonitor || isAdmin) && (
+                <TabTrig
+                  value="monitor"
+                  icon={<Activity className="h-4 w-4 text-cyan-400" />}
+                  label="System Logs"
+                />
+              )}
             </TabsList>
           </div>
 
@@ -221,11 +276,62 @@ function Home() {
             />
             <NFTGallery />
           </TabsContent>
+
+          {(isEditor || isAdmin) && (
+            <TabsContent value="editor" className="space-y-4 mt-0">
+              <SectionHeader
+                title="Editor & Content Creation Studio"
+                subtitle="Exclusive portal for Editors to create, update, and manage news feeds, market alerts, and announcements."
+              />
+              <EditorPanel />
+            </TabsContent>
+          )}
+
+          {(isMonitor || isAdmin) && (
+            <TabsContent value="monitor" className="space-y-4 mt-0">
+              <SectionHeader
+                title="System Activity & Audit Telemetry"
+                subtitle="Exclusive portal for Monitors to review live system logs, RPC API response latency, and authorization events."
+              />
+              <MonitorLogsPanel />
+            </TabsContent>
+          )}
         </Tabs>
 
         <footer className="border-t border-border/50 pt-4 pb-6 text-center text-xs text-muted-foreground space-y-2">
-          <div className="flex justify-center">
+          <div className="flex justify-center items-center gap-3 flex-wrap">
             <SocialLinks />
+
+            {/* Show Admin Portal link ONLY if user is Admin */}
+            {isAdmin && (
+              <a
+                href="/admin"
+                className="inline-flex items-center gap-1.5 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-xs font-mono font-bold text-amber-400 hover:bg-amber-500/20 transition shadow-sm"
+                title="Private Treasury Admin Portal"
+              >
+                <ShieldCheck className="h-3.5 w-3.5 text-amber-400" /> Admin Portal
+              </a>
+            )}
+
+            {/* Show Content Studio shortcut for Editor */}
+            {!isAdmin && isEditor && (
+              <button
+                onClick={() => setTab("editor")}
+                className="inline-flex items-center gap-1.5 rounded-md border border-emerald-500/40 bg-emerald-500/10 px-3 py-1.5 text-xs font-mono font-bold text-emerald-400 hover:bg-emerald-500/20 transition shadow-sm"
+              >
+                <FileEdit className="h-3.5 w-3.5 text-emerald-400" /> Content Studio
+              </button>
+            )}
+
+            {/* Show System Logs shortcut for Monitor */}
+            {!isAdmin && isMonitor && (
+              <button
+                onClick={() => setTab("monitor")}
+                className="inline-flex items-center gap-1.5 rounded-md border border-cyan-500/40 bg-cyan-500/10 px-3 py-1.5 text-xs font-mono font-bold text-cyan-400 hover:bg-cyan-500/20 transition shadow-sm"
+              >
+                <Activity className="h-3.5 w-3.5 text-cyan-400" /> Read-Only Logs
+              </button>
+            )}
           </div>
           <div>{t("footer.disclaimer")}</div>
           <div className="text-[10px] opacity-70">

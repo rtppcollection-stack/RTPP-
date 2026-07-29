@@ -1,5 +1,7 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
+export type UserRole = "admin" | "editor" | "monitor" | "user";
+
 export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
@@ -8,6 +10,33 @@ export type Database = {
   };
   public: {
     Tables: {
+      profiles: {
+        Row: {
+          avatar_url: string | null;
+          created_at: string;
+          id: string;
+          role: "admin" | "editor" | "monitor" | "user";
+          updated_at: string | null;
+          username: string | null;
+        };
+        Insert: {
+          avatar_url?: string | null;
+          created_at?: string;
+          id: string;
+          role?: "admin" | "editor" | "monitor" | "user";
+          updated_at?: string | null;
+          username?: string | null;
+        };
+        Update: {
+          avatar_url?: string | null;
+          created_at?: string;
+          id?: string;
+          role?: "admin" | "editor" | "monitor" | "user";
+          updated_at?: string | null;
+          username?: string | null;
+        };
+        Relationships: [];
+      };
       nft_trades: {
         Row: {
           chain: string;
@@ -99,7 +128,7 @@ export type Database = {
       [_ in never]: never;
     };
     Enums: {
-      [_ in never]: never;
+      user_role: "admin" | "editor" | "monitor" | "user";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -220,6 +249,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_role: ["admin", "editor", "monitor", "user"],
+    },
   },
 } as const;

@@ -62,7 +62,13 @@ export interface SwapToken {
   isNativeBTC?: boolean;
 }
 
-export function TokenAvatar({ token, className = "h-6 w-6" }: { token: SwapToken; className?: string }) {
+export function TokenAvatar({
+  token,
+  className = "h-6 w-6",
+}: {
+  token: SwapToken;
+  className?: string;
+}) {
   const [failed, setFailed] = useState(false);
   if (token.logoUrl && !failed) {
     return (
@@ -74,7 +80,9 @@ export function TokenAvatar({ token, className = "h-6 w-6" }: { token: SwapToken
       />
     );
   }
-  return <span className={`${className} flex items-center justify-center shrink-0`}>{token.icon}</span>;
+  return (
+    <span className={`${className} flex items-center justify-center shrink-0`}>{token.icon}</span>
+  );
 }
 
 export interface AdminFeeRecord {
@@ -359,7 +367,7 @@ export function DEXWidget({ coinId }: Props) {
           const parsed = JSON.parse(saved);
           if (Array.isArray(parsed)) {
             // Filter out old mock records
-            const realRecords = parsed.filter((r: any) => !r.id?.startsWith("fee-10"));
+            const realRecords = parsed.filter((r: AdminFeeRecord) => !r.id?.startsWith("fee-10"));
             setFeeRecords(realRecords);
           }
         } catch {

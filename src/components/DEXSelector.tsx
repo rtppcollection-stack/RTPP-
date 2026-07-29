@@ -39,7 +39,8 @@ export const SUPPORTED_DEXES: DEXOption[] = [
     name: "Uniswap V3",
     chain: "Base / Ethereum / Arbitrum",
     logo: "🦄",
-    logoUrl: "https://raw.githubusercontent.com/uniswap/assets/master/blockchains/ethereum/assets/0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984/logo.png",
+    logoUrl:
+      "https://raw.githubusercontent.com/uniswap/assets/master/blockchains/ethereum/assets/0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984/logo.png",
     color: "from-pink-500/20 to-purple-600/20 border-pink-500/40",
     volume24h: "$1.45B",
     avgFee: "0.05% - 0.30%",
@@ -78,7 +79,8 @@ export const SUPPORTED_DEXES: DEXOption[] = [
     name: "Raydium Protocol",
     chain: "Solana Network",
     logo: "⚡",
-    logoUrl: "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R/logo.png",
+    logoUrl:
+      "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R/logo.png",
     color: "from-cyan-500/20 to-blue-600/20 border-cyan-500/40",
     volume24h: "$890M",
     avgFee: "0.25%",
@@ -91,7 +93,8 @@ export const SUPPORTED_DEXES: DEXOption[] = [
     name: "SushiSwap V3",
     chain: "Multi-Chain (15+ Chains)",
     logo: "🍣",
-    logoUrl: "https://raw.githubusercontent.com/sushiswap/list/master/logos/token-list/sushi/0x6B3595068778DD592e39A122f4f5a5cF09C90fE2/logo.png",
+    logoUrl:
+      "https://raw.githubusercontent.com/sushiswap/list/master/logos/token-list/sushi/0x6B3595068778DD592e39A122f4f5a5cF09C90fE2/logo.png",
     color: "from-indigo-500/20 to-pink-600/20 border-indigo-500/40",
     volume24h: "$210M",
     avgFee: "0.30%",
@@ -104,7 +107,8 @@ export const SUPPORTED_DEXES: DEXOption[] = [
     name: "Trader Joe XYZ",
     chain: "Avalanche / Arbitrum",
     logo: "🔺",
-    logoUrl: "https://raw.githubusercontent.com/traderjoe-xyz/joe-tokenlist/main/logos/0x6e84a6216eA6dCA71dE8c6E368E9d24B49fF082B/logo.png",
+    logoUrl:
+      "https://raw.githubusercontent.com/traderjoe-xyz/joe-tokenlist/main/logos/0x6e84a6216eA6dCA71dE8c6E368E9d24B49fF082B/logo.png",
     color: "from-red-500/20 to-orange-600/20 border-red-500/40",
     volume24h: "$180M",
     avgFee: "0.15% - 0.20%",
@@ -117,7 +121,8 @@ export const SUPPORTED_DEXES: DEXOption[] = [
     name: "Orca DEX",
     chain: "Solana Network",
     logo: "🐋",
-    logoUrl: "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE/logo.png",
+    logoUrl:
+      "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE/logo.png",
     color: "from-teal-500/20 to-emerald-600/20 border-teal-500/40",
     volume24h: "$340M",
     avgFee: "0.07%",
@@ -127,7 +132,13 @@ export const SUPPORTED_DEXES: DEXOption[] = [
   },
 ];
 
-export function DexLogoImage({ dex, className = "h-5 w-5" }: { dex: DEXOption; className?: string }) {
+export function DexLogoImage({
+  dex,
+  className = "h-5 w-5",
+}: {
+  dex: DEXOption;
+  className?: string;
+}) {
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
@@ -148,7 +159,9 @@ export function DexLogoImage({ dex, className = "h-5 w-5" }: { dex: DEXOption; c
   }
 
   return (
-    <span className={`${className} flex items-center justify-center shrink-0 font-normal text-base leading-none select-none`}>
+    <span
+      className={`${className} flex items-center justify-center shrink-0 font-normal text-base leading-none select-none`}
+    >
       {dex.logo}
     </span>
   );
@@ -323,4 +336,3 @@ export function DEXSelector({
     </div>
   );
 }
-

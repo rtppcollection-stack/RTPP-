@@ -171,30 +171,30 @@ export function MarketNewsTicker() {
       <div
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
-        className="group relative flex items-center gap-2.5 rounded-xl border border-primary/30 bg-surface/90 px-3.5 py-2 shadow-sm backdrop-blur-md transition-all hover:border-primary/60"
+        className="group relative flex items-center gap-1.5 sm:gap-2 rounded-xl border border-primary/30 bg-surface/90 px-2 sm:px-3.5 py-1.5 sm:py-2 shadow-sm backdrop-blur-md transition-all hover:border-primary/60 w-full overflow-hidden max-w-full"
       >
         {/* Ticker Tag */}
-        <div className="flex shrink-0 items-center gap-1.5 rounded-lg bg-primary/15 px-2.5 py-1 text-xs font-mono font-extrabold text-primary border border-primary/30">
-          <Newspaper className="h-3.5 w-3.5 animate-pulse" />
+        <div className="flex shrink-0 items-center gap-1 rounded-lg bg-primary/15 px-2 sm:px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-xs font-mono font-extrabold text-primary border border-primary/30">
+          <Newspaper className="h-3 w-3 sm:h-3.5 sm:w-3.5 animate-pulse shrink-0" />
           <span className="hidden sm:inline uppercase tracking-wider">LIVE MARKET NEWS</span>
-          <span className="sm:hidden">NEWS</span>
+          <span className="sm:hidden uppercase tracking-wider">NEWS</span>
         </div>
 
         {/* Article Headline & Sentiment */}
-        <div className="flex-1 min-w-0 flex items-center gap-2">
+        <div className="flex-1 min-w-0 overflow-hidden flex items-center gap-1.5 sm:gap-2">
           {isLoading ? (
-            <div className="h-4 w-64 bg-surface-2/60 rounded animate-pulse" />
+            <div className="h-4 w-36 sm:w-64 bg-surface-2/60 rounded animate-pulse" />
           ) : activeArticle ? (
-            <div className="flex items-center gap-2 min-w-0 font-mono text-xs text-foreground">
+            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 w-full font-mono text-[11px] sm:text-xs text-foreground">
               {/* Sentiment Badge */}
               {activeArticle.sentiment === "bullish" && (
-                <span className="shrink-0 flex items-center gap-0.5 text-[10px] font-bold text-success bg-success/15 px-1.5 py-0.2 rounded border border-success/30">
-                  <TrendingUp className="h-3 w-3" /> BULLISH
+                <span className="shrink-0 hidden xs:inline-flex items-center gap-0.5 text-[9px] sm:text-[10px] font-bold text-success bg-success/15 px-1 sm:px-1.5 py-0.2 rounded border border-success/30">
+                  <TrendingUp className="h-2.5 w-2.5 sm:h-3 sm:w-3" /> BULLISH
                 </span>
               )}
               {activeArticle.sentiment === "bearish" && (
-                <span className="shrink-0 flex items-center gap-0.5 text-[10px] font-bold text-danger bg-danger/15 px-1.5 py-0.2 rounded border border-danger/30">
-                  <TrendingDown className="h-3 w-3" /> BEARISH
+                <span className="shrink-0 hidden xs:inline-flex items-center gap-0.5 text-[9px] sm:text-[10px] font-bold text-danger bg-danger/15 px-1 sm:px-1.5 py-0.2 rounded border border-danger/30">
+                  <TrendingDown className="h-2.5 w-2.5 sm:h-3 sm:w-3" /> BEARISH
                 </span>
               )}
 
@@ -203,10 +203,10 @@ export function MarketNewsTicker() {
                 href={activeArticle.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="truncate hover:text-primary transition-colors font-medium hover:underline flex items-center gap-1"
+                className="flex-1 min-w-0 truncate hover:text-primary transition-colors font-medium hover:underline flex items-center gap-1"
                 title={activeArticle.title}
               >
-                <span>{activeArticle.title}</span>
+                <span className="truncate">{activeArticle.title}</span>
                 <ExternalLink className="h-3 w-3 opacity-50 shrink-0 inline" />
               </a>
 
@@ -225,10 +225,11 @@ export function MarketNewsTicker() {
               <Button
                 size="xs"
                 variant="ghost"
-                className="h-7 gap-1 text-[11px] font-mono text-primary hover:bg-primary/10"
+                className="h-6 sm:h-7 px-1.5 sm:px-2 gap-0.5 sm:gap-1 text-[10px] sm:text-[11px] font-mono text-primary hover:bg-primary/10"
               >
-                <span>All Headlines</span>
-                <ChevronRight className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">All Headlines</span>
+                <span className="sm:hidden">All</span>
+                <ChevronRight className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0" />
               </Button>
             </DialogTrigger>
 

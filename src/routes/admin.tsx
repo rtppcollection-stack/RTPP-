@@ -15,11 +15,11 @@ function AppToaster() {
   return <Toaster position="top-right" theme={theme} richColors />;
 }
 
-export const Route = createFileRoute("/rtpp-boss-789-private-789-gate-789")({
+export const Route = createFileRoute("/admin")({
   beforeLoad: adminGuard,
   head: () => ({
     meta: [
-      { title: "RTPP Private Admin Boss Gate" },
+      { title: "RTPP Private Admin Portal" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -51,7 +51,7 @@ function AdminGatePage() {
 
           <div className="flex items-center gap-2">
             <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-destructive/10 border border-destructive/30 text-[10px] font-mono font-bold text-destructive">
-              <ShieldAlert className="h-3.5 w-3.5" /> Private Admin Route
+              <ShieldAlert className="h-3.5 w-3.5" /> Admin Route
             </div>
             <ThemeToggle />
             <WalletButton />

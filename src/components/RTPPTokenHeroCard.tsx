@@ -132,8 +132,6 @@ export function RTPPTokenHeroCard({ onSelectToken }: { onSelectToken?: (id: stri
             <ExternalLink className="h-3.5 w-3.5" />
             <span>Uniswap Swap</span>
           </a>
-
-
         </div>
       </div>
 
@@ -204,8 +202,11 @@ export function RTPPTokenHeroCard({ onSelectToken }: { onSelectToken?: (id: stri
             <span className="text-[10px] text-muted-foreground block font-bold uppercase">
               {t("hero.change24h")}
             </span>
-            <div className={`text-base font-black flex items-center gap-1 mt-0.5 ${change24h >= 0 ? "text-success" : "text-destructive"}`}>
-              <TrendingUp className="h-4 w-4" /> {change24h >= 0 ? "+" : ""}{change24h.toFixed(2)}%
+            <div
+              className={`text-base font-black flex items-center gap-1 mt-0.5 ${change24h >= 0 ? "text-success" : "text-destructive"}`}
+            >
+              <TrendingUp className="h-4 w-4" /> {change24h >= 0 ? "+" : ""}
+              {change24h.toFixed(2)}%
             </div>
             <div className="text-[11px] text-muted-foreground font-mono">
               {t("hero.marketCap")}: ${formatCompact(coin?.market_data?.market_cap?.usd ?? 6160)}

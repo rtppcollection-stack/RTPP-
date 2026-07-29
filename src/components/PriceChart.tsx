@@ -160,7 +160,8 @@ export function PriceChart({ coinId }: { coinId: string }) {
           <iframe
             title="GeckoTerminal Live Pool Chart"
             src={
-              coinId === "rtpp-token" || coinId.toLowerCase() === "0x90f0712eddc36f4e42c0f8a6a6739ce5b113d9b8"
+              coinId === "rtpp-token" ||
+              coinId.toLowerCase() === "0x90f0712eddc36f4e42c0f8a6a6739ce5b113d9b8"
                 ? "https://www.geckoterminal.com/base/pools/0xc59d51cbb9dc36d28315c0f75054ebcf5ad301304640a3d1bd3cbe746f7082aa?embed=1&info=0&swaps=1"
                 : `https://www.geckoterminal.com/eth/pools/${coinId}?embed=1&info=0&swaps=1`
             }

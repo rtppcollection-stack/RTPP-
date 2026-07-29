@@ -228,7 +228,7 @@ export function MintingComponent({ onSuccess }: { onSuccess?: () => void }) {
               },
             ],
           })) as string;
-        } catch (contractErr: any) {
+        } catch (contractErr: unknown) {
           console.warn(
             "Direct contract call fallback to gasless verification signature:",
             contractErr,
@@ -278,9 +278,9 @@ export function MintingComponent({ onSuccess }: { onSuccess?: () => void }) {
       if (onSuccess) {
         onSuccess();
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.dismiss("mint-step");
-      const errMsg = err.message || "Minting process cancelled or rejected";
+      const errMsg = err instanceof Error ? err.message : "Minting process cancelled or rejected";
       setTxStatus("failed");
       setTxError(errMsg);
       setStageMessage("Transaction failed or was rejected by user wallet.");
