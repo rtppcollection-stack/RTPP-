@@ -48,7 +48,7 @@ import {
 import { formatCurrency, formatNumber } from "@/lib/fx";
 import { toast } from "sonner";
 import { SwapConfirmationModal } from "@/components/SwapConfirmationModal";
-import { DEXSelector, DEXOption } from "@/components/DEXSelector";
+import { DEXSelector, DEXOption, SUPPORTED_DEXES, DexLogoImage } from "@/components/DEXSelector";
 
 export interface SwapToken {
   symbol: string;
@@ -342,6 +342,7 @@ export function DEXWidget({ coinId }: Props) {
     "0x90f0712eddc36f4e42c0f8a6a6739ce5b113d9b8",
   );
   const [selectedDex, setSelectedDex] = useState<string>("uniswap");
+  const activeDexObj = SUPPORTED_DEXES.find((d) => d.id === selectedDex) || SUPPORTED_DEXES[0];
 
   // Config Inputs
   const [editWalletInput, setEditWalletInput] = useState(feeWallet);
@@ -837,7 +838,10 @@ export function DEXWidget({ coinId }: Props) {
 
         <div className="flex justify-between items-center text-[11px]">
           <span className="text-muted-foreground">Optimal Route Engine:</span>
-          <span className="text-primary font-bold">{chain.dexName}</span>
+          <span className="text-primary font-bold flex items-center gap-1.5">
+            <DexLogoImage dex={activeDexObj} className="h-3.5 w-3.5" />
+            <span>{activeDexObj.name}</span>
+          </span>
         </div>
 
         <div className="flex justify-between items-center text-[11px]">

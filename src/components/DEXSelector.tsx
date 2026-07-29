@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,27 +37,40 @@ export const SUPPORTED_DEXES: DEXOption[] = [
   {
     id: "uniswap",
     name: "Uniswap V3",
-    chain: "Ethereum / Arbitrum / Polygon",
+    chain: "Base / Ethereum / Arbitrum",
     logo: "🦄",
-    logoUrl: "https://assets.coingecko.com/coins/images/12504/small/uniswap-uni.png",
+    logoUrl: "https://raw.githubusercontent.com/uniswap/assets/master/blockchains/ethereum/assets/0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984/logo.png",
     color: "from-pink-500/20 to-purple-600/20 border-pink-500/40",
     volume24h: "$1.45B",
     avgFee: "0.05% - 0.30%",
     status: "Optimal",
     description: "Official Uniswap V3 concentrated liquidity smart contract router.",
-    officialUrl: "https://app.uniswap.org/#/swap?chain=mainnet",
+    officialUrl: "https://app.uniswap.org/#/swap?chain=base",
+  },
+  {
+    id: "aerodrome",
+    name: "Aerodrome Finance",
+    chain: "Base Network (EVM)",
+    logo: "✈️",
+    logoUrl: "https://aerodrome.finance/aerodrome-logo.png",
+    color: "from-blue-600/20 to-cyan-500/20 border-blue-500/40",
+    volume24h: "$450M",
+    avgFee: "0.05% - 0.30%",
+    status: "Optimal",
+    description: "Central liquidity hub on Base Network with automated fee routing.",
+    officialUrl: "https://aerodrome.finance/swap",
   },
   {
     id: "pancakeswap",
     name: "PancakeSwap V3",
-    chain: "BNB Chain / Ethereum",
+    chain: "BNB Chain / Base / EVM",
     logo: "🥞",
-    logoUrl: "https://assets.coingecko.com/coins/images/12632/small/pancakeswap-cake-logo.png",
+    logoUrl: "https://tokens.pancakeswap.finance/images/symbol/cake.png",
     color: "from-amber-500/20 to-yellow-600/20 border-amber-500/40",
     volume24h: "$620M",
     avgFee: "0.01% - 0.25%",
     status: "Active",
-    description: "Official PancakeSwap V3 router interface on BNB Chain.",
+    description: "Official PancakeSwap V3 router interface on BNB & EVM chains.",
     officialUrl: "https://pancakeswap.finance/swap",
   },
   {
@@ -65,7 +78,7 @@ export const SUPPORTED_DEXES: DEXOption[] = [
     name: "Raydium Protocol",
     chain: "Solana Network",
     logo: "⚡",
-    logoUrl: "https://assets.coingecko.com/coins/images/15804/small/raydium.png",
+    logoUrl: "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R/logo.png",
     color: "from-cyan-500/20 to-blue-600/20 border-cyan-500/40",
     volume24h: "$890M",
     avgFee: "0.25%",
@@ -78,7 +91,7 @@ export const SUPPORTED_DEXES: DEXOption[] = [
     name: "SushiSwap V3",
     chain: "Multi-Chain (15+ Chains)",
     logo: "🍣",
-    logoUrl: "https://assets.coingecko.com/coins/images/12271/small/512x512_Logo_no_shadow.png",
+    logoUrl: "https://raw.githubusercontent.com/sushiswap/list/master/logos/token-list/sushi/0x6B3595068778DD592e39A122f4f5a5cF09C90fE2/logo.png",
     color: "from-indigo-500/20 to-pink-600/20 border-indigo-500/40",
     volume24h: "$210M",
     avgFee: "0.30%",
@@ -91,7 +104,7 @@ export const SUPPORTED_DEXES: DEXOption[] = [
     name: "Trader Joe XYZ",
     chain: "Avalanche / Arbitrum",
     logo: "🔺",
-    logoUrl: "https://assets.coingecko.com/coins/images/17702/small/traderjoe_200x200.png",
+    logoUrl: "https://raw.githubusercontent.com/traderjoe-xyz/joe-tokenlist/main/logos/0x6e84a6216eA6dCA71dE8c6E368E9d24B49fF082B/logo.png",
     color: "from-red-500/20 to-orange-600/20 border-red-500/40",
     volume24h: "$180M",
     avgFee: "0.15% - 0.20%",
@@ -104,7 +117,7 @@ export const SUPPORTED_DEXES: DEXOption[] = [
     name: "Orca DEX",
     chain: "Solana Network",
     logo: "🐋",
-    logoUrl: "https://assets.coingecko.com/coins/images/17547/small/orca.png",
+    logoUrl: "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE/logo.png",
     color: "from-teal-500/20 to-emerald-600/20 border-teal-500/40",
     volume24h: "$340M",
     avgFee: "0.07%",
@@ -113,6 +126,33 @@ export const SUPPORTED_DEXES: DEXOption[] = [
     officialUrl: "https://www.orca.so/",
   },
 ];
+
+export function DexLogoImage({ dex, className = "h-5 w-5" }: { dex: DEXOption; className?: string }) {
+  const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    setHasError(false);
+  }, [dex.id, dex.logoUrl]);
+
+  if (dex.logoUrl && !hasError) {
+    return (
+      <img
+        src={dex.logoUrl}
+        alt={dex.name}
+        referrerPolicy="no-referrer"
+        crossOrigin="anonymous"
+        className={`${className} rounded-full object-contain shrink-0 bg-background/80 ring-1 ring-border/50 p-0.5`}
+        onError={() => setHasError(true)}
+      />
+    );
+  }
+
+  return (
+    <span className={`${className} flex items-center justify-center shrink-0 font-normal text-base leading-none select-none`}>
+      {dex.logo}
+    </span>
+  );
+}
 
 interface DEXSelectorProps {
   selectedDexId?: string;
@@ -126,6 +166,12 @@ export function DEXSelector({
   className = "",
 }: DEXSelectorProps) {
   const [currentDexId, setCurrentDexId] = useState<string>(selectedDexId);
+
+  useEffect(() => {
+    if (selectedDexId) {
+      setCurrentDexId(selectedDexId);
+    }
+  }, [selectedDexId]);
 
   const activeDex = SUPPORTED_DEXES.find((d) => d.id === currentDexId) || SUPPORTED_DEXES[0];
 
@@ -151,32 +197,21 @@ export function DEXSelector({
         {/* Dropdown Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-              <Button
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 px-3 bg-surface border-border hover:bg-surface-2 font-mono text-xs font-bold gap-2 text-foreground"
+            >
+              <DexLogoImage dex={activeDex} className="h-4 w-4" />
+              <span>{activeDex.name}</span>
+              <Badge
                 variant="outline"
-                size="sm"
-                className="h-9 px-3 bg-surface border-border hover:bg-surface-2 font-mono text-xs font-bold gap-2 text-foreground"
+                className="text-[9px] px-1.5 py-0 bg-primary/10 border-primary/30 text-primary font-bold"
               >
-                {activeDex.logoUrl ? (
-                  <img
-                    src={activeDex.logoUrl}
-                    alt={activeDex.name}
-                    className="h-4 w-4 rounded-full object-contain shrink-0"
-                    onError={(e) => {
-                      (e.target as HTMLElement).style.display = "none";
-                    }}
-                  />
-                ) : (
-                  <span className="text-base">{activeDex.logo}</span>
-                )}
-                <span>{activeDex.name}</span>
-                <Badge
-                  variant="outline"
-                  className="text-[9px] px-1.5 py-0 bg-primary/10 border-primary/30 text-primary font-bold"
-                >
-                  {activeDex.chain.split("/")[0]}
-                </Badge>
-                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground ml-1" />
-              </Button>
+                {activeDex.chain.split("/")[0]}
+              </Badge>
+              <ChevronDown className="h-3.5 w-3.5 text-muted-foreground ml-1" />
+            </Button>
           </DropdownMenuTrigger>
 
           <DropdownMenuContent
@@ -197,18 +232,7 @@ export function DEXSelector({
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  {dex.logoUrl ? (
-                    <img
-                      src={dex.logoUrl}
-                      alt={dex.name}
-                      className="h-5 w-5 rounded-full object-contain shrink-0"
-                      onError={(e) => {
-                        (e.target as HTMLElement).style.display = "none";
-                      }}
-                    />
-                  ) : (
-                    <span className="text-lg">{dex.logo}</span>
-                  )}
+                  <DexLogoImage dex={dex} className="h-5 w-5" />
                   <div>
                     <div className="font-bold flex items-center gap-1.5">
                       <span>{dex.name}</span>
@@ -248,22 +272,11 @@ export function DEXSelector({
               <div className="flex items-start justify-between gap-2 mb-2">
                 <div className="flex items-center gap-2">
                   <div
-                    className={`h-9 w-9 rounded-xl flex items-center justify-center text-xl shadow-sm border overflow-hidden shrink-0 ${
+                    className={`h-9 w-9 rounded-xl flex items-center justify-center shadow-sm border overflow-hidden shrink-0 ${
                       isSelected ? "bg-surface border-primary/50" : "bg-surface-2 border-border"
                     }`}
                   >
-                    {dex.logoUrl ? (
-                      <img
-                        src={dex.logoUrl}
-                        alt={dex.name}
-                        className="h-6 w-6 object-contain"
-                        onError={(e) => {
-                          (e.target as HTMLElement).style.display = "none";
-                        }}
-                      />
-                    ) : (
-                      dex.logo
-                    )}
+                    <DexLogoImage dex={dex} className="h-6 w-6" />
                   </div>
                   <div>
                     <div className="font-extrabold text-foreground text-xs flex items-center gap-1">
@@ -310,3 +323,4 @@ export function DEXSelector({
     </div>
   );
 }
+
