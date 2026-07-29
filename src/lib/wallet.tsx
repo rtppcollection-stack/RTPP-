@@ -95,7 +95,14 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     setHasProvider(typeof window !== "undefined" && !!window.ethereum);
     if (typeof window === "undefined" || !window.ethereum) return;
     refresh();
-    const onAcc = (a: unknown) => setAddress((a as string[])?.[0] ?? null);
+    const onAcc = (a: unknown) => {
+      const addr = (a as string[])?.[0] ?? null;
+      setAddress(addr);
+      if (typeof window !== "undefined") {
+        if (addr) localStorage.setItem("rtpp_connected_wallet_address", addr);
+        else localStorage.removeItem("rtpp_connected_wallet_address");
+      }
+    };
     const onChain = (c: unknown) => setChainId(c as string);
     window.ethereum.on?.("accountsChanged", onAcc);
     window.ethereum.on?.("chainChanged", onChain);
@@ -107,30 +114,36 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   const connect = useCallback(async () => {
     if (typeof window === "undefined" || !window.ethereum) {
-      const demoAddress = "0x3f4e8912A453d867c828e12B4f2910488e3a8e12";
+      const demoAddress = "0x82627aeEDD0E7f0B6d45d443A1F59bCD2Adcd68f";
       setAddress(demoAddress);
       setChainId("0x1");
+      localStorage.setItem("rtpp_connected_wallet_address", demoAddress);
       return;
     }
     setConnecting(true);
     try {
       const accts = (await window.ethereum.request({ method: "eth_requestAccounts" })) as string[];
-      if (accts && accts[0]) {
-        setAddress(accts[0]);
-      } else {
-        setAddress("0x3f4e8912A453d867c828e12B4f2910488e3a8e12");
-      }
+      const activeAddr = accts && accts[0] ? accts[0] : "0x82627aeEDD0E7f0B6d45d443A1F59bCD2Adcd68f";
+      setAddress(activeAddr);
+      localStorage.setItem("rtpp_connected_wallet_address", activeAddr);
       const cid = (await window.ethereum.request({ method: "eth_chainId" })) as string;
       setChainId(cid || "0x1");
     } catch {
-      setAddress("0x3f4e8912A453d867c828e12B4f2910488e3a8e12");
+      const demoAddress = "0x82627aeEDD0E7f0B6d45d443A1F59bCD2Adcd68f";
+      setAddress(demoAddress);
       setChainId("0x1");
+      localStorage.setItem("rtpp_connected_wallet_address", demoAddress);
     } finally {
       setConnecting(false);
     }
   }, []);
 
-  const disconnect = useCallback(() => setAddress(null), []);
+  const disconnect = useCallback(() => {
+    setAddress(null);
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("rtpp_connected_wallet_address");
+    }
+  }, []);
 
   const sendEth = useCallback(
     async (to: string, ethAmount: number) => {

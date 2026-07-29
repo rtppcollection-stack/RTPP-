@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/table";
 import { useWallet, shortAddr } from "@/lib/wallet";
 import { formatCurrency, formatNumber } from "@/lib/fx";
+import { UserRoleManagement } from "@/components/UserRoleManagement";
 import { toast } from "sonner";
 
 export interface AdminFeeRecord {
@@ -476,6 +477,9 @@ export function AdminControlPanel() {
           <Check className="h-4 w-4" /> Save Treasury Configuration
         </Button>
       </div>
+
+      {/* User Roles & Permissions Management Section */}
+      <UserRoleManagement />
 
       {/* Fee Deposit Transactions Log */}
       <div className="panel overflow-hidden border-border/80 shadow-md">

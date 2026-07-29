@@ -1,21 +1,66 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { UserRole } from "@/integrations/supabase/types";
+import { useWallet } from "@/lib/wallet";
 
 export function useUserRole() {
+  const { address } = useWallet();
   const [role, setRole] = useState<UserRole | null>(null);
   const [loading, setLoading] = useState(true);
-  const [userId, setUserId] = useState<string | null>(null);
+  const [activeUserId, setActiveUserId] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
 
-    async function fetchRole(id: string) {
+    async function evaluateRole(targetId: string | null) {
+      if (!targetId) {
+        if (mounted) {
+          setRole(null);
+          setLoading(false);
+        }
+        return;
+      }
+
+      const activeId = targetId.toLowerCase();
+
+      // Default Admin wallet address matching
+      if (
+        activeId === "0x82627aeedd0e7f0b6d45d443a1f59bcd2adcd68f" ||
+        activeId === "0x752f726410b3e276dae704b6e4671c50ea199798"
+      ) {
+        if (mounted) {
+          setRole("admin");
+          setLoading(false);
+        }
+        return;
+      }
+
+      // Check local role override
+      try {
+        const savedRoles = localStorage.getItem("rtpp_user_roles_override_v1");
+        if (savedRoles) {
+          const parsed = JSON.parse(savedRoles);
+          const match = parsed.find(
+            (u: { id: string; role: UserRole }) => u.id.toLowerCase() === activeId,
+          );
+          if (match && match.role) {
+            if (mounted) {
+              setRole(match.role as UserRole);
+              setLoading(false);
+            }
+            return;
+          }
+        }
+      } catch {
+        // ignore
+      }
+
+      // Query Supabase profiles table
       try {
         const { data, error } = await supabase
           .from("profiles")
           .select("role")
-          .eq("id", id)
+          .eq("id", targetId)
           .maybeSingle();
 
         if (mounted) {
@@ -34,31 +79,38 @@ export function useUserRole() {
       }
     }
 
-    // Check initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!mounted) return;
-      if (session?.user) {
-        setUserId(session.user.id);
-        fetchRole(session.user.id);
-      } else {
-        setRole(null);
-        setUserId(null);
-        setLoading(false);
-      }
-    });
+    const currentAddr = address || (typeof window !== "undefined" ? localStorage.getItem("rtpp_connected_wallet_address") : null);
 
-    // Listen for auth changes
+    if (currentAddr) {
+      setActiveUserId(currentAddr);
+      evaluateRole(currentAddr);
+    } else {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (!mounted) return;
+        if (session?.user?.id) {
+          setActiveUserId(session.user.id);
+          evaluateRole(session.user.id);
+        } else {
+          setActiveUserId(null);
+          setRole(null);
+          setLoading(false);
+        }
+      });
+    }
+
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!mounted) return;
-      if (session?.user) {
-        setUserId(session.user.id);
-        fetchRole(session.user.id);
-      } else {
-        setRole(null);
-        setUserId(null);
-        setLoading(false);
+      if (!currentAddr) {
+        if (session?.user?.id) {
+          setActiveUserId(session.user.id);
+          evaluateRole(session.user.id);
+        } else {
+          setActiveUserId(null);
+          setRole(null);
+          setLoading(false);
+        }
       }
     });
 
@@ -66,11 +118,11 @@ export function useUserRole() {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [address]);
 
   return {
     role,
-    userId,
+    userId: address || activeUserId,
     loading,
     isAdmin: role === "admin",
     isEditor: role === "editor",
