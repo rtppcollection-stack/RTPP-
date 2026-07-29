@@ -124,7 +124,7 @@ export function RTPPTokenHeroCard({ onSelectToken }: { onSelectToken?: (id: stri
           </a>
 
           <a
-            href={`https://app.uniswap.org/#/swap?chain=mainnet&outputCurrency=${contractAddress}`}
+            href={`https://app.uniswap.org/#/swap?chain=base&outputCurrency=${contractAddress}`}
             target="_blank"
             rel="noreferrer"
             className="inline-flex items-center justify-center h-9 px-3.5 text-xs font-extrabold bg-pink-600/90 text-white hover:bg-pink-500 rounded-xl gap-1.5 shadow-md transition-all border border-pink-400/40"
@@ -145,7 +145,7 @@ export function RTPPTokenHeroCard({ onSelectToken }: { onSelectToken?: (id: stri
             <span className="flex items-center gap-1.5 font-bold text-foreground">
               <ShieldCheck className="h-3.5 w-3.5 text-success" /> Verified Smart Contract Address:
             </span>
-            <span className="text-success font-bold text-[10px]">ERC-20 • Ethereum</span>
+            <span className="text-success font-bold text-[10px]">ERC-20 • Base Network</span>
           </div>
 
           <div className="flex items-center justify-between gap-2 bg-surface p-2 rounded-lg border border-border font-mono text-xs">
@@ -160,13 +160,13 @@ export function RTPPTokenHeroCard({ onSelectToken }: { onSelectToken?: (id: stri
                 <Copy className="h-3 w-3" /> Copy
               </button>
               <a
-                href={`https://etherscan.io/token/${contractAddress}`}
+                href={`https://basescan.org/token/${contractAddress}`}
                 target="_blank"
                 rel="noreferrer"
                 className="flex items-center gap-1 text-[11px] font-bold bg-surface-2 hover:bg-primary/20 text-foreground hover:text-primary px-2 py-1 rounded border border-border transition-colors"
-                title="View on Etherscan"
+                title="View on BaseScan"
               >
-                <ExternalLink className="h-3 w-3" /> Etherscan
+                <ExternalLink className="h-3 w-3" /> BaseScan
               </a>
             </div>
           </div>
