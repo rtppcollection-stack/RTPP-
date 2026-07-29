@@ -13,6 +13,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useWallet, shortAddr } from "@/lib/wallet";
+import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -88,6 +89,7 @@ const SUPPORTED_CHAINS: Record<string, ChainInfo> = {
 };
 
 export function WalletButton() {
+  const { t } = useI18n();
   const {
     address,
     chainId,
@@ -152,9 +154,9 @@ export function WalletButton() {
           >
             <Wallet className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">
-              {!mounted ? "Connect Wallet" : connecting ? "Connecting..." : "Connect Wallet"}
+              {!mounted ? t("wallet.connect") : connecting ? t("wallet.connecting") : t("wallet.connect")}
             </span>
-            <span className="sm:hidden">{connecting ? "Connecting..." : "Connect"}</span>
+            <span className="sm:hidden">{connecting ? t("wallet.connecting") : t("wallet.connect")}</span>
           </Button>
         </DialogTrigger>
 

@@ -1,0 +1,102 @@
+{
+  "welcome": {
+    "title": "مرحباً بك في منصة RTPP Web3 Crypto",
+    "subtitle": "تبادل DEX متعدد السلاسل، تتبع السوق المباشر، سك NFT وحاسبة P2P",
+    "tagline": "حاسبة P2P للعملات المشفرة والأسعار المباشرة"
+  },
+  "nav": {
+    "dashboard": "لوحة التحكم",
+    "swap": "تبادل DEX",
+    "hero": "رمز RTPP",
+    "mint": "سك NFT",
+    "calculator": "الحاسبة",
+    "radar": "رادار الحيتان",
+    "markets": "الأسواق",
+    "news": "الأخبار"
+  },
+  "wallet": {
+    "connect": "ربط المحفظة",
+    "connecting": "جاري الربط...",
+    "connected": "متصل",
+    "disconnect": "قطع الاتصال",
+    "address": "عنوان المحفظة",
+    "balance": "الرصيد"
+  },
+  "swap": {
+    "title": "تبادل DEX فوري",
+    "subtitle": "تداول العملات بسلاسة عبر 5 شبكات EVM",
+    "pay": "أنت تدفع",
+    "receive": "أنت تستلم",
+    "selectToken": "حدد العملة",
+    "instantSwap": "تبادل فوري",
+    "swapping": "جاري التبادل...",
+    "slippage": "نسبة الانزلاق المسموح بها",
+    "route": "أفضل مسار",
+    "insufficientBalance": "الرصيد غير كافٍ"
+  },
+  "hero": {
+    "title": "رمز RTPP الرسمي",
+    "subtitle": "مجمع السيولة الرسمي على شبكة Base",
+    "livePrice": "السعر المباشر",
+    "marketCap": "القيمة السوقية",
+    "volume24h": "حجم التداول خلال 24 ساعة",
+    "change24h": "التغير خلال 24 ساعة",
+    "liquidity": "مجمع السيولة",
+    "uniswap": "تبادل على Uniswap",
+    "tokenChart": "رسم بياني للعملة",
+    "contract": "عنوان العقد",
+    "copyContract": "نسخ العقد"
+  },
+  "feed": {
+    "recentTransactions": "أحدث المعاملات",
+    "liveFeed": "البث المباشر",
+    "type": "النوع",
+    "amount": "الكمية",
+    "value": "القيمة",
+    "time": "الوقت",
+    "status": "الحالة",
+    "buy": "شراء",
+    "sell": "بيع",
+    "swap": "تبادل"
+  },
+  "token": {
+    "rank": "الترتيب",
+    "marketCap": "القيمة السوقية",
+    "volume": "حجم التداول 24س",
+    "supply": "العرض المتداول",
+    "high24": "أعلى سعر خلال 24س",
+    "low24": "أدنى سعر خلال 24س",
+    "ath": "أعلى سعر على الإطلاق",
+    "atl": "أدنى سعر على الإطلاق",
+    "about": "نبذة",
+    "website": "الموقع الإلكتروني",
+    "chart": "الرسم البياني للسعر",
+    "related": "عملات ذات صلة"
+  },
+  "calc": {
+    "title": "حاسبة الأرباح والخسائر P2P",
+    "buyPrice": "سعر الشراء (USD)",
+    "amountInvested": "المبلغ المستثمر",
+    "tokensReceived": "عدد العملات المستلمة",
+    "currentValue": "القيمة الحالية",
+    "pnl": "الأرباح / الخسائر",
+    "profit": "الربح",
+    "loss": "الخسارة",
+    "p2pValue": "قيمة P2P",
+    "scenarios": "إذا تغير السعر…",
+    "scenarioHint": "شاهد تغير الربح / الخسارة مع حركة الأسعار",
+    "currency": "العملة",
+    "calculate": "احسب",
+    "reset": "إعادة ضبط"
+  },
+  "common": {
+    "live": "مباشر",
+    "updated": "تم التحديث",
+    "search": "البحث عن عملة (BTC, ETH, SOL...)",
+    "noResults": "لم يتم العثور على نتائج",
+    "total": "الإجمالي",
+    "buy": "شراء",
+    "sell": "بيع",
+    "loading": "جاري التحميل..."
+  }
+}

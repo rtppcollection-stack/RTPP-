@@ -25,7 +25,9 @@ const RANGES = [
 export function PriceChart({ coinId }: { coinId: string }) {
   const { t } = useI18n();
   const [days, setDays] = useState("7");
-  const [mode, setMode] = useState<"area" | "tradingview">("area");
+  const [mode, setMode] = useState<"area" | "tradingview" | "geckoterminal">(
+    coinId === "rtpp-token" ? "geckoterminal" : "area",
+  );
 
   const { data: coin } = useQuery({
     queryKey: ["coin-detail", coinId],
@@ -101,6 +103,16 @@ export function PriceChart({ coinId }: { coinId: string }) {
         <div className="flex items-center gap-2 flex-wrap">
           <div className="flex rounded-md bg-surface-2 p-0.5 border border-border">
             <button
+              onClick={() => setMode("geckoterminal")}
+              className={`flex items-center gap-1 px-2.5 py-1 text-xs font-mono rounded transition-colors ${
+                mode === "geckoterminal"
+                  ? "bg-emerald-600 text-white font-extrabold shadow"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              🦎 GeckoTerminal
+            </button>
+            <button
               onClick={() => setMode("area")}
               className={`flex items-center gap-1 px-2.5 py-1 text-xs font-mono rounded transition-colors ${
                 mode === "area"
@@ -143,7 +155,21 @@ export function PriceChart({ coinId }: { coinId: string }) {
       </div>
 
       {/* Main Chart Area */}
-      {mode === "area" ? (
+      {mode === "geckoterminal" ? (
+        <div className="h-96 w-full rounded-lg overflow-hidden border border-emerald-500/40 bg-black shadow-lg relative">
+          <iframe
+            title="GeckoTerminal Live Pool Chart"
+            src={
+              coinId === "rtpp-token" || coinId.toLowerCase() === "0x90f0712eddc36f4e42c0f8a6a6739ce5b113d9b8"
+                ? "https://www.geckoterminal.com/base/pools/0xc59d51cbb9dc36d28315c0f75054ebcf5ad301304640a3d1bd3cbe746f7082aa?embed=1&info=0&swaps=1"
+                : `https://www.geckoterminal.com/eth/pools/${coinId}?embed=1&info=0&swaps=1`
+            }
+            className="h-full w-full border-0"
+            allow="clipboard-write"
+            allowFullScreen
+          />
+        </div>
+      ) : mode === "area" ? (
         <div className="h-72 w-full relative">
           {isLoading && (
             <div className="absolute inset-0 flex items-center justify-center bg-surface/50 backdrop-blur-xs z-10 text-xs font-mono text-muted-foreground">

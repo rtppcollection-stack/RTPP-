@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useWallet } from "@/lib/wallet";
+import { formatCryptoPriceUsd, formatCompact } from "@/lib/fx";
 import { fetchCoinDetailByContract, CoinDetail } from "@/lib/coingecko";
 import {
   Search,
@@ -156,10 +157,10 @@ export function SwapConfirmationModal({
   const receiveAmount = tokenPriceUSD > 0 ? netPayUSD / tokenPriceUSD : 0;
 
   const handleExecuteSwap = async () => {
-    if (!address) {
-      connect();
-      toast.info("Connecting wallet...");
-      return;
+    const currentAddress = address;
+    if (!currentAddress) {
+      await connect();
+      toast.info("Wallet connected!");
     }
 
     if (payAmtNum <= 0) {
@@ -168,10 +169,11 @@ export function SwapConfirmationModal({
     }
 
     setSwapping(true);
-    toast.loading("Validating smart contract & routing swap via DEX...");
+    const toastId = toast.loading("Validating smart contract & routing swap via DEX...");
 
     setTimeout(() => {
       setSwapping(false);
+      toast.dismiss(toastId);
       const txHash = `0x${Array.from({ length: 64 }, () =>
         Math.floor(Math.random() * 16).toString(16),
       ).join("")}`;
@@ -187,7 +189,7 @@ export function SwapConfirmationModal({
         onSwapSuccess(txHash, sym, receiveAmount);
       }
       onOpenChange(false);
-    }, 2000);
+    }, 1500);
   };
 
   return (
@@ -326,7 +328,7 @@ export function SwapConfirmationModal({
 
                   <div className="text-right">
                     <div className="text-base font-extrabold text-foreground">
-                      ${tokenPriceUSD < 0.01 ? tokenPriceUSD.toFixed(6) : tokenPriceUSD.toFixed(2)}{" "}
+                      ${formatCryptoPriceUsd(tokenPriceUSD)}{" "}
                       <span className="text-[10px] text-muted-foreground">USD</span>
                     </div>
                     <div

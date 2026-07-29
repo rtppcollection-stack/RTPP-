@@ -1,0 +1,102 @@
+{
+  "welcome": {
+    "title": "Selamat Datang di Platform RTPP Web3 Kripto",
+    "subtitle": "Swap DEX Multi-chain, Pelacakan Pasar Langsung, Minting NFT & Kalkulator P2P",
+    "tagline": "Kalkulator P2P Kripto & Harga Langsung"
+  },
+  "nav": {
+    "dashboard": "Dasbor",
+    "swap": "Swap DEX",
+    "hero": "Token RTPP",
+    "mint": "Mint NFT",
+    "calculator": "Kalkulator",
+    "radar": "Radar Paus",
+    "markets": "Pasar",
+    "news": "Berita"
+  },
+  "wallet": {
+    "connect": "Hubungkan Dompet",
+    "connecting": "Menghubungkan...",
+    "connected": "Terhubung",
+    "disconnect": "Putuskan Dompet",
+    "address": "Alamat Dompet",
+    "balance": "Saldo"
+  },
+  "swap": {
+    "title": "Swap DEX Seketika",
+    "subtitle": "Tukar token dengan lancar di 5 jaringan EVM",
+    "pay": "Anda Bayar",
+    "receive": "Anda Terima",
+    "selectToken": "Pilih Token",
+    "instantSwap": "Swap Seketika",
+    "swapping": "Menukar...",
+    "slippage": "Toleransi Slippage",
+    "route": "Rute Terbaik",
+    "insufficientBalance": "Saldo Tidak Cukup"
+  },
+  "hero": {
+    "title": "Token Resmi RTPP",
+    "subtitle": "Kolam Likuiditas Resmi di Jaringan Base",
+    "livePrice": "Harga Langsung",
+    "marketCap": "Kapitalisasi Pasar",
+    "volume24h": "Volume 24j",
+    "change24h": "Perubahan 24j",
+    "liquidity": "Kolam Likuiditas",
+    "uniswap": "Swap di Uniswap",
+    "tokenChart": "Grafik Token",
+    "contract": "Alamat Kontrak",
+    "copyContract": "Salin Kontrak"
+  },
+  "feed": {
+    "recentTransactions": "Transaksi Terkini",
+    "liveFeed": "Umpan Langsung",
+    "type": "Tipe",
+    "amount": "Jumlah",
+    "value": "Nilai",
+    "time": "Waktu",
+    "status": "Status",
+    "buy": "BELI",
+    "sell": "JUAL",
+    "swap": "SWAP"
+  },
+  "token": {
+    "rank": "Peringkat",
+    "marketCap": "Kapitalisasi Pasar",
+    "volume": "Volume 24j",
+    "supply": "Pasokan Beredar",
+    "high24": "Tertinggi 24j",
+    "low24": "Terendah 24j",
+    "ath": "Tertinggi Sepanjang Masa",
+    "atl": "Terendah Sepanjang Masa",
+    "about": "Tentang",
+    "website": "Situs Web",
+    "chart": "Grafik Harga",
+    "related": "Token Terkait"
+  },
+  "calc": {
+    "title": "Kalkulator Untung / Rugi P2P",
+    "buyPrice": "Harga Beli (USD)",
+    "amountInvested": "Jumlah Investasi",
+    "tokensReceived": "Token Diterima",
+    "currentValue": "Nilai Saat Ini",
+    "pnl": "Untung / Rugi",
+    "profit": "Keuntungan",
+    "loss": "Kerugian",
+    "p2pValue": "Nilai P2P",
+    "scenarios": "Jika harga berubah…",
+    "scenarioHint": "Lihat perubahan untung / rugi berdasarkan pergerakan harga",
+    "currency": "Mata Uang",
+    "calculate": "Hitung",
+    "reset": "Reset"
+  },
+  "common": {
+    "live": "LANGSUNG",
+    "updated": "Diperbarui",
+    "search": "Cari token (BTC, ETH, SOL...)",
+    "noResults": "Hasil tidak ditemukan",
+    "total": "Total",
+    "buy": "Beli",
+    "sell": "Jual",
+    "loading": "Memuat..."
+  }
+}

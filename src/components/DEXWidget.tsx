@@ -96,8 +96,8 @@ const SUPPORTED_SWAP_TOKENS: SwapToken[] = [
   {
     symbol: "RTPP",
     name: "RTPP Collection Token",
-    chain: "Ethereum / EVM",
-    priceUSD: 0.25,
+    chain: "Base / EVM (Pool 0xc59d...)",
+    priceUSD: 0.00000616,
     icon: "🔥",
     logoUrl: "https://assets.coingecko.com/coins/images/279/small/ethereum.png",
     address: "0x90f0712eddc36f4e42c0f8a6a6739ce5b113d9b8",

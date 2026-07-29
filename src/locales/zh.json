@@ -1,0 +1,102 @@
+{
+  "welcome": {
+    "title": "欢迎使用 RTPP Web3 加密平台",
+    "subtitle": "多链 DEX 兑换、实时市场追踪、NFT 铸造与 P2P 计算器",
+    "tagline": "加密货币 P2P 计算器与实时价格"
+  },
+  "nav": {
+    "dashboard": "控制台",
+    "swap": "DEX 兑换",
+    "hero": "RTPP 代币",
+    "mint": "NFT 铸造",
+    "calculator": "计算器",
+    "radar": "巨鲸雷达",
+    "markets": "市场",
+    "news": "新闻"
+  },
+  "wallet": {
+    "connect": "连接钱包",
+    "connecting": "连接中...",
+    "connected": "已连接",
+    "disconnect": "断开连接",
+    "address": "钱包地址",
+    "balance": "余额"
+  },
+  "swap": {
+    "title": "即时 DEX 兑换",
+    "subtitle": "跨 5 条 EVM 公链无缝交易代币",
+    "pay": "支付",
+    "receive": "获得",
+    "selectToken": "选择代币",
+    "instantSwap": "立即兑换",
+    "swapping": "兑换中...",
+    "slippage": "滑点容忍度",
+    "route": "最佳路由",
+    "insufficientBalance": "余额不足"
+  },
+  "hero": {
+    "title": "RTPP 官方代币",
+    "subtitle": "Base 网络官方流动性池",
+    "livePrice": "实时价格",
+    "marketCap": "市值",
+    "volume24h": "24小时成交量",
+    "change24h": "24小时涨跌",
+    "liquidity": "流动性池",
+    "uniswap": "Uniswap 兑换",
+    "tokenChart": "代币图表",
+    "contract": "合约地址",
+    "copyContract": "复制合约"
+  },
+  "feed": {
+    "recentTransactions": "最近交易记录",
+    "liveFeed": "实时动态",
+    "type": "类型",
+    "amount": "数量",
+    "value": "价值",
+    "time": "时间",
+    "status": "状态",
+    "buy": "买入",
+    "sell": "卖出",
+    "swap": "兑换"
+  },
+  "token": {
+    "rank": "排名",
+    "marketCap": "市值",
+    "volume": "24小时成交量",
+    "supply": "流通量",
+    "high24": "24小时最高",
+    "low24": "24小时最低",
+    "ath": "历史最高",
+    "atl": "历史最低",
+    "about": "简介",
+    "website": "官网",
+    "chart": "价格图表",
+    "related": "相关代币"
+  },
+  "calc": {
+    "title": "P2P 盈亏计算器",
+    "buyPrice": "买入价 (USD)",
+    "amountInvested": "投资金额",
+    "tokensReceived": "获得代币数",
+    "currentValue": "当前价值",
+    "pnl": "盈亏",
+    "profit": "盈利",
+    "loss": "亏损",
+    "p2pValue": "P2P 价值",
+    "scenarios": "价格变动时…",
+    "scenarioHint": "不同价格变动下的盈亏",
+    "currency": "货币",
+    "calculate": "计算",
+    "reset": "重置"
+  },
+  "common": {
+    "live": "实时",
+    "updated": "更新于",
+    "search": "搜索代币 (BTC, ETH, SOL...)",
+    "noResults": "未找到相关结果",
+    "total": "总计",
+    "buy": "买入",
+    "sell": "卖出",
+    "loading": "加载中..."
+  }
+}

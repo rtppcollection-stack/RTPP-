@@ -109,25 +109,25 @@ function Home() {
               <TabTrig
                 value="dashboard"
                 icon={<LayoutDashboard className="h-4 w-4" />}
-                label="Dashboard"
+                label={t("nav.dashboard")}
               />
               <TabTrig
                 value="portfolio"
                 icon={<Wallet className="h-4 w-4 text-cyan-400" />}
-                label="Portfolio & Gas"
+                label={t("nav.portfolio") || "Portfolio & Gas"}
               />
               <TabTrig
                 value="swap"
                 icon={<ArrowLeftRight className="h-4 w-4" />}
-                label="Swap & Bridge"
+                label={t("nav.swap")}
               />
               <TabTrig
                 value="whale"
                 icon={<Radar className="h-4 w-4 text-amber-400" />}
-                label="Whale Radar"
+                label={t("nav.radar")}
               />
-              <TabTrig value="calc" icon={<Calculator className="h-4 w-4" />} label="P2P Calc" />
-              <TabTrig value="nft" icon={<Images className="h-4 w-4" />} label="NFT Market" />
+              <TabTrig value="calc" icon={<Calculator className="h-4 w-4" />} label={t("nav.calculator")} />
+              <TabTrig value="nft" icon={<Images className="h-4 w-4" />} label={t("nav.mint")} />
             </TabsList>
           </div>
 

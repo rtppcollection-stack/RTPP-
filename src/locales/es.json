@@ -1,0 +1,102 @@
+{
+  "welcome": {
+    "title": "Bienvenido a la plataforma RTPP Web3 Crypto",
+    "subtitle": "Intercambio DEX multicadena, seguimiento del mercado en vivo, minteo NFT y calculadora P2P",
+    "tagline": "Calculadora P2P Cripto y Precios en Vivo"
+  },
+  "nav": {
+    "dashboard": "Panel",
+    "swap": "DEX Swap",
+    "hero": "Token RTPP",
+    "mint": "Mintear NFT",
+    "calculator": "Calculadora",
+    "radar": "Radar Ballenas",
+    "markets": "Mercados",
+    "news": "Noticias"
+  },
+  "wallet": {
+    "connect": "Conectar Billetera",
+    "connecting": "Conectando...",
+    "connected": "Conectado",
+    "disconnect": "Desconectar",
+    "address": "Dirección de Billetera",
+    "balance": "Balance"
+  },
+  "swap": {
+    "title": "Swap Instantáneo en DEX",
+    "subtitle": "Intercambia tokens sin problemas en 5 cadenas EVM",
+    "pay": "Pagas",
+    "receive": "Recibes",
+    "selectToken": "Seleccionar Token",
+    "instantSwap": "Intercambio Instantáneo",
+    "swapping": "Intercambiando...",
+    "slippage": "Tolerancia de Deslizamiento",
+    "route": "Mejor Ruta",
+    "insufficientBalance": "Balance Insuficiente"
+  },
+  "hero": {
+    "title": "Token Oficial RTPP",
+    "subtitle": "Pool de Liquidez Oficial en Red Base",
+    "livePrice": "Precio en Vivo",
+    "marketCap": "Capitalización",
+    "volume24h": "Volumen 24h",
+    "change24h": "Cambio 24h",
+    "liquidity": "Pool de Liquidez",
+    "uniswap": "Swap en Uniswap",
+    "tokenChart": "Gráfico de Token",
+    "contract": "Dirección de Contrato",
+    "copyContract": "Copiar Contrato"
+  },
+  "feed": {
+    "recentTransactions": "Transacciones Recientes",
+    "liveFeed": "Feed en Vivo",
+    "type": "Tipo",
+    "amount": "Monto",
+    "value": "Valor",
+    "time": "Hora",
+    "status": "Estado",
+    "buy": "COMPRA",
+    "sell": "VENTA",
+    "swap": "SWAP"
+  },
+  "token": {
+    "rank": "Rango",
+    "marketCap": "Capitalización",
+    "volume": "Volumen 24h",
+    "supply": "Circulante",
+    "high24": "Máximo 24h",
+    "low24": "Mínimo 24h",
+    "ath": "Máximo Histórico",
+    "atl": "Mínimo Histórico",
+    "about": "Acerca de",
+    "website": "Sitio Web",
+    "chart": "Gráfico de Precio",
+    "related": "Tokens Relacionados"
+  },
+  "calc": {
+    "title": "Calculadora de Ganancias/Pérdidas P2P",
+    "buyPrice": "Precio de Compra (USD)",
+    "amountInvested": "Monto Invertido",
+    "tokensReceived": "Tokens Recibidos",
+    "currentValue": "Valor Actual",
+    "pnl": "Ganancia/Pérdida",
+    "profit": "Ganancia",
+    "loss": "Pérdida",
+    "p2pValue": "Valor P2P",
+    "scenarios": "Si el precio cambia…",
+    "scenarioHint": "Mira cómo cambia la ganancia/pérdida con diferentes movimientos de precio",
+    "currency": "Moneda",
+    "calculate": "Calcular",
+    "reset": "Reiniciar"
+  },
+  "common": {
+    "live": "EN VIVO",
+    "updated": "Actualizado",
+    "search": "Buscar token (BTC, ETH, SOL...)",
+    "noResults": "Sin resultados",
+    "total": "Total",
+    "buy": "Comprar",
+    "sell": "Vender",
+    "loading": "Cargando..."
+  }
+}

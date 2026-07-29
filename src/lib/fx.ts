@@ -51,6 +51,31 @@ export function formatNumber(value: number, digits = 2, locale = "en-US"): strin
   return value.toLocaleString(locale, { maximumFractionDigits: digits });
 }
 
+export function formatCryptoPriceUsd(price: number): string {
+  if (!isFinite(price) || price === 0) return "0.00";
+  if (price >= 1) {
+    return price.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+  }
+  if (price >= 0.01) {
+    return price.toFixed(4);
+  }
+  if (price >= 0.0001) {
+    return price.toFixed(6);
+  }
+  return price.toFixed(8);
+}
+
+export function formatCryptoPriceMmk(mmk: number): string {
+  if (!isFinite(mmk) || mmk === 0) return "0";
+  if (mmk >= 100) {
+    return Math.round(mmk).toLocaleString("en-US");
+  }
+  if (mmk >= 1) {
+    return mmk.toFixed(2);
+  }
+  return mmk.toFixed(4);
+}
+
 export function formatCompact(value: number, locale = "en-US"): string {
   if (!isFinite(value)) return "-";
   return new Intl.NumberFormat(locale, { notation: "compact", maximumFractionDigits: 2 }).format(

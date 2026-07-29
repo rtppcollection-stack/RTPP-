@@ -10,7 +10,6 @@ import {
   Coins,
   ShieldCheck,
   Award,
-  BarChart2,
   Sparkles,
   ArrowRight,
 } from "lucide-react";
@@ -27,14 +26,20 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
-import { formatNumber } from "@/lib/fx";
+import { useI18n } from "@/lib/i18n";
+import { formatNumber, formatCryptoPriceUsd, formatCryptoPriceMmk, formatCompact } from "@/lib/fx";
 import { SwapConfirmationModal } from "@/components/SwapConfirmationModal";
 
 export function RTPPTokenHeroCard({ onSelectToken }: { onSelectToken?: (id: string) => void }) {
+  const { t } = useI18n();
   const [days, setDays] = useState("7");
+  const [chartMode, setChartMode] = useState<"area" | "geckoterminal">("geckoterminal");
   const [swapModalOpen, setSwapModalOpen] = useState(false);
 
   const contractAddress = "0x90f0712eddc36f4e42c0f8a6a6739ce5b113d9b8";
+  const geckoTerminalPoolUrl =
+    "https://www.geckoterminal.com/base/pools/0xc59d51cbb9dc36d28315c0f75054ebcf5ad301304640a3d1bd3cbe746f7082aa";
+  const geckoTerminalEmbedUrl = `${geckoTerminalPoolUrl}?embed=1&info=0&swaps=1`;
 
   const { data: coin } = useQuery({
     queryKey: ["coin-detail", "rtpp-token"],
@@ -105,8 +110,18 @@ export function RTPPTokenHeroCard({ onSelectToken }: { onSelectToken?: (id: stri
             className="h-9 px-4 text-xs font-bold bg-amber-500 text-black hover:bg-amber-400 gap-1.5 shadow-md transition-transform active:scale-95"
           >
             <Zap className="h-4 w-4 fill-black" />
-            <span>Instant Swap RTPP</span>
+            <span>{t("swap.instantSwap")} RTPP</span>
           </Button>
+
+          <a
+            href={geckoTerminalPoolUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center justify-center h-9 px-3.5 text-xs font-extrabold bg-emerald-600/90 text-white hover:bg-emerald-500 rounded-xl gap-1.5 shadow-md transition-all border border-emerald-400/40"
+          >
+            <ExternalLink className="h-3.5 w-3.5" />
+            <span>GeckoTerminal Base Pool</span>
+          </a>
 
           <a
             href={`https://app.uniswap.org/#/swap?chain=mainnet&outputCurrency=${contractAddress}`}
@@ -115,20 +130,10 @@ export function RTPPTokenHeroCard({ onSelectToken }: { onSelectToken?: (id: stri
             className="inline-flex items-center justify-center h-9 px-3.5 text-xs font-extrabold bg-pink-600/90 text-white hover:bg-pink-500 rounded-xl gap-1.5 shadow-md transition-all border border-pink-400/40"
           >
             <ExternalLink className="h-3.5 w-3.5" />
-            <span>Official Uniswap V3 Swap</span>
+            <span>Uniswap Swap</span>
           </a>
 
-          {onSelectToken && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => onSelectToken("rtpp-token")}
-              className="h-9 px-3 text-xs border-primary/40 bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground font-semibold"
-            >
-              <BarChart2 className="h-3.5 w-3.5 mr-1" />
-              <span>Deep Analysis</span>
-            </Button>
-          )}
+
         </div>
       </div>
 
@@ -184,105 +189,148 @@ export function RTPPTokenHeroCard({ onSelectToken }: { onSelectToken?: (id: stri
         {/* Live Price Statistics Block */}
         <div className="md:col-span-5 grid grid-cols-2 gap-2 text-xs">
           <div className="p-3 rounded-xl bg-surface-2/80 border border-border/70">
-            <span className="text-[10px] text-muted-foreground block font-bold">
-              RTPP LIVE PRICE
+            <span className="text-[10px] text-muted-foreground block font-bold uppercase">
+              RTPP {t("hero.livePrice")}
             </span>
-            <div className="text-lg font-black text-foreground mt-0.5">
-              ${priceUSD.toFixed(2)} USD
+            <div className="text-base font-black text-foreground mt-0.5 font-mono">
+              ${formatCryptoPriceUsd(priceUSD)} USD
             </div>
-            <div className="text-[11px] text-muted-foreground">
-              ≈ {priceMMK.toLocaleString()} MMK
+            <div className="text-[11px] text-muted-foreground font-mono">
+              ≈ {formatCryptoPriceMmk(priceMMK)} MMK
             </div>
           </div>
 
           <div className="p-3 rounded-xl bg-surface-2/80 border border-border/70">
-            <span className="text-[10px] text-muted-foreground block font-bold">
-              24H PERFORMANCE
+            <span className="text-[10px] text-muted-foreground block font-bold uppercase">
+              {t("hero.change24h")}
             </span>
-            <div className="text-lg font-black text-success flex items-center gap-1 mt-0.5">
-              <TrendingUp className="h-4 w-4" /> +{change24h.toFixed(2)}%
+            <div className={`text-base font-black flex items-center gap-1 mt-0.5 ${change24h >= 0 ? "text-success" : "text-destructive"}`}>
+              <TrendingUp className="h-4 w-4" /> {change24h >= 0 ? "+" : ""}{change24h.toFixed(2)}%
             </div>
-            <div className="text-[11px] text-muted-foreground">Market Cap: $25M</div>
+            <div className="text-[11px] text-muted-foreground font-mono">
+              {t("hero.marketCap")}: ${formatCompact(coin?.market_data?.market_cap?.usd ?? 6160)}
+            </div>
           </div>
         </div>
       </div>
 
       {/* Live Chart Section */}
       <div className="relative z-10 space-y-2 pt-2 border-t border-border/60">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-amber-400" />
             <span className="font-bold text-foreground text-xs">
-              RTPP Collection Token Live Price Chart
+              RTPP Live GeckoTerminal Base Market Chart
             </span>
           </div>
 
-          <div className="flex items-center gap-1 bg-surface-2 p-1 rounded-lg border border-border">
-            {[
-              { label: "1D", val: "1" },
-              { label: "7D", val: "7" },
-              { label: "30D", val: "30" },
-              { label: "1Y", val: "365" },
-            ].map((d) => (
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex rounded-md bg-surface-2 p-0.5 border border-border">
               <button
-                key={d.val}
                 type="button"
-                onClick={() => setDays(d.val)}
+                onClick={() => setChartMode("geckoterminal")}
                 className={`px-2 py-0.5 rounded text-[10px] font-bold transition-colors ${
-                  days === d.val
-                    ? "bg-primary text-primary-foreground shadow"
+                  chartMode === "geckoterminal"
+                    ? "bg-emerald-600 text-white font-extrabold shadow"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {d.label}
+                🦎 GeckoTerminal Live
               </button>
-            ))}
+              <button
+                type="button"
+                onClick={() => setChartMode("area")}
+                className={`px-2 py-0.5 rounded text-[10px] font-bold transition-colors ${
+                  chartMode === "area"
+                    ? "bg-primary text-primary-foreground font-extrabold shadow"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                📊 Area Summary
+              </button>
+            </div>
+
+            {chartMode === "area" && (
+              <div className="flex items-center gap-1 bg-surface-2 p-1 rounded-lg border border-border">
+                {[
+                  { label: "1D", val: "1" },
+                  { label: "7D", val: "7" },
+                  { label: "30D", val: "30" },
+                  { label: "1Y", val: "365" },
+                ].map((d) => (
+                  <button
+                    key={d.val}
+                    type="button"
+                    onClick={() => setDays(d.val)}
+                    className={`px-2 py-0.5 rounded text-[10px] font-bold transition-colors ${
+                      days === d.val
+                        ? "bg-primary text-primary-foreground shadow"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {d.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="h-44 w-full rounded-xl bg-surface/80 p-2 border border-border/60">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={points}>
-              <defs>
-                <linearGradient id="rtppGlow" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="oklch(0.64 0.24 252)" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="oklch(0.64 0.24 252)" stopOpacity={0.0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
-              <XAxis dataKey="time" stroke="#888888" fontSize={10} tickLine={false} />
-              <YAxis
-                domain={["auto", "auto"]}
-                stroke="#888888"
-                fontSize={10}
-                tickFormatter={(v) => `$${v.toFixed(2)}`}
-                orientation="right"
-                tickLine={false}
-              />
-              <Tooltip
-                content={({ active, payload }) => {
-                  if (active && payload && payload.length) {
-                    const p = payload[0].value as number;
-                    return (
-                      <div className="rounded-lg border border-border bg-surface p-2 shadow-xl text-xs font-mono">
-                        <div className="text-muted-foreground">{payload[0].payload.time}</div>
-                        <div className="font-extrabold text-foreground">${p.toFixed(4)} USD</div>
-                      </div>
-                    );
-                  }
-                  return null;
-                }}
-              />
-              <Area
-                type="monotone"
-                dataKey="price"
-                stroke="oklch(0.64 0.24 252)"
-                strokeWidth={2.5}
-                fill="url(#rtppGlow)"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
+        {chartMode === "geckoterminal" ? (
+          <div className="h-96 w-full rounded-xl overflow-hidden border border-emerald-500/40 bg-black shadow-lg relative">
+            <iframe
+              title="GeckoTerminal Live Base Pool Chart"
+              src={geckoTerminalEmbedUrl}
+              className="h-full w-full border-0"
+              allow="clipboard-write"
+              allowFullScreen
+            />
+          </div>
+        ) : (
+          <div className="h-52 w-full rounded-xl bg-surface/80 p-2 border border-border/60">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={points}>
+                <defs>
+                  <linearGradient id="rtppGlow" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="oklch(0.64 0.24 252)" stopOpacity={0.4} />
+                    <stop offset="95%" stopColor="oklch(0.64 0.24 252)" stopOpacity={0.0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
+                <XAxis dataKey="time" stroke="#888888" fontSize={10} tickLine={false} />
+                <YAxis
+                  domain={["auto", "auto"]}
+                  stroke="#888888"
+                  fontSize={10}
+                  tickFormatter={(v) => `$${v.toFixed(2)}`}
+                  orientation="right"
+                  tickLine={false}
+                />
+                <Tooltip
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      const p = payload[0].value as number;
+                      return (
+                        <div className="rounded-lg border border-border bg-surface p-2 shadow-xl text-xs font-mono">
+                          <div className="text-muted-foreground">{payload[0].payload.time}</div>
+                          <div className="font-extrabold text-foreground">${p.toFixed(4)} USD</div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="price"
+                  stroke="oklch(0.64 0.24 252)"
+                  strokeWidth={2.5}
+                  fill="url(#rtppGlow)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        )}
       </div>
 
       {/* Swap Confirmation Modal Link */}
@@ -290,6 +338,14 @@ export function RTPPTokenHeroCard({ onSelectToken }: { onSelectToken?: (id: stri
         open={swapModalOpen}
         onOpenChange={setSwapModalOpen}
         initialAddress={contractAddress}
+        onSwapSuccess={(txHash, symbol, amount) => {
+          toast.success(`Live DEX Swap recorded! Tx: ${txHash.slice(0, 12)}...`);
+          window.dispatchEvent(
+            new CustomEvent("rtpp-swap-completed", {
+              detail: { txHash, symbol, amount, timestamp: Date.now() },
+            }),
+          );
+        }}
       />
     </div>
   );

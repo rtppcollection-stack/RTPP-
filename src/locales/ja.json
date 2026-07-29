@@ -1,0 +1,102 @@
+{
+  "welcome": {
+    "title": "RTPP Web3 クリプトプラットフォームへようこそ",
+    "subtitle": "マルチチェーン DEX スワップ、リアルタイム市場追跡、NFT ミント＆ P2P 計算機",
+    "tagline": "暗号資産 P2P 計算機 ＆ リアルタイム価格"
+  },
+  "nav": {
+    "dashboard": "ダッシュボード",
+    "swap": "DEX スワップ",
+    "hero": "RTPP トークン",
+    "mint": "NFT ミント",
+    "calculator": "計算機",
+    "radar": "クジラレーダー",
+    "markets": "マーケット",
+    "news": "ニュース"
+  },
+  "wallet": {
+    "connect": "ウォレット接続",
+    "connecting": "接続中...",
+    "connected": "接続済み",
+    "disconnect": "切断",
+    "address": "ウォレットアドレス",
+    "balance": "残高"
+  },
+  "swap": {
+    "title": "インスタント DEX スワップ",
+    "subtitle": "5つの EVM チェーン間でスムーズにトークンを取引",
+    "pay": "支払う",
+    "receive": "受け取る",
+    "selectToken": "トークンを選択",
+    "instantSwap": "即座にスワップ",
+    "swapping": "スワップ中...",
+    "slippage": "スリッページ許容度",
+    "route": "最良ルート",
+    "insufficientBalance": "残高不足"
+  },
+  "hero": {
+    "title": "RTPP 公式トークン",
+    "subtitle": "Base ネットワーク公式流動性プール",
+    "livePrice": "リアルタイム価格",
+    "marketCap": "時価総額",
+    "volume24h": "24時間出来高",
+    "change24h": "24時間変動",
+    "liquidity": "流動性プール",
+    "uniswap": "Uniswap スワップ",
+    "tokenChart": "トークンチャート",
+    "contract": "コントラクトアドレス",
+    "copyContract": "アドレスをコピー"
+  },
+  "feed": {
+    "recentTransactions": "最近の取引履歴",
+    "liveFeed": "ライブフィード",
+    "type": "タイプ",
+    "amount": "数量",
+    "value": "価値",
+    "time": "時間",
+    "status": "ステータス",
+    "buy": "購入",
+    "sell": "売却",
+    "swap": "スワップ"
+  },
+  "token": {
+    "rank": "順位",
+    "marketCap": "時価総額",
+    "volume": "24時間出来高",
+    "supply": "循環供給量",
+    "high24": "24時間最高値",
+    "low24": "24時間最安値",
+    "ath": "過去最高値",
+    "atl": "過去最安値",
+    "about": "概要",
+    "website": "ウェブサイト",
+    "chart": "価格チャート",
+    "related": "関連トークン"
+  },
+  "calc": {
+    "title": "P2P 損益計算機",
+    "buyPrice": "購入価格 (USD)",
+    "amountInvested": "投資金額",
+    "tokensReceived": "獲得トークン数",
+    "currentValue": "現在の価値",
+    "pnl": "損益",
+    "profit": "利益",
+    "loss": "損失",
+    "p2pValue": "P2P 価値",
+    "scenarios": "価格が変動した場合…",
+    "scenarioHint": "さまざまな価格変動における損益",
+    "currency": "通貨",
+    "calculate": "計算する",
+    "reset": "リセット"
+  },
+  "common": {
+    "live": "ライブ",
+    "updated": "更新済み",
+    "search": "トークンを検索 (BTC, ETH, SOL...)",
+    "noResults": "結果が見つかりません",
+    "total": "合計",
+    "buy": "買",
+    "sell": "売",
+    "loading": "読み込み中..."
+  }
+}

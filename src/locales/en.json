@@ -1,0 +1,102 @@
+{
+  "welcome": {
+    "title": "Welcome to RTPP Web3 Crypto Platform",
+    "subtitle": "Multi-chain DEX Swap, Live Market Tracking, NFT Minting & P2P Calculator",
+    "tagline": "Crypto P2P Calculator & Live Prices"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "swap": "DEX Swap",
+    "hero": "RTPP Token",
+    "mint": "NFT Mint",
+    "calculator": "Calculator",
+    "radar": "Whale Radar",
+    "markets": "Markets",
+    "news": "News"
+  },
+  "wallet": {
+    "connect": "Connect Wallet",
+    "connecting": "Connecting...",
+    "connected": "Connected",
+    "disconnect": "Disconnect",
+    "address": "Wallet Address",
+    "balance": "Balance"
+  },
+  "swap": {
+    "title": "Instant DEX Swap",
+    "subtitle": "Trade tokens seamlessly across 5 EVM chains",
+    "pay": "You Pay",
+    "receive": "You Receive",
+    "selectToken": "Select Token",
+    "instantSwap": "Instant Swap",
+    "swapping": "Swapping...",
+    "slippage": "Slippage Tolerance",
+    "route": "Best Route",
+    "insufficientBalance": "Insufficient Balance"
+  },
+  "hero": {
+    "title": "RTPP Official Token",
+    "subtitle": "Base Network Official Liquidity Pool",
+    "livePrice": "Live Price",
+    "marketCap": "Market Cap",
+    "volume24h": "24h Volume",
+    "change24h": "24h Change",
+    "liquidity": "Liquidity Pool",
+    "uniswap": "Uniswap Swap",
+    "tokenChart": "Token Chart",
+    "contract": "Contract Address",
+    "copyContract": "Copy Contract"
+  },
+  "feed": {
+    "recentTransactions": "Recent Transactions",
+    "liveFeed": "Live Feed",
+    "type": "Type",
+    "amount": "Amount",
+    "value": "Value",
+    "time": "Time",
+    "status": "Status",
+    "buy": "BUY",
+    "sell": "SELL",
+    "swap": "SWAP"
+  },
+  "token": {
+    "rank": "Rank",
+    "marketCap": "Market Cap",
+    "volume": "24h Volume",
+    "supply": "Circulating Supply",
+    "high24": "24h High",
+    "low24": "24h Low",
+    "ath": "All-Time High",
+    "atl": "All-Time Low",
+    "about": "About",
+    "website": "Website",
+    "chart": "Price Chart",
+    "related": "Related Tokens"
+  },
+  "calc": {
+    "title": "P2P Profit / Loss Calculator",
+    "buyPrice": "Buy Price (USD)",
+    "amountInvested": "Amount Invested",
+    "tokensReceived": "Tokens Received",
+    "currentValue": "Current Value",
+    "pnl": "P&L",
+    "profit": "Profit",
+    "loss": "Loss",
+    "p2pValue": "P2P Value",
+    "scenarios": "If price changes by…",
+    "scenarioHint": "See how profit / loss changes at different price moves",
+    "currency": "Currency",
+    "calculate": "Calculate",
+    "reset": "Reset"
+  },
+  "common": {
+    "live": "LIVE",
+    "updated": "Updated",
+    "search": "Search token (BTC, ETH, SOL...)",
+    "noResults": "No results found",
+    "total": "Total",
+    "buy": "Buy",
+    "sell": "Sell",
+    "loading": "Loading..."
+  }
+}

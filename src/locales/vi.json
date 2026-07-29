@@ -1,0 +1,102 @@
+{
+  "welcome": {
+    "title": "Chào mừng đến với Nền tảng RTPP Web3 Crypto",
+    "subtitle": "Trao đổi DEX đa chuỗi, Theo dõi thị trường trực tiếp, Đúc NFT & Máy tính P2P",
+    "tagline": "Máy tính P2P Crypto & Giá trực tiếp"
+  },
+  "nav": {
+    "dashboard": "Bảng điều khiển",
+    "swap": "DEX Swap",
+    "hero": "RTPP Token",
+    "mint": "Đúc NFT",
+    "calculator": "Máy tính",
+    "radar": "Radar Cá Voi",
+    "markets": "Thị trường",
+    "news": "Tin tức"
+  },
+  "wallet": {
+    "connect": "Kết nối ví",
+    "connecting": "Đang kết nối...",
+    "connected": "Đã kết nối",
+    "disconnect": "Ngắt kết nối",
+    "address": "Địa chỉ ví",
+    "balance": "Số dư"
+  },
+  "swap": {
+    "title": "Hoán đổi DEX Tức thì",
+    "subtitle": "Giao dịch token mượt mà trên 5 chuỗi EVM",
+    "pay": "Bạn trả",
+    "receive": "Bạn nhận",
+    "selectToken": "Chọn Token",
+    "instantSwap": "Hoán đổi ngay",
+    "swapping": "Đang hoán đổi...",
+    "slippage": "Dung sai trượt giá",
+    "route": "Tuyến đường tốt nhất",
+    "insufficientBalance": "Số dư không đủ"
+  },
+  "hero": {
+    "title": "Token Chính thức RTPP",
+    "subtitle": "Bể thanh khoản chính thức trên Base Network",
+    "livePrice": "Giá trực tiếp",
+    "marketCap": "Vốn hóa thị trường",
+    "volume24h": "Khối lượng 24h",
+    "change24h": "Biến động 24h",
+    "liquidity": "Bể thanh khoản",
+    "uniswap": "Swap trên Uniswap",
+    "tokenChart": "Biểu đồ Token",
+    "contract": "Địa chỉ hợp đồng",
+    "copyContract": "Sao chép hợp đồng"
+  },
+  "feed": {
+    "recentTransactions": "Giao dịch gần đây",
+    "liveFeed": "Nguồn trực tiếp",
+    "type": "Loại",
+    "amount": "Số lượng",
+    "value": "Giá trị",
+    "time": "Thời gian",
+    "status": "Trạng thái",
+    "buy": "MUA",
+    "sell": "BÁN",
+    "swap": "SWAP"
+  },
+  "token": {
+    "rank": "Xếp hạng",
+    "marketCap": "Vốn hóa",
+    "volume": "Khối lượng 24h",
+    "supply": "Nguồn cung lưu hành",
+    "high24": "Cao nhất 24h",
+    "low24": "Thấp nhất 24h",
+    "ath": "Cao nhất mọi thời đại",
+    "atl": "Thấp nhất mọi thời đại",
+    "about": "Giới thiệu",
+    "website": "Trang web",
+    "chart": "Biểu đồ giá",
+    "related": "Token liên quan"
+  },
+  "calc": {
+    "title": "Máy tính Lời/Lỗ P2P",
+    "buyPrice": "Giá mua (USD)",
+    "amountInvested": "Số tiền đầu tư",
+    "tokensReceived": "Số token nhận được",
+    "currentValue": "Giá trị hiện tại",
+    "pnl": "Lời / Lỗ",
+    "profit": "Lợi nhuận",
+    "loss": "Thua lỗ",
+    "p2pValue": "Giá trị P2P",
+    "scenarios": "Nếu giá thay đổi…",
+    "scenarioHint": "Xem lợi nhuận / thua lỗ thay đổi theo biến động giá",
+    "currency": "Tiền tệ",
+    "calculate": "Tính toán",
+    "reset": "Đặt lại"
+  },
+  "common": {
+    "live": "TRỰC TIẾP",
+    "updated": "Đã cập nhật",
+    "search": "Tìm kiếm token (BTC, ETH, SOL...)",
+    "noResults": "Không tìm thấy kết quả",
+    "total": "Tổng cộng",
+    "buy": "Mua",
+    "sell": "Bán",
+    "loading": "Đang tải..."
+  }
+}

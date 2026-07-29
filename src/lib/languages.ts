@@ -1,4 +1,16 @@
-export type LangCode = "my" | "en" | "zh" | "vi" | "ru" | "es" | "tr" | "ar" | "id" | "hi";
+export type LangCode =
+  | "en"
+  | "my"
+  | "zh"
+  | "ja"
+  | "ko"
+  | "es"
+  | "vi"
+  | "ru"
+  | "tr"
+  | "ar"
+  | "id"
+  | "hi";
 
 export interface LangInfo {
   code: LangCode;
@@ -12,14 +24,6 @@ export interface LangInfo {
 
 export const LANGUAGES: LangInfo[] = [
   {
-    code: "my",
-    name: "မြန်မာ",
-    flag: "🇲🇲",
-    currency: "MMK",
-    currencySymbol: "K",
-    currencyName: "Myanmar Kyat",
-  },
-  {
     code: "en",
     name: "English",
     flag: "🇺🇸",
@@ -28,12 +32,44 @@ export const LANGUAGES: LangInfo[] = [
     currencyName: "US Dollar",
   },
   {
+    code: "my",
+    name: "မြန်မာ",
+    flag: "🇲🇲",
+    currency: "MMK",
+    currencySymbol: "K",
+    currencyName: "Myanmar Kyat",
+  },
+  {
     code: "zh",
     name: "中文",
     flag: "🇨🇳",
     currency: "CNY",
     currencySymbol: "¥",
     currencyName: "Chinese Yuan",
+  },
+  {
+    code: "ja",
+    name: "日本語",
+    flag: "🇯🇵",
+    currency: "JPY",
+    currencySymbol: "¥",
+    currencyName: "Japanese Yen",
+  },
+  {
+    code: "ko",
+    name: "한국어",
+    flag: "🇰🇷",
+    currency: "KRW",
+    currencySymbol: "₩",
+    currencyName: "South Korean Won",
+  },
+  {
+    code: "es",
+    name: "Español",
+    flag: "🇪🇸",
+    currency: "EUR",
+    currencySymbol: "€",
+    currencyName: "Euro",
   },
   {
     code: "vi",
@@ -50,14 +86,6 @@ export const LANGUAGES: LangInfo[] = [
     currency: "RUB",
     currencySymbol: "₽",
     currencyName: "Russian Ruble",
-  },
-  {
-    code: "es",
-    name: "Español",
-    flag: "🇪🇸",
-    currency: "EUR",
-    currencySymbol: "€",
-    currencyName: "Euro",
   },
   {
     code: "tr",

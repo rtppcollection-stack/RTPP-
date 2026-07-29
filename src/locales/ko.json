@@ -1,0 +1,102 @@
+{
+  "welcome": {
+    "title": "RTPP Web3 크립토 플랫폼에 오신 것을 환영합니다",
+    "subtitle": "멀티체인 DEX 스왑, 실시간 시세 추적, NFT 민팅 및 P2P 계산기",
+    "tagline": "크립토 P2P 계산기 및 실시간 시세"
+  },
+  "nav": {
+    "dashboard": "대시보드",
+    "swap": "DEX 스왑",
+    "hero": "RTPP 토큰",
+    "mint": "NFT 민트",
+    "calculator": "계산기",
+    "radar": "고래 레이더",
+    "markets": "마켓",
+    "news": "뉴스"
+  },
+  "wallet": {
+    "connect": "지갑 연결",
+    "connecting": "연결 중...",
+    "connected": "연결됨",
+    "disconnect": "연결 해제",
+    "address": "지갑 주소",
+    "balance": "잔액"
+  },
+  "swap": {
+    "title": "즉시 DEX 스왑",
+    "subtitle": "5개 EVM 체인에서 토큰을 원활하게 거래하세요",
+    "pay": "지불 금액",
+    "receive": "수령 금액",
+    "selectToken": "토큰 선택",
+    "instantSwap": "즉시 스왑",
+    "swapping": "스왑 중...",
+    "slippage": "슬리피지 허용치",
+    "route": "최적 경로",
+    "insufficientBalance": "잔액 부족"
+  },
+  "hero": {
+    "title": "RTPP 공식 토큰",
+    "subtitle": "Base 네트워크 공식 유동성 풀",
+    "livePrice": "실시간 시세",
+    "marketCap": "시가총액",
+    "volume24h": "24시간 거래량",
+    "change24h": "24시간 변동폭",
+    "liquidity": "유동성 풀",
+    "uniswap": "Uniswap 스왑",
+    "tokenChart": "토큰 차트",
+    "contract": "컨트랙트 주소",
+    "copyContract": "주소 복사"
+  },
+  "feed": {
+    "recentTransactions": "최근 거래 내역",
+    "liveFeed": "실시간 피드",
+    "type": "유형",
+    "amount": "수량",
+    "value": "가치",
+    "time": "시간",
+    "status": "상태",
+    "buy": "매수",
+    "sell": "매도",
+    "swap": "스왑"
+  },
+  "token": {
+    "rank": "순위",
+    "marketCap": "시가총액",
+    "volume": "24시간 거래량",
+    "supply": "유통량",
+    "high24": "24시간 최고가",
+    "low24": "24시간 최저가",
+    "ath": "역대 최고가",
+    "atl": "역대 최저가",
+    "about": "소개",
+    "website": "웹사이트",
+    "chart": "시세 차트",
+    "related": "관련 토큰"
+  },
+  "calc": {
+    "title": "P2P 손익 계산기",
+    "buyPrice": "매수가 (USD)",
+    "amountInvested": "투자 금액",
+    "tokensReceived": "수령 토큰 수",
+    "currentValue": "현재 가치",
+    "pnl": "손익",
+    "profit": "수익",
+    "loss": "손실",
+    "p2pValue": "P2P 가치",
+    "scenarios": "가격 변동 시…",
+    "scenarioHint": "다양한 가격 변동 시 손익 예측",
+    "currency": "통화",
+    "calculate": "계산하기",
+    "reset": "초기화"
+  },
+  "common": {
+    "live": "라이브",
+    "updated": "업데이트됨",
+    "search": "토큰 검색 (BTC, ETH, SOL...)",
+    "noResults": "검색 결과가 없습니다",
+    "total": "합계",
+    "buy": "매수",
+    "sell": "매도",
+    "loading": "로딩 중..."
+  }
+}

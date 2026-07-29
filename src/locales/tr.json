@@ -1,0 +1,102 @@
+{
+  "welcome": {
+    "title": "RTPP Web3 Kripto Platformuna Hoş Geldiniz",
+    "subtitle": "Çoklu Zincir DEX Takas, Canlı Piyasa Takibi, NFT Basımı ve P2P Hesaplayıcı",
+    "tagline": "Kripto P2P Hesaplayıcı ve Canlı Fiyatlar"
+  },
+  "nav": {
+    "dashboard": "Panel",
+    "swap": "DEX Takas",
+    "hero": "RTPP Token",
+    "mint": "NFT Basımı",
+    "calculator": "Hesaplayıcı",
+    "radar": "Balina Radarı",
+    "markets": "Piyasalar",
+    "news": "Haberler"
+  },
+  "wallet": {
+    "connect": "Cüzdanı Bağla",
+    "connecting": "Bağlanıyor...",
+    "connected": "Bağlandı",
+    "disconnect": "Bağlantıyı Kes",
+    "address": "Cüzdan Adresi",
+    "balance": "Bakiye"
+  },
+  "swap": {
+    "title": "Anında DEX Takası",
+    "subtitle": "5 EVM zincirinde sorunsuz token ticareti yapın",
+    "pay": "Ödediğiniz",
+    "receive": "Aldığınız",
+    "selectToken": "Token Seçin",
+    "instantSwap": "Anında Takas Et",
+    "swapping": "Takas Yapılıyor...",
+    "slippage": "Kayma Toleransı",
+    "route": "En İyi Rota",
+    "insufficientBalance": "Yetersiz Bakiye"
+  },
+  "hero": {
+    "title": "RTPP Resmi Tokenı",
+    "subtitle": "Base Ağında Resmi Likidite Havuzu",
+    "livePrice": "Canlı Fiyat",
+    "marketCap": "Piyasa Değeri",
+    "volume24h": "24s Hacim",
+    "change24h": "24s Değişim",
+    "liquidity": "Likidite Havuzu",
+    "uniswap": "Uniswap'ta Takas Et",
+    "tokenChart": "Token Grafiği",
+    "contract": "Sözleşme Adresi",
+    "copyContract": "Adresi Kopyala"
+  },
+  "feed": {
+    "recentTransactions": "Son İşlemler",
+    "liveFeed": "Canlı Akış",
+    "type": "Tür",
+    "amount": "Miktar",
+    "value": "Değer",
+    "time": "Zaman",
+    "status": "Durum",
+    "buy": "AL",
+    "sell": "SAT",
+    "swap": "TAKAS"
+  },
+  "token": {
+    "rank": "Sıralama",
+    "marketCap": "Piyasa Değeri",
+    "volume": "24s Hacim",
+    "supply": "Dolaşımdaki Arz",
+    "high24": "24s En Yüksek",
+    "low24": "24s En Düşük",
+    "ath": "Tüm Zamanların En Yükseği",
+    "atl": "Tüm Zamanların En Düşüğü",
+    "about": "Hakkında",
+    "website": "Web Sitesi",
+    "chart": "Fiyat Grafiği",
+    "related": "İlgili Tokenlar"
+  },
+  "calc": {
+    "title": "P2P Kar / Zarar Hesaplayıcı",
+    "buyPrice": "Alış Fiyatı (USD)",
+    "amountInvested": "Yatırılan Tutar",
+    "tokensReceived": "Alınan Token Sayısı",
+    "currentValue": "Mevcut Değer",
+    "pnl": "Kar / Zarar",
+    "profit": "Kar",
+    "loss": "Zarar",
+    "p2pValue": "P2P Değeri",
+    "scenarios": "Fiyat değişirse…",
+    "scenarioHint": "Farklı fiyat hareketlerinde kar/zarar durumunu görün",
+    "currency": "Para Birimi",
+    "calculate": "Hesapla",
+    "reset": "Sıfırla"
+  },
+  "common": {
+    "live": "CANLI",
+    "updated": "Güncellendi",
+    "search": "Token ara (BTC, ETH, SOL...)",
+    "noResults": "Sonuç bulunamadı",
+    "total": "Toplam",
+    "buy": "Satın Al",
+    "sell": "Sat",
+    "loading": "Yükleniyor..."
+  }
+}

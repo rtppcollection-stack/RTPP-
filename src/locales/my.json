@@ -1,0 +1,102 @@
+{
+  "welcome": {
+    "title": "RTPP Web3 Crypto ပလပ်ဖောင်းမှ ကြိုဆိုပါသည်",
+    "subtitle": "Multi-chain DEX Swap၊ Live ဈေးနှုန်း၊ NFT Minting နှင့် P2P ဂဏန်းတွက်စက်",
+    "tagline": "Crypto P2P ဂဏန်းတွက်စက် နှင့် Live ဈေးနှုန်း"
+  },
+  "nav": {
+    "dashboard": "ပင်မစာမျက်နှာ",
+    "swap": "DEX Swap",
+    "hero": "RTPP Token",
+    "mint": "NFT Mint",
+    "calculator": "တွက်ချက်ရန်",
+    "radar": "Whale Radar",
+    "markets": "စျေးကွက်",
+    "news": "သတင်း"
+  },
+  "wallet": {
+    "connect": "Wallet ချိတ်ဆက်ရန်",
+    "connecting": "ချိတ်ဆက်နေသည်...",
+    "connected": "ချိတ်ဆက်ပြီးပါပြီ",
+    "disconnect": "Wallet ဖြုတ်ရန်",
+    "address": "Wallet လိပ်စာ",
+    "balance": "လက်ကျန်ငွေ"
+  },
+  "swap": {
+    "title": "ချက်ချင်း DEX Swap ပြုလုပ်ရန်",
+    "subtitle": "EVM Chain ၅ လိုင်းတွင် Token များကို လွယ်ကူစွာ ချိန်းနိုင်ပါသည်",
+    "pay": "ပေးချေမည့် ပမာဏ",
+    "receive": "လက်ခံရရှိမည့် ပမာဏ",
+    "selectToken": "Token ရွေးချယ်ရန်",
+    "instantSwap": "ချက်ချင်း Swap လုပ်ရန်",
+    "swapping": "Swap လုပ်နေသည်...",
+    "slippage": "Slippage ပမာဏ",
+    "route": "အကောင်းဆုံး လမ်းကြောင်း",
+    "insufficientBalance": "လက်ကျန်ငွေ မလုံလောက်ပါ"
+  },
+  "hero": {
+    "title": "RTPP တရားဝင် Token",
+    "subtitle": "Base Network တရားဝင် Liquidity Pool",
+    "livePrice": "တိုက်ရိုက် ဈေးနှုန်း",
+    "marketCap": "စျေးကွက်တန်ဖိုး",
+    "volume24h": "၂၄ နာရီ အရောင်းအဝယ်",
+    "change24h": "၂၄ နာရီ ပြောင်းလဲမှု",
+    "liquidity": "Liquidity Pool",
+    "uniswap": "Uniswap Swap",
+    "tokenChart": "Token ဇယား",
+    "contract": "Contract လိပ်စာ",
+    "copyContract": "Contract ကူးယူရန်"
+  },
+  "feed": {
+    "recentTransactions": "နောက်ဆုံး အရောင်းအဝယ်များ",
+    "liveFeed": "တိုက်ရိုက် Feed",
+    "type": "အမျိုးအစား",
+    "amount": "ပမာဏ",
+    "value": "တန်ဖိုး",
+    "time": "အချိန်",
+    "status": "အခြေအနေ",
+    "buy": "ဝယ်ယူ",
+    "sell": "ရောင်းချ",
+    "swap": "SWAP"
+  },
+  "token": {
+    "rank": "အဆင့်",
+    "marketCap": "စျေးကွက်တန်ဖိုး",
+    "volume": "၂၄ နာရီ အရောင်းအဝယ်",
+    "supply": "လက်ကျန်ပမာဏ",
+    "high24": "၂၄နာရီ အမြင့်ဆုံး",
+    "low24": "၂၄နာရီ အနိမ့်ဆုံး",
+    "ath": "အမြင့်ဆုံးမှတ်တမ်း",
+    "atl": "အနိမ့်ဆုံးမှတ်တမ်း",
+    "about": "အကြောင်းအရာ",
+    "website": "ဝဘ်ဆိုက်",
+    "chart": "ဈေးနှုန်း ခြေရာခံ",
+    "related": "ဆက်စပ်တိုကင်များ"
+  },
+  "calc": {
+    "title": "P2P အရှုံးအမြတ် ဂဏန်းတွက်စက်",
+    "buyPrice": "ဝယ်ခဲ့သည့် ဈေး (USD)",
+    "amountInvested": "စိုက်ထုတ်ငွေ ပမာဏ",
+    "tokensReceived": "ရရှိ Token အရေအတွက်",
+    "currentValue": "လက်ရှိ တန်ဖိုး",
+    "pnl": "အရှုံး / အမြတ်",
+    "profit": "အမြတ်",
+    "loss": "အရှုံး",
+    "p2pValue": "P2P တန်ဖိုး",
+    "scenarios": "ဈေးပြောင်းလဲသွားလျှင်…",
+    "scenarioHint": "ဈေးအတက်အကျ အနေအထားများတွင် အရှုံးအမြတ်",
+    "currency": "ငွေကြေး",
+    "calculate": "တွက်မည်",
+    "reset": "ပြန်စ"
+  },
+  "common": {
+    "live": "တိုက်ရိုက်",
+    "updated": "ပြင်ဆင်ချိန်",
+    "search": "Token ရှာရန် (BTC, ETH, SOL...)",
+    "noResults": "ရှာဖွေမှု မတွေ့ပါ",
+    "total": "စုစုပေါင်း",
+    "buy": "ဝယ်",
+    "sell": "ရောင်း",
+    "loading": "တင်နေသည်..."
+  }
+}
