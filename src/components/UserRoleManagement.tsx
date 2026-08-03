@@ -189,7 +189,7 @@ export function UserRoleManagement() {
           </div>
           <div>
             <h3 className="text-sm font-bold text-amber-400 flex items-center gap-2">
-              User Role Management &amp; Permissions (ခန့်အပ်ရေး)
+              User Role Management &amp; Permissions
             </h3>
             <p className="text-xs text-muted-foreground">
               Grant Admin, Editor, or Monitor privileges to user accounts and Web3 wallets.

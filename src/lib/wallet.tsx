@@ -123,7 +123,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     setConnecting(true);
     try {
       const accts = (await window.ethereum.request({ method: "eth_requestAccounts" })) as string[];
-      const activeAddr = accts && accts[0] ? accts[0] : "0x82627aeEDD0E7f0B6d45d443A1F59bCD2Adcd68f";
+      const activeAddr =
+        accts && accts[0] ? accts[0] : "0x82627aeEDD0E7f0B6d45d443A1F59bCD2Adcd68f";
       setAddress(activeAddr);
       localStorage.setItem("rtpp_connected_wallet_address", activeAddr);
       const cid = (await window.ethereum.request({ method: "eth_chainId" })) as string;

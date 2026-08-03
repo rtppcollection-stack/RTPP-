@@ -15,6 +15,8 @@ import {
   Sparkles,
   DollarSign,
   TrendingUp,
+  TrendingDown,
+  Keyboard,
   Wallet,
   RefreshCw,
   Info,
@@ -23,6 +25,7 @@ import {
   Layers,
   Building2,
   Download,
+  Star,
 } from "lucide-react";
 import { fetchCoinDetail } from "@/lib/coingecko";
 import { useWallet, shortAddr } from "@/lib/wallet";
@@ -33,6 +36,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -48,7 +52,7 @@ import {
 import { formatCurrency, formatNumber } from "@/lib/fx";
 import { toast } from "sonner";
 import { SwapConfirmationModal } from "@/components/SwapConfirmationModal";
-import { DEXSelector, DEXOption, SUPPORTED_DEXES, DexLogoImage } from "@/components/DEXSelector";
+import { useOrderShortcuts } from "@/hooks/useOrderShortcuts";
 
 export interface SwapToken {
   symbol: string;
@@ -242,6 +246,26 @@ const SUPPORTED_SWAP_TOKENS: SwapToken[] = [
     address: "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
     decimals: 18,
   },
+  {
+    symbol: "BRETT",
+    name: "Brett (Based)",
+    chain: "Base Network",
+    priceUSD: 0.12,
+    icon: "🟦",
+    logoUrl: "https://assets.coingecko.com/coins/images/35538/small/brett.png",
+    address: "0x532f27101965dd16442e59d40670faf5ebb142e4",
+    decimals: 18,
+  },
+  {
+    symbol: "DEGEN",
+    name: "Degen (Base)",
+    chain: "Base Network",
+    priceUSD: 0.015,
+    icon: "🎩",
+    logoUrl: "https://assets.coingecko.com/coins/images/34515/small/degen.png",
+    address: "0x4ed4e862860bed51a9570b96d89af5e1b0efefed",
+    decimals: 18,
+  },
 ];
 
 interface ChainCfg {
@@ -250,7 +274,7 @@ interface ChainCfg {
   chainId: string;
   native: string;
   dexName: string;
-  dexUrl: (from: string, to: string, amt: number) => string;
+  dexUrl: (from: string, to: string, amt: number, slippage?: number) => string;
 }
 
 const CHAINS: ChainCfg[] = [
@@ -259,52 +283,54 @@ const CHAINS: ChainCfg[] = [
     label: "Bitcoin (BTC)",
     chainId: "btc",
     native: "BTC",
-    dexName: "ThorChain / Garden Cross-Chain",
-    dexUrl: (from, to, n) => `https://app.thorswap.finance/swap/BTC.BTC_${from}.${to}?amount=${n}`,
+    dexName: "RTPP Cross-Chain Bitcoin Bridge",
+    dexUrl: (from, to, n, sl = 0.5) =>
+      `https://app.thorswap.finance/swap/BTC.BTC_${from}.${to}?amount=${n}&slippage=${sl}`,
   },
   {
     key: "ethereum",
     label: "Ethereum",
     chainId: "0x1",
     native: "ETH",
-    dexName: "Uniswap V3",
-    dexUrl: (from, to, n) =>
-      `https://app.uniswap.org/#/swap?chain=mainnet&inputCurrency=${from}&outputCurrency=${to}&exactAmount=${n}&exactField=input`,
+    dexName: "RTPP Universal EVM Pool",
+    dexUrl: (from, to, n, sl = 0.5) =>
+      `https://app.uniswap.org/#/swap?chain=mainnet&inputCurrency=${from}&outputCurrency=${to}&exactAmount=${n}&exactField=input&slippage=${sl}`,
   },
   {
     key: "base",
     label: "Base L2",
     chainId: "0x2105",
     native: "ETH",
-    dexName: "Aerodrome / Uniswap Base",
-    dexUrl: (from, to, n) =>
-      `https://app.uniswap.org/#/swap?chain=base&inputCurrency=${from}&outputCurrency=${to}&exactAmount=${n}`,
+    dexName: "RTPP Base Liquidity Hub",
+    dexUrl: (from, to, n, sl = 0.5) =>
+      `https://app.uniswap.org/#/swap?chain=base&inputCurrency=${from}&outputCurrency=${to}&exactAmount=${n}&slippage=${sl}`,
   },
   {
     key: "solana",
     label: "Solana",
     chainId: "solana",
     native: "SOL",
-    dexName: "Jupiter Aggregator",
-    dexUrl: (from, to, n) => `https://jup.ag/swap/${from}-${to}?exactIn=${n}`,
+    dexName: "RTPP Solana Liquidity Engine",
+    dexUrl: (from, to, n, sl = 0.5) =>
+      `https://jup.ag/swap/${from}-${to}?exactIn=${n}&slippageBps=${Math.round(sl * 100)}`,
   },
   {
     key: "bsc",
     label: "BSC (Binance)",
     chainId: "0x38",
     native: "BNB",
-    dexName: "PancakeSwap V3",
-    dexUrl: (from, to, n) =>
-      `https://pancakeswap.finance/swap?inputCurrency=${from}&outputCurrency=${to}&exactAmount=${n}`,
+    dexName: "RTPP BSC High-Speed Pool",
+    dexUrl: (from, to, n, sl = 0.5) =>
+      `https://pancakeswap.finance/swap?inputCurrency=${from}&outputCurrency=${to}&exactAmount=${n}&slippage=${sl}`,
   },
   {
     key: "polygon",
     label: "Polygon",
     chainId: "0x89",
     native: "POL",
-    dexName: "QuickSwap / Uniswap",
-    dexUrl: (from, to, n) =>
-      `https://app.uniswap.org/#/swap?chain=polygon&inputCurrency=${from}&outputCurrency=${to}&exactAmount=${n}`,
+    dexName: "RTPP Polygon L2 Pool",
+    dexUrl: (from, to, n, sl = 0.5) =>
+      `https://app.uniswap.org/#/swap?chain=polygon&inputCurrency=${from}&outputCurrency=${to}&exactAmount=${n}&slippage=${sl}`,
   },
 ];
 
@@ -344,13 +370,38 @@ export function DEXWidget({ coinId }: Props) {
   // Dialog states for token selection & Admin Fee Dashboard
   const [selectTokenMode, setSelectTokenMode] = useState<"from" | "to" | null>(null);
   const [tokenSearch, setTokenSearch] = useState<string>("");
+  const [activeTokenTab, setActiveTokenTab] = useState<"all" | "favorites">("all");
+  const [favoriteSymbols, setFavoriteSymbols] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem("rtpp_favorite_tokens");
+      return saved ? JSON.parse(saved) : ["RTPP", "BTC", "ETH", "SOL", "USDT"];
+    } catch {
+      return ["RTPP", "BTC", "ETH", "SOL", "USDT"];
+    }
+  });
+
+  const toggleFavoriteToken = (symbol: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setFavoriteSymbols((prev) => {
+      const next = prev.includes(symbol)
+        ? prev.filter((s) => s !== symbol)
+        : [...prev, symbol];
+      try {
+        localStorage.setItem("rtpp_favorite_tokens", JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  };
+
+  const favoriteTokensList = useMemo(() => {
+    return SUPPORTED_SWAP_TOKENS.filter((t) => favoriteSymbols.includes(t.symbol));
+  }, [favoriteSymbols]);
+
   const [adminModalOpen, setAdminModalOpen] = useState(false);
   const [swapConfirmModalOpen, setSwapConfirmModalOpen] = useState(false);
   const [inspectContractAddress, setInspectContractAddress] = useState<string>(
     "0x90f0712eddc36f4e42c0f8a6a6739ce5b113d9b8",
   );
-  const [selectedDex, setSelectedDex] = useState<string>("uniswap");
-  const activeDexObj = SUPPORTED_DEXES.find((d) => d.id === selectedDex) || SUPPORTED_DEXES[0];
 
   // Config Inputs
   const [editWalletInput, setEditWalletInput] = useState(feeWallet);
@@ -411,7 +462,7 @@ export function DEXWidget({ coinId }: Props) {
   const estimatedAmountOut = toToken.priceUSD > 0 ? netValueUSD / toToken.priceUSD : 0;
 
   // Swap route URL
-  const dexUrl = chain.dexUrl(fromToken.symbol, toToken.symbol, amtInNum);
+  const dexUrl = chain.dexUrl(fromToken.symbol, toToken.symbol, amtInNum, slippage);
 
   // Flip tokens
   const handleFlipTokens = () => {
@@ -512,6 +563,39 @@ export function DEXWidget({ coinId }: Props) {
   // Total Admin Collected Fees Metrics
   const totalAdminFeesUSD = feeRecords.reduce((acc, r) => acc + r.feeCollectedUSD, 0);
 
+  const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
+
+  // Hook for keyboard shortcuts ('B' = BUY, 'S' = SELL, 'F' = Flip, 'M' = Max, 'H' = Half, 'Ctrl+Enter' = Execute)
+  const { activeMode, setActiveMode } = useOrderShortcuts({
+    onBuy: () => {
+      toast.success("⌨️ Shortcut [B]: Switched to BUY Mode");
+    },
+    onSell: () => {
+      toast.success("⌨️ Shortcut [S]: Switched to SELL Mode");
+    },
+    onFlipTokens: () => {
+      handleFlipTokens();
+      toast.info("⌨️ Shortcut [F]: Inverted token pair");
+    },
+    onMax: () => {
+      setAmountIn("1.0");
+      toast.info("⌨️ Shortcut [M]: Set MAX amount (1.0)");
+    },
+    onHalf: () => {
+      setAmountIn((prev) => {
+        const val = parseFloat(prev) || 0;
+        return val > 0 ? (val / 2).toString() : "0.05";
+      });
+      toast.info("⌨️ Shortcut [H]: Halved swap amount");
+    },
+    onExecute: () => {
+      toast.info("⌨️ Shortcut [Ctrl+Enter]: Triggering order execution...");
+      handleExecuteSwap();
+    },
+    enabled: true,
+    defaultMode: "BUY",
+  });
+
   // Filtered Tokens for modal with contract address lookup support
   const searchLower = tokenSearch.toLowerCase().trim();
   let filteredTokens = SUPPORTED_SWAP_TOKENS.filter(
@@ -535,6 +619,10 @@ export function DEXWidget({ coinId }: Props) {
         decimals: 18,
       },
     ];
+  }
+
+  if (activeTokenTab === "favorites") {
+    filteredTokens = filteredTokens.filter((t) => favoriteSymbols.includes(t.symbol));
   }
 
   return (
@@ -649,11 +737,6 @@ export function DEXWidget({ coinId }: Props) {
         </div>
       </div>
 
-      {/* Interactive DEX Exchange Selector */}
-      <div className="relative z-10">
-        <DEXSelector selectedDexId={selectedDex} onSelectDex={(d) => setSelectedDex(d.id)} />
-      </div>
-
       {/* Network Chain Tabs & Popular BTC/WBTC Pairs */}
       <div className="relative z-10 space-y-2">
         <div className="flex items-center justify-between gap-2 overflow-x-auto pb-1">
@@ -724,6 +807,71 @@ export function DEXWidget({ coinId }: Props) {
               </button>
             );
           })}
+        </div>
+      </div>
+
+      {/* Terminal Order Mode & Keyboard Shortcuts Bar */}
+      <div className="relative z-10 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border/80 bg-surface-2/70 p-2 font-mono text-xs">
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] text-muted-foreground uppercase font-bold mr-1">
+            Order Mode:
+          </span>
+          <button
+            type="button"
+            onClick={() => setActiveMode("BUY")}
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-bold transition-all ${
+              activeMode === "BUY"
+                ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shadow-sm"
+                : "bg-surface/80 text-muted-foreground hover:text-foreground border border-transparent"
+            }`}
+          >
+            <TrendingUp className="h-3.5 w-3.5" />
+            <span>BUY</span>
+            <span className="text-[10px] opacity-70 px-1 py-0.5 rounded bg-surface/80 border border-border/40 ml-0.5">
+              B
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveMode("SELL")}
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-bold transition-all ${
+              activeMode === "SELL"
+                ? "bg-rose-500/20 text-rose-400 border border-rose-500/40 shadow-sm"
+                : "bg-surface/80 text-muted-foreground hover:text-foreground border border-transparent"
+            }`}
+          >
+            <TrendingDown className="h-3.5 w-3.5" />
+            <span>SELL</span>
+            <span className="text-[10px] opacity-70 px-1 py-0.5 rounded bg-surface/80 border border-border/40 ml-0.5">
+              S
+            </span>
+          </button>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <div className="hidden md:flex items-center gap-1.5 text-[10px] text-muted-foreground">
+            <span>Flip:</span>
+            <kbd className="px-1.5 py-0.5 rounded bg-surface border border-border text-foreground font-mono">
+              F
+            </kbd>
+            <span>Max:</span>
+            <kbd className="px-1.5 py-0.5 rounded bg-surface border border-border text-foreground font-mono">
+              M
+            </kbd>
+            <span>Exec:</span>
+            <kbd className="px-1.5 py-0.5 rounded bg-surface border border-border text-foreground font-mono">
+              Ctrl+Enter
+            </kbd>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowShortcutsHelp(true)}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-border/60 bg-surface/80 text-muted-foreground hover:text-foreground hover:bg-surface transition-all text-xs"
+            title="View Keyboard Shortcuts Cheat Sheet"
+          >
+            <Keyboard className="h-3.5 w-3.5 text-amber-400" />
+            <span>Shortcuts</span>
+          </button>
         </div>
       </div>
 
@@ -825,6 +973,41 @@ export function DEXWidget({ coinId }: Props) {
         </div>
       </div>
 
+      {/* Slippage Tolerance Control */}
+      <div className="flex items-center justify-between px-1.5 py-1 text-xs font-mono">
+        <span className="text-muted-foreground">Slippage Tolerance:</span>
+        <div className="flex items-center gap-1.5">
+          {[0.1, 0.5, 1.0].map((sl) => (
+            <button
+              key={sl}
+              type="button"
+              onClick={() => setSlippage(sl)}
+              className={`px-2 py-0.5 rounded text-[11px] font-bold transition-colors ${
+                slippage === sl
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-surface/80 border border-border/50 text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {sl}%
+            </button>
+          ))}
+          <div className="flex items-center bg-surface/80 border border-border/50 rounded px-1.5 py-0.5">
+            <input
+              type="number"
+              step="0.1"
+              min="0.1"
+              max="15.0"
+              value={slippage}
+              onChange={(e) =>
+                setSlippage(Math.max(0.1, Math.min(15, parseFloat(e.target.value) || 0.5)))
+              }
+              className="w-10 bg-transparent text-right text-[11px] font-bold text-foreground focus:outline-none"
+            />
+            <span className="text-[10px] text-muted-foreground ml-0.5">%</span>
+          </div>
+        </div>
+      </div>
+
       {/* Swap Order Summary & Admin Fee Breakdown */}
       <div className="p-3 rounded-xl bg-surface/70 border border-border/60 space-y-1.5 font-mono text-xs">
         <div className="flex justify-between items-center">
@@ -847,8 +1030,7 @@ export function DEXWidget({ coinId }: Props) {
         <div className="flex justify-between items-center text-[11px]">
           <span className="text-muted-foreground">Optimal Route Engine:</span>
           <span className="text-primary font-bold flex items-center gap-1.5">
-            <DexLogoImage dex={activeDexObj} className="h-3.5 w-3.5" />
-            <span>{activeDexObj.name}</span>
+            <span>⚡ {chain.dexName}</span>
           </span>
         </div>
 
@@ -863,7 +1045,11 @@ export function DEXWidget({ coinId }: Props) {
         <Button
           onClick={handleExecuteSwap}
           disabled={busy || amtInNum <= 0}
-          className="w-full h-12 text-sm font-mono font-extrabold uppercase bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 gap-2"
+          className={`w-full h-12 text-sm font-mono font-extrabold uppercase shadow-lg gap-2 transition-all ${
+            activeMode === "BUY"
+              ? "bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-500/20"
+              : "bg-rose-600 hover:bg-rose-500 text-white shadow-rose-500/20"
+          }`}
         >
           {busy ? (
             <>
@@ -877,10 +1063,17 @@ export function DEXWidget({ coinId }: Props) {
             </>
           ) : (
             <>
-              <Zap className="h-5 w-5 text-amber-300" />
+              {activeMode === "BUY" ? (
+                <TrendingUp className="h-5 w-5 text-emerald-200" />
+              ) : (
+                <TrendingDown className="h-5 w-5 text-rose-200" />
+              )}
               <span>
-                Execute Swap ({fromToken.symbol} → {toToken.symbol})
+                Execute {activeMode} Order ({fromToken.symbol} → {toToken.symbol})
               </span>
+              <kbd className="hidden sm:inline-block ml-1 px-1.5 py-0.5 rounded text-[10px] bg-black/20 border border-white/20 font-mono">
+                Ctrl+Enter
+              </kbd>
             </>
           )}
         </Button>
@@ -907,39 +1100,185 @@ export function DEXWidget({ coinId }: Props) {
               />
             </div>
 
-            <div className="max-h-60 overflow-y-auto space-y-1 pr-1">
-              {filteredTokens.map((t) => (
-                <div
-                  key={t.symbol}
-                  onClick={() => {
-                    if (selectTokenMode === "from") setFromToken(t);
-                    else setToToken(t);
-                    setSelectTokenMode(null);
-                    setTokenSearch("");
-                  }}
-                  className="flex items-center justify-between p-2.5 rounded-xl border border-border/50 bg-surface-2/40 hover:bg-surface-2 hover:border-primary/50 transition-all cursor-pointer group"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <TokenAvatar token={t} className="h-7 w-7" />
-                    <div>
-                      <div className="font-extrabold text-foreground text-sm group-hover:text-primary transition-colors">
-                        {t.symbol}
-                      </div>
-                      <div className="text-[10px] text-muted-foreground">
-                        {t.name} · {t.chain}
-                      </div>
-                    </div>
-                  </div>
+            {/* Filter Tabs & Quick Access */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-2 border-b border-border/40 pb-2">
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTokenTab("all")}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                      activeTokenTab === "all"
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "bg-surface/80 text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    All Tokens
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTokenTab("favorites")}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                      activeTokenTab === "favorites"
+                        ? "bg-amber-400 text-black shadow-sm"
+                        : "bg-surface/80 text-muted-foreground hover:text-amber-400"
+                    }`}
+                  >
+                    <Star className="h-3.5 w-3.5 fill-current" />
+                    <span>Favorites ({favoriteSymbols.length})</span>
+                  </button>
+                </div>
+                <span className="text-[10px] text-muted-foreground hidden sm:inline">
+                  Click ⭐ to favorite
+                </span>
+              </div>
 
-                  <div className="text-right">
-                    <div className="font-extrabold text-foreground">
-                      ${formatCurrency(t.priceUSD)}
-                    </div>
-                    <div className="text-[10px] text-success">USD Live</div>
+              {favoriteTokensList.length > 0 && activeTokenTab === "all" && !tokenSearch && (
+                <div className="space-y-1">
+                  <div className="text-[10px] text-muted-foreground font-semibold flex items-center gap-1">
+                    <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                    <span>Quick Access Favorites</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+                    {favoriteTokensList.map((t) => (
+                      <button
+                        key={`quick-${t.symbol}`}
+                        type="button"
+                        onClick={() => {
+                          if (selectTokenMode === "from") setFromToken(t);
+                          else setToToken(t);
+                          setSelectTokenMode(null);
+                          setTokenSearch("");
+                        }}
+                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-border/60 bg-surface hover:border-amber-400/60 hover:bg-surface-2 transition-all shrink-0 group"
+                      >
+                        <TokenAvatar token={t} className="h-4 w-4" />
+                        <span className="font-bold text-xs group-hover:text-amber-400 transition-colors">
+                          {t.symbol}
+                        </span>
+                        <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                      </button>
+                    ))}
                   </div>
                 </div>
-              ))}
+              )}
             </div>
+
+            <div className="max-h-60 overflow-y-auto space-y-1 pr-1">
+              {filteredTokens.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground space-y-2">
+                  <Star className="h-8 w-8 mx-auto text-muted-foreground/30" />
+                  <p className="text-xs">No tokens found</p>
+                  {activeTokenTab === "favorites" && (
+                    <p className="text-[10px] text-muted-foreground/80 max-w-[240px] mx-auto">
+                      Click the star ⭐ icon next to any token in &quot;All Tokens&quot; to add it to your favorites.
+                    </p>
+                  )}
+                </div>
+              ) : (
+                filteredTokens.map((t) => {
+                  const isFav = favoriteSymbols.includes(t.symbol);
+                  return (
+                    <div
+                      key={t.symbol}
+                      onClick={() => {
+                        if (selectTokenMode === "from") setFromToken(t);
+                        else setToToken(t);
+                        setSelectTokenMode(null);
+                        setTokenSearch("");
+                      }}
+                      className="flex items-center justify-between p-2.5 rounded-xl border border-border/50 bg-surface-2/40 hover:bg-surface-2 hover:border-primary/50 transition-all cursor-pointer group"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <TokenAvatar token={t} className="h-7 w-7" />
+                        <div>
+                          <div className="font-extrabold text-foreground text-sm group-hover:text-primary transition-colors">
+                            {t.symbol}
+                          </div>
+                          <div className="text-[10px] text-muted-foreground">
+                            {t.name} · {t.chain}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <div className="font-extrabold text-foreground">
+                            ${formatCurrency(t.priceUSD)}
+                          </div>
+                          <div className="text-[10px] text-success">USD Live</div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={(e) => toggleFavoriteToken(t.symbol, e)}
+                          title={isFav ? "Remove from Favorites" : "Add to Favorites"}
+                          className={`p-1.5 rounded-lg transition-all ${
+                            isFav
+                              ? "text-amber-400 hover:bg-amber-400/15"
+                              : "text-muted-foreground/60 hover:text-amber-400 hover:bg-surface"
+                          }`}
+                        >
+                          <Star
+                            className={`h-4 w-4 transition-transform ${
+                              isFav ? "fill-amber-400 scale-110" : "scale-100"
+                            }`}
+                          />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Keyboard Shortcuts Cheat Sheet Modal */}
+      <Dialog open={showShortcutsHelp} onOpenChange={setShowShortcutsHelp}>
+        <DialogContent className="bg-surface/95 border-border text-foreground max-w-md font-mono text-xs backdrop-blur-2xl">
+          <DialogHeader className="border-b border-border/60 pb-3">
+            <DialogTitle className="flex items-center gap-2 text-primary font-mono text-base">
+              <Keyboard className="h-5 w-5 text-amber-400" />
+              <span>Terminal Keyboard Shortcuts</span>
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              Rapid order execution shortcuts for instant DEX terminal operation.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 py-2">
+            {[
+              { key: "B", label: "BUY Mode", desc: "Switch trading terminal to BUY mode" },
+              { key: "S", label: "SELL Mode", desc: "Switch trading terminal to SELL mode" },
+              { key: "F / X", label: "Flip Tokens", desc: "Invert the current swap token pair" },
+              { key: "M", label: "Max Amount", desc: "Quickly fill MAX available balance (1.0)" },
+              { key: "H", label: "Half Amount", desc: "Halve the current order amount" },
+              { key: "Ctrl + Enter", label: "Execute Order", desc: "Instantly execute DEX swap & collect fee" },
+              { key: "Esc", label: "Cancel / Close", desc: "Close open modals or selectors" },
+            ].map((item) => (
+              <div
+                key={item.key}
+                className="flex items-center justify-between p-2.5 rounded-xl border border-border/60 bg-surface-2/40"
+              >
+                <div>
+                  <div className="font-bold text-foreground text-sm">{item.label}</div>
+                  <div className="text-[10px] text-muted-foreground">{item.desc}</div>
+                </div>
+                <kbd className="px-2.5 py-1 rounded-lg bg-surface border border-border text-primary font-extrabold font-mono text-xs shadow-sm">
+                  {item.key}
+                </kbd>
+              </div>
+            ))}
+          </div>
+          <div className="pt-2 border-t border-border/40 flex justify-end">
+            <Button
+              size="sm"
+              onClick={() => setShowShortcutsHelp(false)}
+              className="font-mono font-bold bg-primary text-primary-foreground"
+            >
+              Got It
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

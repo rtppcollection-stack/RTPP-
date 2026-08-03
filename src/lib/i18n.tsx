@@ -51,25 +51,6 @@ function detect(): LangCode {
   if (typeof window === "undefined") return "en";
   const saved = localStorage.getItem("rtpp.lang") as LangCode | null;
   if (saved && LANG_MAP[saved]) return saved;
-  const nav = navigator.language.toLowerCase();
-  const codes: LangCode[] = [
-    "en",
-    "my",
-    "zh",
-    "ja",
-    "ko",
-    "es",
-    "vi",
-    "ru",
-    "tr",
-    "ar",
-    "id",
-    "hi",
-  ];
-  for (const c of codes) {
-    if (nav.startsWith(c)) return c;
-  }
-  if (nav.startsWith("in")) return "id";
   return "en";
 }
 

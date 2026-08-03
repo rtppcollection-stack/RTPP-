@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Bot, X, Send, Loader2, Sparkles, Trash2, Cpu } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { useWallet } from "@/lib/wallet";
+import { useI18n } from "@/lib/i18n";
 
 interface Msg {
   role: "user" | "assistant";
@@ -12,8 +13,17 @@ interface Msg {
 const ADMIN_WALLET = "0x752f726410B3e276DAE704B6E4671C50ea199798";
 const CLIENT_CACHE_KEY = "rtpp_chat_local_cache_v2";
 
-const QUICK_PROMPTS = [
-  { label: "💡 ဒီ Web အကြောင်း (Burmese)", prompt: "ဒီ web အကြောင်းရှင်းပြပေးပါ" },
+const QUICK_PROMPTS_EN = [
+  { label: "💡 About This Platform", prompt: "Tell me about this platform and its features" },
+  { label: "🔥 RTPP Token & Pool", prompt: "Tell me about RTPP Token and Base Pool" },
+  { label: "⚡ DEX Swap Fees", prompt: "How do DEX Swaps and fee routing work?" },
+  { label: "🎨 Free NFT Minting", prompt: "How to mint NFTs for free without gas?" },
+  { label: "📊 P2P Calculator", prompt: "How does the P2P profit calculator work?" },
+  { label: "🐋 Whale Radar", prompt: "How to check live Mempool and whale transactions?" },
+];
+
+const QUICK_PROMPTS_MY = [
+  { label: "💡 ဒီ Web အကြောင်း", prompt: "ဒီ web အကြောင်းရှင်းပြပေးပါ" },
   { label: "🔥 RTPP Token & Pool", prompt: "Tell me about RTPP Token and Base Pool" },
   { label: "⚡ DEX Swap Fees", prompt: "How do DEX Swaps and fee routing work?" },
   { label: "🎨 Free NFT Minting", prompt: "How to mint NFTs for free without gas?" },
@@ -23,6 +33,10 @@ const QUICK_PROMPTS = [
 
 export function AIChat() {
   const { address } = useWallet();
+  const { lang } = useI18n();
+  const isBurmese = lang === "my";
+  const quickPrompts = isBurmese ? QUICK_PROMPTS_MY : QUICK_PROMPTS_EN;
+
   const [open, setOpen] = useState(false);
   const [isAdminMode] = useState(false);
   const [input, setInput] = useState("");
@@ -32,14 +46,31 @@ export function AIChat() {
   const isOwnerWallet = (address || "").toLowerCase() === ADMIN_WALLET.toLowerCase();
   const activeIsAdmin = isOwnerWallet || isAdminMode;
 
-  const [messages, setMessages] = useState<Msg[]>([
+  const [messages, setMessages] = useState<Msg[]>(() => [
     {
       role: "assistant",
       content: activeIsAdmin
         ? "👨‍💻 **RTPP Master Admin AI:**\n\nFull administrative mode enabled. Ask me anything about the platform architecture, DEX fee routing, Netlify deployment setup, NFT smart contract royalties, or Whale Radar integrations."
-        : "Hello! 👋 I'm **RTPP Global AI Assistant**.\n\nAsk me anything in English or မြန်မာဘာသာ:\n• ⚡ **DEX Swap & Bridge** (Multi-chain & 0.30% Fee routing)\n• 🔥 **RTPP Token & Base Pool** (`0xc59d51cbb...` GeckoTerminal)\n• 🎨 **NFT Marketplace** (100% Free Lazy Minting & 1% royalties)\n• 🐋 **Whale Radar & Inspector** (Live Mempool & DexScreener)\n• 📊 **P2P Profit/Loss Calculator** (PnL, breakeven, exchange fees)\n• ⛽ **Network Gas Tracker** (Live EVM Gwei rates)",
+        : isBurmese
+          ? "Hello! 👋 I'm **RTPP Global AI Assistant**.\n\nလိုရာမေးခွန်းများကို မြန်မာလို သို့မဟုတ် English လို လွတ်လပ်စွာ မေးမြန်းနိုင်ပါသည်:\n• ⚡ **DEX Swap & Bridge** (Multi-chain & 0.30% Fee routing)\n• 🔥 **RTPP Token & Base Pool** (`0xc59d51cbb...` GeckoTerminal)\n• 🎨 **NFT Marketplace** (100% Free Lazy Minting & 1% royalties)\n• 🐋 **Whale Radar & Inspector** (Live Mempool & DexScreener)\n• 📊 **P2P Profit/Loss Calculator** (PnL, breakeven, exchange fees)\n• ⛽ **Network Gas Tracker** (Live EVM Gwei rates)"
+          : "Hello! 👋 I'm **RTPP Global AI Assistant**.\n\nAsk me anything about our Web3 Platform:\n• ⚡ **DEX Swap & Bridge** (Multi-chain & 0.30% Fee routing)\n• 🔥 **RTPP Token & Base Pool** (`0xc59d51cbb...` GeckoTerminal)\n• 🎨 **NFT Marketplace** (100% Free Lazy Minting & 1% royalties)\n• 🐋 **Whale Radar & Inspector** (Live Mempool & DexScreener)\n• 📊 **P2P Profit/Loss Calculator** (PnL, breakeven, exchange fees)\n• ⛽ **Network Gas Tracker** (Live EVM Gwei rates)",
     },
   ]);
+
+  useEffect(() => {
+    if (messages.length === 1) {
+      setMessages([
+        {
+          role: "assistant",
+          content: activeIsAdmin
+            ? "👨‍💻 **RTPP Master Admin AI:**\n\nFull administrative mode enabled. Ask me anything about the platform architecture, DEX fee routing, Netlify deployment setup, NFT smart contract royalties, or Whale Radar integrations."
+            : isBurmese
+              ? "Hello! 👋 I'm **RTPP Global AI Assistant**.\n\nလိုရာမေးခွန်းများကို မြန်မာလို သို့မဟုတ် English လို လွတ်လပ်စွာ မေးမြန်းနိုင်ပါသည်:\n• ⚡ **DEX Swap & Bridge** (Multi-chain & 0.30% Fee routing)\n• 🔥 **RTPP Token & Base Pool** (`0xc59d51cbb...` GeckoTerminal)\n• 🎨 **NFT Marketplace** (100% Free Lazy Minting & 1% royalties)\n• 🐋 **Whale Radar & Inspector** (Live Mempool & DexScreener)\n• 📊 **P2P Profit/Loss Calculator** (PnL, breakeven, exchange fees)\n• ⛽ **Network Gas Tracker** (Live EVM Gwei rates)"
+              : "Hello! 👋 I'm **RTPP Global AI Assistant**.\n\nAsk me anything about our Web3 Platform:\n• ⚡ **DEX Swap & Bridge** (Multi-chain & 0.30% Fee routing)\n• 🔥 **RTPP Token & Base Pool** (`0xc59d51cbb...` GeckoTerminal)\n• 🎨 **NFT Marketplace** (100% Free Lazy Minting & 1% royalties)\n• 🐋 **Whale Radar & Inspector** (Live Mempool & DexScreener)\n• 📊 **P2P Profit/Loss Calculator** (PnL, breakeven, exchange fees)\n• ⛽ **Network Gas Tracker** (Live EVM Gwei rates)",
+        },
+      ]);
+    }
+  }, [isBurmese, activeIsAdmin]);
 
   useEffect(() => {
     if (listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight;
@@ -111,6 +142,7 @@ export function AIChat() {
           messages: next.filter((m) => m.content),
           isAdmin: activeIsAdmin,
           walletAddress: address,
+          lang,
         }),
       });
 
@@ -138,14 +170,23 @@ export function AIChat() {
           normQ.includes("database"))
       ) {
         reply =
-          "🔒 **Security Notice / လုံခြုံရေး သတိပေးချက်:**\n\nSystem source code, database architecture, and backend secrets are restricted to RTPP Administrators.\n\nစနစ်၏ သော့ချက်များနှင့် မူရင်း Code များကို အုပ်ချုပ်သူ Admin သာ ကြည့်ရှုခွင့်ရှိပါသည်။ အခြား DEX Swaps, P2P Calculator, NFT Minting သို့မဟုတ် ဈေးနှုန်းများကို မေးမြန်းနိုင်ပါသည်။";
+          isBurmese || /[\u1000-\u109F]/.test(normQ)
+            ? "🔒 **လုံခြုံရေး သတိပေးချက်:**\n\nစနစ်၏ သော့ချက်များနှင့် မူရင်း Code များကို အုပ်ချုပ်သူ Admin သာ ကြည့်ရှုခွင့်ရှိပါသည်။ အခြား DEX Swaps, P2P Calculator, NFT Minting သို့မဟုတ် ဈေးနှုန်းများကို မေးမြန်းနိုင်ပါသည်။"
+            : "🔒 **Security Notice:**\n\nSystem source code, database architecture, and backend secrets are restricted to RTPP Administrators. Please feel free to ask about DEX Swaps, P2P Calculator, NFT Minting, or live token charts.";
       } else if (
+        normQ.includes("about") ||
+        normQ.includes("platform") ||
+        normQ.includes("features") ||
+        normQ.includes("free") ||
         normQ.includes("မင်္ဂလာပါ") ||
         normQ.includes("ဒီ web") ||
         normQ.includes("အကြောင်း") ||
         normQ.includes("အခမဲ့")
       ) {
-        reply = `💡 **RTPP Web Platform အကြောင်း (၁၀၀% အခမဲ့ AI လမ်းညွှန်):**\n\nဤ Web App တွင် အောက်ပါ Feature များကို အခမဲ့ အသုံးပြုနိုင်ပါသည် -\n\n1. ⚡ **DEX Swap & Bridge:** EVM ၅ လိုင်းစလုံးတွင် Token ချိန်းနိုင်ခြင်း။\n2. 🔥 **RTPP Token & Live Chart:** Base Pool \`0xc59d51cbb...\` ဖြင့် GeckoTerminal တိုက်ရိုက် Live ဇယားကြည့်နိုင်ခြင်း။\n3. 🎨 **Free NFT Lazy Minting:** Gas Fee လုံးဝ မကုန်ဘဲ NFT ရောင်းရန် တိုက်ရိုက် Lazy Mint လုပ်နိုင်ခြင်း။\n4. 📊 **P2P Profit/Loss Calculator:** P2P ကုန်သွယ်မှုတွင် မြတ်/ရှုံး ရာခိုင်နှုန်းနှင့် အကျိုးအမြတ် တွက်ချက်နိုင်ခြင်း။\n5. 🐋 **Whale Alert Radar:** Live Mempool နှင့် DEX ငွေလွှဲမှုများကို Block Explorer တွင် တိုက်ရိုက် စစ်ဆေးနိုင်ခြင်း။`;
+        reply =
+          isBurmese || /[\u1000-\u109F]/.test(normQ)
+            ? `💡 **RTPP Web Platform အကြောင်း (၁၀၀% အခမဲ့ AI လမ်းညွှန်):**\n\nဤ Web App တွင် အောက်ပါ Feature များကို အခမဲ့ အသုံးပြုနိုင်ပါသည် -\n\n1. ⚡ **DEX Swap & Bridge:** EVM ၅ လိုင်းစလုံးတွင် Token ချိန်းနိုင်ခြင်း။\n2. 🔥 **RTPP Token & Live Chart:** Base Pool \`0xc59d51cbb...\` ဖြင့် GeckoTerminal တိုက်ရိုက် Live ဇယားကြည့်နိုင်ခြင်း။\n3. 🎨 **Free NFT Lazy Minting:** Gas Fee လုံးဝ မကုန်ဘဲ NFT ရောင်းရန် တိုက်ရိုက် Lazy Mint လုပ်နိုင်ခြင်း။\n4. 📊 **P2P Profit/Loss Calculator:** P2P ကုန်သွယ်မှုတွင် မြတ်/ရှုံး ရာခိုင်နှုန်းနှင့် အကျိုးအမြတ် တွက်ချက်နိုင်ခြင်း။\n5. 🐋 **Whale Alert Radar:** Live Mempool နှင့် DEX ငွေလွှဲမှုများကို Block Explorer တွင် တိုက်ရိုက် စစ်ဆေးနိုင်ခြင်း။`
+            : `💡 **About RTPP Web Platform:**\n\nThis platform provides 100% free Web3 & crypto tools:\n\n1. ⚡ **DEX Swap & Bridge:** Swap tokens across 5 EVM chains with 0.30% fee routing.\n2. 🔥 **RTPP Token & Live Chart:** Real-time GeckoTerminal candlestick charts for Base pool \`0xc59d...\`.\n3. 🎨 **Free NFT Lazy Minting:** Gasless 0-upfront NFT minting and marketplace listing.\n4. 📊 **P2P Profit/Loss Calculator:** Calculate ROI, breakeven, exit targets, and exchange fees.\n5. 🐋 **Whale Alert Radar:** Track live Bitcoin mempool and DEX transactions.`;
       } else if (
         normQ.includes("rtpp") ||
         normQ.includes("token") ||
@@ -248,7 +289,7 @@ export function AIChat() {
 
           {/* Quick Prompts */}
           <div className="flex items-center gap-1.5 overflow-x-auto p-2 bg-surface-2/60 border-b border-border/40 scrollbar-none">
-            {QUICK_PROMPTS.map((qp, idx) => (
+            {quickPrompts.map((qp, idx) => (
               <button
                 key={idx}
                 onClick={() => sendQuery(qp.prompt)}
@@ -301,7 +342,9 @@ export function AIChat() {
                 placeholder={
                   activeIsAdmin
                     ? "Ask about codebase, fee engine, netlify setup..."
-                    : "ဒီ web အကြောင်း သို့မဟုတ် မေးချင်ရာမေးပါ..."
+                    : isBurmese
+                      ? "ဒီ web အကြောင်း သို့မဟုတ် မေးချင်ရာမေးပါ..."
+                      : "Ask anything about RTPP DEX, NFT, Calculator..."
                 }
                 disabled={busy}
                 className="flex-1 resize-none rounded-md border border-border bg-surface px-2.5 py-1.5 text-xs font-mono focus:border-primary focus:outline-none disabled:opacity-50"

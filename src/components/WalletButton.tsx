@@ -376,28 +376,30 @@ export function WalletButton() {
             <AlertDialogTitle className="flex items-center gap-2 text-base font-mono text-red-400">
               <ShieldAlert className="h-5 w-5 text-red-400" /> Confirm Secure Wallet Disconnect
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-xs text-muted-foreground space-y-3 pt-2">
-              <p className="leading-relaxed">
-                Are you sure you want to terminate your active Web3 wallet session?
-              </p>
-              {address && (
-                <div className="p-3 rounded-lg bg-surface-2/80 border border-border font-mono text-xs space-y-1.5">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Connected Account:</span>
-                    <span className="text-foreground font-bold">{shortAddr(address)}</span>
+            <AlertDialogDescription asChild>
+              <div className="text-xs text-muted-foreground space-y-3 pt-2">
+                <p className="leading-relaxed">
+                  Are you sure you want to terminate your active Web3 wallet session?
+                </p>
+                {address && (
+                  <div className="p-3 rounded-lg bg-surface-2/80 border border-border font-mono text-xs space-y-1.5">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Connected Account:</span>
+                      <span className="text-foreground font-bold">{shortAddr(address)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Active Network:</span>
+                      <span className="text-primary font-bold">
+                        {activeChain?.name || `Chain ${parseInt(chainId || "0x1", 16)}`}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Active Network:</span>
-                    <span className="text-primary font-bold">
-                      {activeChain?.name || `Chain ${parseInt(chainId || "0x1", 16)}`}
-                    </span>
-                  </div>
-                </div>
-              )}
-              <p className="text-[11px] text-muted-foreground leading-normal">
-                Disconnecting revokes dApp session signatures and ensures your Web3 wallet is safely
-                disconnected.
-              </p>
+                )}
+                <p className="text-[11px] text-muted-foreground leading-normal">
+                  Disconnecting revokes dApp session signatures and ensures your Web3 wallet is
+                  safely disconnected.
+                </p>
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-2 sm:gap-0">

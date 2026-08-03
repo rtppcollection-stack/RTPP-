@@ -29,7 +29,7 @@ export function LanguageSwitcher() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56 bg-surface border-border">
-        <DropdownMenuLabel>Language / ဘာသာ</DropdownMenuLabel>
+        <DropdownMenuLabel>Language & Currency</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {LANGUAGES.map((l) => (
           <DropdownMenuItem

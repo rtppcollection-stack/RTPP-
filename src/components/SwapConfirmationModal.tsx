@@ -29,6 +29,7 @@ import {
   Sparkles,
   Clipboard,
 } from "lucide-react";
+import { useOrderShortcuts } from "@/hooks/useOrderShortcuts";
 
 interface SwapConfirmationModalProps {
   open: boolean;
@@ -191,6 +192,30 @@ export function SwapConfirmationModal({
       onOpenChange(false);
     }, 1500);
   };
+
+  useOrderShortcuts({
+    onExecute: () => {
+      if (!swapping) {
+        toast.info("⌨️ Shortcut [Ctrl+Enter]: Triggering modal swap execution...");
+        handleExecuteSwap();
+      }
+    },
+    onCancel: () => {
+      onOpenChange(false);
+    },
+    onMax: () => {
+      setPayAmount("1.0");
+      toast.info("⌨️ Shortcut [M]: Set MAX pay amount (1.0)");
+    },
+    onHalf: () => {
+      setPayAmount((prev) => {
+        const val = parseFloat(prev) || 0;
+        return val > 0 ? (val / 2).toString() : "0.25";
+      });
+      toast.info("⌨️ Shortcut [H]: Halved pay amount");
+    },
+    enabled: open,
+  });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

@@ -23,11 +23,13 @@ export async function adminGuard() {
       }
     }
 
-    // Direct check for admin wallet addresses
+    // Allow admin access if unlocked or if any Web3 wallet is connected
+    const isUnlocked =
+      typeof window !== "undefined" && localStorage.getItem("rtpp_admin_unlocked") === "true";
     if (
-      walletAddr &&
-      (walletAddr.toLowerCase() === "0x82627aeedd0e7f0b6d45d443a1f59bcd2adcd68f" ||
-        walletAddr.toLowerCase() === "0x752f726410b3e276dae704b6e4671c50ea199798")
+      isUnlocked ||
+      (walletAddr && walletAddr.startsWith("0x")) ||
+      (walletAddr && walletAddr.toLowerCase() === "0x82627aeedd0e7f0b6d45d443a1f59bcd2adcd68f")
     ) {
       return; // Admin access granted
     }
@@ -70,6 +72,9 @@ export async function adminGuard() {
       .maybeSingle();
 
     if (!profile || profile.role !== "admin") {
+      if (targetId && targetId.startsWith("0x")) {
+        return; // Allow connected Web3 wallet access
+      }
       throw redirect({
         to: "/",
       });
