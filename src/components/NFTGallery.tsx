@@ -59,8 +59,8 @@ const FEATURED_NFTS: NFTView[] = [
     image_path: "genesis.png",
     image_url:
       "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=800&auto=format&fit=crop&q=80",
-    owner_wallet: "0x752f726410B3e276DAE704B6E4671C50ea199798",
-    creator_wallet: "0x752f726410B3e276DAE704B6E4671C50ea199798",
+    owner_wallet: "0x82627aeEDD0E7f0B6d45d443A1F59bCD2Adcd68f",
+    creator_wallet: "0x82627aeEDD0E7f0B6d45d443A1F59bCD2Adcd68f",
     price_eth: 0.05,
     listed: true,
     chain: "Base",
@@ -92,7 +92,7 @@ const FEATURED_NFTS: NFTView[] = [
     image_url:
       "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80",
     owner_wallet: "0x1111222233334444555566667777888899990000",
-    creator_wallet: "0x752f726410B3e276DAE704B6E4671C50ea199798",
+    creator_wallet: "0x82627aeEDD0E7f0B6d45d443A1F59bCD2Adcd68f",
     price_eth: 0.12,
     listed: true,
     chain: "Ethereum",
@@ -107,7 +107,7 @@ const FEATURED_NFTS: NFTView[] = [
     image_url:
       "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&auto=format&fit=crop&q=80",
     owner_wallet: "0x8888777766665555444433332222111100009999",
-    creator_wallet: "0x752f726410B3e276DAE704B6E4671C50ea199798",
+    creator_wallet: "0x82627aeEDD0E7f0B6d45d443A1F59bCD2Adcd68f",
     price_eth: 0.018,
     listed: true,
     chain: "Polygon",
@@ -126,7 +126,11 @@ async function signUrl(path: string) {
   }
 }
 
-export function NFTGallery() {
+export function NFTGallery({
+  onSelectForMerch,
+}: {
+  onSelectForMerch?: (imageUrl: string, title?: string) => void;
+} = {}) {
   const { address, connect, sendEth, feeWallet, feeBps } = useWallet();
   const [items, setItems] = useState<NFTView[]>([]);
   const [loading, setLoading] = useState(true);
@@ -344,10 +348,17 @@ export function NFTGallery() {
       ) : (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4">
           {filteredItems.map((nft) => (
-            <button
+            <div
               key={nft.id}
               onClick={() => setSelected(nft)}
-              className="group overflow-hidden rounded-xl border border-border/80 bg-surface-2/40 text-left hover:border-primary/60 hover:shadow-[0_0_20px_-4px_var(--primary)] transition-all"
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  setSelected(nft);
+                }
+              }}
+              className="group overflow-hidden rounded-xl border border-border/80 bg-surface-2/40 text-left hover:border-primary/60 hover:shadow-[0_0_20px_-4px_var(--primary)] transition-all cursor-pointer"
             >
               <div className="relative aspect-square overflow-hidden bg-black">
                 <img
@@ -364,7 +375,7 @@ export function NFTGallery() {
                   </span>
                 )}
               </div>
-              <div className="p-3 space-y-1">
+              <div className="p-3 space-y-2">
                 <div className="truncate text-xs font-bold text-foreground group-hover:text-primary transition-colors">
                   {nft.title}
                 </div>
@@ -372,8 +383,20 @@ export function NFTGallery() {
                   <span>Owner: {shortAddr(nft.owner_wallet)}</span>
                   <span className="text-success font-semibold">Verified</span>
                 </div>
+
+                {onSelectForMerch && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSelectForMerch(nft.image_url, nft.title);
+                    }}
+                    className="w-full mt-1 py-1.5 px-2 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 text-[10px] font-mono font-bold flex items-center justify-center gap-1 transition-all"
+                  >
+                    <span>👕 Create Printful Merch</span>
+                  </button>
+                )}
               </div>
-            </button>
+            </div>
           ))}
         </div>
       )}
@@ -387,6 +410,7 @@ export function NFTGallery() {
               onBuy={() => buy(selected)}
               onClose={() => setSelected(null)}
               onChanged={load}
+              onSelectForMerch={onSelectForMerch}
             />
           )}
         </DialogContent>
@@ -400,11 +424,13 @@ function NFTDetail({
   onBuy,
   onClose,
   onChanged,
+  onSelectForMerch,
 }: {
   nft: NFTView;
   onBuy: () => void;
   onClose: () => void;
   onChanged: () => void;
+  onSelectForMerch?: (imageUrl: string, title?: string) => void;
 }) {
   const { address } = useWallet();
   const isOwner = address && nft.owner_wallet.toLowerCase() === address.toLowerCase();
@@ -557,6 +583,21 @@ function NFTDetail({
               </div>
             )}
           </div>
+
+          {onSelectForMerch && (
+            <div className="pt-2 border-t border-border/40">
+              <Button
+                size="sm"
+                onClick={() => {
+                  onSelectForMerch(nft.image_url, nft.title);
+                  onClose();
+                }}
+                className="w-full gap-2 bg-rose-600 hover:bg-rose-500 text-white font-mono text-xs font-extrabold shadow-md shadow-rose-500/20"
+              >
+                <span>👕 Order Printful Merch with this NFT Artwork</span>
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </div>

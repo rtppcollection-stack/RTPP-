@@ -51,16 +51,21 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [mounted, setMounted] = useState(false);
   const [hasProvider, setHasProvider] = useState(false);
   const [feeWallet, setFeeWalletState] = useState<string>(
-    "0x752f726410B3e276DAE704B6E4671C50ea199798",
+    "0x82627aeEDD0E7f0B6d45d443A1F59bCD2Adcd68f",
   );
-  const [feeBps, setFeeBpsState] = useState<number>(30);
+  const [feeBps, setFeeBpsState] = useState<number>(10);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedWallet = localStorage.getItem("rtpp_fee_wallet_address");
       if (savedWallet) setFeeWalletState(savedWallet);
       const savedBps = localStorage.getItem("rtpp_fee_rate_bps");
-      if (savedBps) setFeeBpsState(Number(savedBps) || 30);
+      if (savedBps) {
+        const val = Number(savedBps);
+        setFeeBpsState(val > 0 ? val : 10);
+      } else {
+        setFeeBpsState(10);
+      }
     }
   }, []);
 
@@ -252,6 +257,6 @@ export function shortAddr(a: string | null) {
   return a.slice(0, 6) + "…" + a.slice(-4);
 }
 
-// Platform fee wallet (Base network) — transparent 1% marketplace fee
-export const PLATFORM_FEE_WALLET = "0x752f726410B3e276DAE704B6E4671C50ea199798";
+// Platform fee wallet (Base network) — transparent marketplace fee
+export const PLATFORM_FEE_WALLET = "0x82627aeEDD0E7f0B6d45d443A1F59bCD2Adcd68f";
 export const PLATFORM_FEE_PCT = 0.01; // 1%

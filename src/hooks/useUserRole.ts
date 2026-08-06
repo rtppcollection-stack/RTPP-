@@ -29,7 +29,6 @@ export function useUserRole() {
       if (
         isUnlocked ||
         activeId === "0x82627aeedd0e7f0b6d45d443a1f59bcd2adcd68f" ||
-        activeId === "0x752f726410b3e276dae704b6e4671c50ea199798" ||
         activeId === "0x3f4e8912a453d867c828e12b4f2910488e3a8e12"
       ) {
         if (mounted) {

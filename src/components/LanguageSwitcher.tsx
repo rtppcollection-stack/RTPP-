@@ -25,7 +25,9 @@ export function LanguageSwitcher() {
             {info.flag} {info.name}
           </span>
           <span className="sm:hidden">{info.flag}</span>
-          <span className="font-mono text-xs text-muted-foreground">{info.currency}</span>
+          <span className="hidden md:inline font-mono text-xs text-muted-foreground">
+            {info.currency}
+          </span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56 bg-surface border-border">

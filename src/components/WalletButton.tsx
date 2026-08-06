@@ -286,17 +286,19 @@ export function WalletButton() {
 
   // Connected Wallet Controls Bar
   return (
-    <div className="flex items-center gap-1.5">
+    <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
       {/* Network Selector Dropdown */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
             size="sm"
             variant="outline"
-            className="h-8 gap-1 px-2 border-primary/30 bg-surface-2/60 font-mono text-xs text-foreground hover:bg-surface-2"
+            className="h-8 gap-1 px-1.5 sm:px-2 border-primary/30 bg-surface-2/60 font-mono text-xs text-foreground hover:bg-surface-2 shrink-0"
           >
-            <Globe className="h-3.5 w-3.5 text-primary" />
-            <span>{activeChain?.name || `Chain ${parseInt(chainId || "0x1", 16)}`}</span>
+            <Globe className="h-3.5 w-3.5 text-primary shrink-0" />
+            <span className="hidden sm:inline">
+              {activeChain?.name || `Chain ${parseInt(chainId || "0x1", 16)}`}
+            </span>
             <ChevronDown className="h-3 w-3 opacity-60" />
           </Button>
         </DropdownMenuTrigger>
@@ -334,7 +336,7 @@ export function WalletButton() {
       </DropdownMenu>
 
       {/* Account Info Button */}
-      <div className="flex items-center gap-1 rounded-md border border-primary/40 bg-primary/10 px-2 py-1">
+      <div className="flex items-center gap-1 rounded-md border border-primary/40 bg-primary/10 px-1.5 sm:px-2 py-1 shrink-0">
         <button
           onClick={() => {
             navigator.clipboard.writeText(address);
@@ -343,9 +345,9 @@ export function WalletButton() {
           className="flex items-center gap-1 font-mono text-xs text-foreground hover:text-primary transition-colors"
           title={address}
         >
-          <Wallet className="h-3.5 w-3.5 text-primary" />
+          <Wallet className="h-3.5 w-3.5 text-primary shrink-0" />
           <span>{shortAddr(address)}</span>
-          <Copy className="h-3 w-3 opacity-60 hover:opacity-100" />
+          <Copy className="h-3 w-3 opacity-60 hover:opacity-100 hidden sm:inline" />
         </button>
 
         {activeChain && (
@@ -353,7 +355,7 @@ export function WalletButton() {
             href={`${activeChain.explorer}/address/${address}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-muted-foreground hover:text-primary p-0.5"
+            className="text-muted-foreground hover:text-primary p-0.5 hidden sm:inline-block"
             title="View on Explorer"
           >
             <ExternalLink className="h-3 w-3" />

@@ -21,6 +21,7 @@ import { AreaChart, Area, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 interface MarketDashboardProps {
   onSelectToken?: (tokenId: string) => void;
+  onTrade?: (tokenId: string, mode: "BUY" | "SELL") => void;
   activeTokenId?: string;
 }
 
@@ -145,10 +146,12 @@ function CoinGridCard({
   coin,
   isSelected,
   onSelectToken,
+  onTrade,
 }: {
   coin: MarketCoin;
   isSelected: boolean;
   onSelectToken?: (tokenId: string) => void;
+  onTrade?: (tokenId: string, mode: "BUY" | "SELL") => void;
 }) {
   const [isHovered, setIsHovered] = useState(false);
   const isUp = (coin.price_change_percentage_24h ?? 0) >= 0;
@@ -213,8 +216,36 @@ function CoinGridCard({
         </div>
       </div>
 
+      {/* Quick Trade Buttons */}
+      <div className="mt-2.5 flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+        <button
+          onClick={() => {
+            if (onTrade) {
+              onTrade(coin.id, "BUY");
+            } else {
+              onSelectToken?.(coin.id);
+            }
+          }}
+          className="flex-1 py-1 px-2 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 font-mono text-xs font-bold text-center transition-all shadow-sm"
+        >
+          BUY
+        </button>
+        <button
+          onClick={() => {
+            if (onTrade) {
+              onTrade(coin.id, "SELL");
+            } else {
+              onSelectToken?.(coin.id);
+            }
+          }}
+          className="flex-1 py-1 px-2 rounded-lg bg-rose-500/15 hover:bg-rose-500/30 text-rose-400 border border-rose-500/30 font-mono text-xs font-bold text-center transition-all shadow-sm"
+        >
+          SELL
+        </button>
+      </div>
+
       {/* Sparkline & Volume Footer */}
-      <div className="mt-3 pt-2.5 border-t border-border/40 flex items-end justify-between gap-2">
+      <div className="mt-3 pt-2 border-t border-border/40 flex items-end justify-between gap-2">
         <div className="text-[10px] font-mono text-muted-foreground space-y-0.5">
           <div>
             Vol: <strong className="text-foreground">${formatCompact(coin.total_volume)}</strong>
@@ -228,7 +259,7 @@ function CoinGridCard({
           <span className="text-[9px] font-mono text-muted-foreground mb-0.5 flex items-center gap-0.5">
             {isHovered ? (
               <span className="text-primary font-bold flex items-center gap-0.5 animate-pulse">
-                <Sparkles className="h-2.5 w-2.5" /> Recharts Live
+                <Sparkles className="h-2.5 w-2.5" /> Live
               </span>
             ) : (
               "7D Trend"
@@ -246,10 +277,10 @@ function CoinGridCard({
   );
 }
 
-export function MarketDashboard({ onSelectToken, activeTokenId }: MarketDashboardProps) {
+export function MarketDashboard({ onSelectToken, onTrade, activeTokenId }: MarketDashboardProps) {
   const [category, setCategory] = useState<FilterCategory>("all");
   const [search, setSearch] = useState("");
-  const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
+  const [viewMode, setViewMode] = useState<"grid" | "table">("table");
 
   const {
     data: coins = [],
@@ -461,46 +492,56 @@ export function MarketDashboard({ onSelectToken, activeTokenId }: MarketDashboar
               coin={coin}
               isSelected={activeTokenId === coin.id}
               onSelectToken={onSelectToken}
+              onTrade={onTrade}
             />
           ))}
         </div>
       ) : (
-        /* Compact Table Layout */
-        <div className="panel overflow-hidden border-border/80">
+        /* Pro Exchange Table Layout */
+        <div className="panel overflow-hidden border-border/80 shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left font-mono text-xs">
-              <thead className="bg-surface-2/60 text-muted-foreground border-b border-border uppercase text-[10px]">
+              <thead className="bg-surface-2/80 text-muted-foreground border-b border-border uppercase text-[10px] tracking-wider">
                 <tr>
                   <th className="py-2.5 px-3">#</th>
                   <th className="py-2.5 px-3">Asset</th>
                   <th className="py-2.5 px-3 text-right">Price</th>
                   <th className="py-2.5 px-3 text-right">24h Change</th>
-                  <th className="py-2.5 px-3 text-right">24h Volume</th>
-                  <th className="py-2.5 px-3 text-right">Market Cap</th>
-                  <th className="py-2.5 px-3 text-center">Action</th>
+                  <th className="py-2.5 px-3 text-center hidden md:table-cell">7D Trend</th>
+                  <th className="py-2.5 px-3 text-right hidden sm:table-cell">24h Volume</th>
+                  <th className="py-2.5 px-3 text-right hidden lg:table-cell">Market Cap</th>
+                  <th className="py-2.5 px-3 text-center min-w-[130px]">Instant Trade</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border/40">
+              <tbody className="divide-y divide-border/40 bg-surface/40">
                 {filteredCoins.map((coin) => {
                   const isUp = (coin.price_change_percentage_24h ?? 0) >= 0;
+                  const isSelected = activeTokenId === coin.id;
+
                   return (
                     <tr
                       key={coin.id}
                       onClick={() => onSelectToken?.(coin.id)}
-                      className="hover:bg-surface-2/40 transition-colors cursor-pointer group"
+                      className={`transition-colors cursor-pointer group ${
+                        isSelected
+                          ? "bg-primary/15 border-l-2 border-primary"
+                          : "hover:bg-surface-2/60"
+                      }`}
                     >
                       <td className="py-2.5 px-3 text-muted-foreground font-bold">
                         #{coin.market_cap_rank}
                       </td>
                       <td className="py-2.5 px-3">
                         <div className="flex items-center gap-2">
-                          <img src={coin.image} alt="" className="h-5 w-5 rounded-full" />
-                          <span className="font-bold text-foreground group-hover:text-primary transition-colors">
-                            {coin.name}
-                          </span>
-                          <span className="text-[10px] text-muted-foreground uppercase">
-                            ({coin.symbol})
-                          </span>
+                          <img src={coin.image} alt="" className="h-6 w-6 rounded-full shrink-0" />
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-1.5">
+                            <span className="font-bold text-foreground group-hover:text-primary transition-colors">
+                              {coin.name}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground uppercase font-mono">
+                              {coin.symbol}
+                            </span>
+                          </div>
                         </div>
                       </td>
                       <td className="py-2.5 px-3 text-right font-bold text-foreground">
@@ -509,23 +550,51 @@ export function MarketDashboard({ onSelectToken, activeTokenId }: MarketDashboar
                       <td
                         className={`py-2.5 px-3 text-right font-bold ${isUp ? "text-success" : "text-danger"}`}
                       >
-                        {isUp ? "+" : ""}
-                        {coin.price_change_percentage_24h?.toFixed(2)}%
+                        <span className="inline-flex items-center gap-0.5">
+                          {isUp ? "+" : ""}
+                          {coin.price_change_percentage_24h?.toFixed(2)}%
+                        </span>
                       </td>
-                      <td className="py-2.5 px-3 text-right text-muted-foreground">
+                      <td className="py-2 px-3 hidden md:table-cell">
+                        <div className="flex justify-center">
+                          <Sparkline data={coin.sparkline_in_7d?.price} up={isUp} />
+                        </div>
+                      </td>
+                      <td className="py-2.5 px-3 text-right text-muted-foreground hidden sm:table-cell">
                         ${formatCompact(coin.total_volume)}
                       </td>
-                      <td className="py-2.5 px-3 text-right text-muted-foreground">
+                      <td className="py-2.5 px-3 text-right text-muted-foreground hidden lg:table-cell">
                         ${formatCompact(coin.market_cap)}
                       </td>
-                      <td className="py-2.5 px-3 text-center">
-                        <Button
-                          size="xs"
-                          variant="ghost"
-                          className="h-6 text-[10px] font-mono text-primary"
-                        >
-                          Analyze →
-                        </Button>
+                      <td className="py-2 px-3 text-center" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-center gap-1">
+                          <button
+                            onClick={() => {
+                              if (onTrade) {
+                                onTrade(coin.id, "BUY");
+                              } else {
+                                onSelectToken?.(coin.id);
+                              }
+                            }}
+                            className="px-2 py-1 rounded bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-300 border border-emerald-500/40 font-mono text-[11px] font-extrabold transition-all shadow-xs"
+                            title={`Buy ${coin.symbol.toUpperCase()}`}
+                          >
+                            BUY
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (onTrade) {
+                                onTrade(coin.id, "SELL");
+                              } else {
+                                onSelectToken?.(coin.id);
+                              }
+                            }}
+                            className="px-2 py-1 rounded bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 border border-rose-500/40 font-mono text-[11px] font-extrabold transition-all shadow-xs"
+                            title={`Sell ${coin.symbol.toUpperCase()}`}
+                          >
+                            SELL
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );

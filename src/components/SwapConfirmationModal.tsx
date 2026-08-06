@@ -504,7 +504,7 @@ export function SwapConfirmationModal({
                   <div className="flex justify-between items-center">
                     <span>Platform Service Fee (0.30%):</span>
                     <span className="text-amber-400 font-bold">
-                      ${platformFeeUSD.toFixed(2)} USD (Auto-routed to Treasury: 0x752f...9798)
+                      ${platformFeeUSD.toFixed(2)} USD (Auto-routed to Treasury: 0x8262...68f)
                     </span>
                   </div>
                   <div className="flex justify-between items-center">

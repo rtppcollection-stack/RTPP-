@@ -895,7 +895,7 @@ export function WhaleAndNewsRadar() {
                 <Input
                   value={inspectorInput}
                   onChange={(e) => setInspectorInput(e.target.value)}
-                  placeholder="Paste address or Tx hash e.g. 0x752f726410B3e276DAE704B6E4671C50ea199798 or 0x90f0712ed..."
+                  placeholder="Paste address or Tx hash e.g. 0x82627aeEDD0E7f0B6d45d443A1F59bCD2Adcd68f or 0x90f0712ed..."
                   className="bg-surface-2 border-border text-xs font-mono pr-20"
                 />
                 {inspectorInput && (
@@ -913,7 +913,7 @@ export function WhaleAndNewsRadar() {
             <div className="flex items-center gap-1.5 flex-wrap text-[11px] pt-1">
               <span className="text-muted-foreground font-bold">Quick Verification Samples:</span>
               <button
-                onClick={() => setInspectorInput("0x752f726410B3e276DAE704B6E4671C50ea199798")}
+                onClick={() => setInspectorInput("0x82627aeEDD0E7f0B6d45d443A1F59bCD2Adcd68f")}
                 className="px-2 py-0.5 rounded bg-surface-2 border border-border/80 hover:border-primary text-primary font-mono text-[10px]"
               >
                 Admin Treasury Wallet

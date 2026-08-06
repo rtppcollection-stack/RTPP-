@@ -14,6 +14,7 @@ import { GlobalWalletBalance } from "@/components/GlobalWalletBalance";
 import { NetworkGasTracker } from "@/components/NetworkGasTracker";
 import { WalletButton } from "@/components/WalletButton";
 import { NFTGallery } from "@/components/NFTGallery";
+import { NFTMerchStore } from "@/components/NFTMerchStore";
 import { DEXWidget } from "@/components/DEXWidget";
 import { TransactionHistory } from "@/components/TransactionHistory";
 import { WhaleAndNewsRadar } from "@/components/WhaleAndNewsRadar";
@@ -41,7 +42,7 @@ import {
   FileEdit,
   Activity,
 } from "lucide-react";
-import { Toaster } from "sonner";
+import { toast, Toaster } from "sonner";
 
 function AppToaster() {
   const { theme } = useTheme();
@@ -86,21 +87,44 @@ function Home() {
   const [tab, setTab] = useState<string>("dashboard");
   const { role, isAdmin, isEditor, isMonitor } = useUserRole();
 
+  // Selected Merch Artwork State for Printful Configurator
+  const [selectedMerchImage, setSelectedMerchImage] = useState<string>("");
+  const [selectedMerchTitle, setSelectedMerchTitle] = useState<string>("");
+
+  const handleSelectNFTForMerch = (imageUrl: string, title?: string) => {
+    setSelectedMerchImage(imageUrl);
+    if (title) setSelectedMerchTitle(title);
+    toast.success(`Selected "${title || "NFT Artwork"}" for Printful Merch Configurator!`);
+    setTimeout(() => {
+      document
+        .getElementById("printful-merch-configurator")
+        ?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  };
+
   // Determine grid columns dynamically for nav tabs
   const extraTabsCount =
     (isAdmin ? 2 : 0) + (!isAdmin && isEditor ? 1 : 0) + (!isAdmin && isMonitor ? 1 : 0);
   const totalTabs = 6 + extraTabsCount;
 
   return (
-    <div className="min-h-screen text-foreground bg-[radial-gradient(ellipse_at_top,hsl(var(--primary)/0.08),transparent_60%)]">
-      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 sm:gap-3 px-2.5 sm:px-4 py-2 sm:py-2.5">
-          <Logo />
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <div className="hidden lg:inline-flex items-center gap-1.5 rounded-full border border-success/30 bg-success/10 px-2.5 py-1 text-[10px] font-mono font-semibold text-success">
+    <div
+      className="min-h-screen text-foreground bg-[radial-gradient(ellipse_at_top,hsl(var(--primary)/0.08),transparent_60%)]"
+      suppressHydrationWarning
+    >
+      <header
+        className="sticky top-0 z-40 border-b border-border/80 bg-background/90 backdrop-blur-2xl transition-all shadow-sm"
+        suppressHydrationWarning
+      >
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 sm:gap-4 px-3 sm:px-6 py-2.5 sm:py-3">
+          <div className="flex items-center gap-3">
+            <Logo />
+            <div className="hidden xl:inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-mono font-bold text-emerald-400">
               <span className="live-dot" /> {t("live.badge")}
             </div>
+          </div>
 
+          <div className="flex items-center gap-1.5 sm:gap-2.5">
             {/* Role Badge Indicator */}
             {role && role !== "user" && (
               <div
@@ -116,43 +140,40 @@ function Home() {
               </div>
             )}
 
-            <div className="hidden sm:flex">
+            <div className="hidden lg:flex items-center">
               <SocialLinks compact />
             </div>
-            <ThemeToggle />
-            <div className="hidden md:block">
-              <AppTour currentTab={tab} onTabChange={setTab} />
+
+            <div className="flex items-center gap-1 sm:gap-1.5">
+              <ThemeToggle />
+              <div className="hidden md:block">
+                <AppTour currentTab={tab} onTabChange={setTab} />
+              </div>
+              <WalletButton />
+              <LanguageSwitcher />
             </div>
-            <WalletButton />
-            <LanguageSwitcher />
           </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-4 py-5 space-y-5">
-        <Tabs value={tab} onValueChange={setTab} className="space-y-5">
-          <div className="sticky top-[52px] z-30 -mx-4 px-4 py-2 bg-background/70 backdrop-blur-xl border-b border-border/40">
-            <TabsList
-              className={`mx-auto grid w-full max-w-6xl gap-1 bg-surface/70 p-1 h-auto rounded-xl border border-border/60 ${
-                totalTabs > 6
-                  ? "grid-cols-2 sm:grid-cols-4 md:grid-cols-8"
-                  : "grid-cols-2 sm:grid-cols-3 md:grid-cols-6"
-              }`}
-            >
+      <main className="mx-auto max-w-7xl px-3 sm:px-4 py-3 sm:py-5 space-y-4">
+        <Tabs value={tab} onValueChange={setTab} className="space-y-4">
+          <div className="sticky top-[52px] z-30 -mx-3 sm:-mx-4 px-3 sm:px-4 py-2 bg-background/80 backdrop-blur-xl border-b border-border/40">
+            <TabsList className="flex w-full items-center gap-1.5 overflow-x-auto no-scrollbar bg-surface/80 p-1.5 rounded-2xl border border-border/60 shadow-sm font-mono text-xs">
               <TabTrig
                 value="dashboard"
                 icon={<LayoutDashboard className="h-4 w-4" />}
                 label={t("nav.dashboard")}
               />
               <TabTrig
-                value="portfolio"
-                icon={<Wallet className="h-4 w-4 text-cyan-400" />}
-                label={t("nav.portfolio") || "Portfolio & Gas"}
+                value="swap"
+                icon={<ArrowLeftRight className="h-4 w-4 text-emerald-400" />}
+                label={t("nav.swap") || "DEX Swap"}
               />
               <TabTrig
-                value="swap"
-                icon={<ArrowLeftRight className="h-4 w-4" />}
-                label={t("nav.swap")}
+                value="portfolio"
+                icon={<Wallet className="h-4 w-4 text-cyan-400" />}
+                label={t("nav.portfolio") || "Portfolio"}
               />
               <TabTrig
                 value="whale"
@@ -161,10 +182,14 @@ function Home() {
               />
               <TabTrig
                 value="calc"
-                icon={<Calculator className="h-4 w-4" />}
+                icon={<Calculator className="h-4 w-4 text-purple-400" />}
                 label={t("nav.calculator")}
               />
-              <TabTrig value="nft" icon={<Images className="h-4 w-4" />} label={t("nav.mint")} />
+              <TabTrig
+                value="nft"
+                icon={<Images className="h-4 w-4 text-rose-400" />}
+                label={t("nav.mint")}
+              />
 
               {/* Editor Role Navigation Feature */}
               {(isEditor || isAdmin) && (
@@ -187,28 +212,36 @@ function Home() {
           </div>
 
           <TabsContent value="dashboard" className="space-y-4 mt-0">
-            {/* Official Primary Native RTPP Collection Token Spotlight Card & Live Chart (FIRST ON DASHBOARD) */}
+            {/* Primary Spotlight: Official RTPP Token */}
             <RTPPTokenHeroCard onSelectToken={setCoinId} />
 
-            {/* Instant DEX Swap Terminal */}
-            <DEXWidget coinId={coinId} />
-
+            {/* Core Exchange Market Overview */}
             <SectionHeader
-              title="Market Dashboard"
-              subtitle="Real-time live prices, 24h market trends, volumes, and charts powered by CoinGecko."
+              title="Market Overview & Live Prices"
+              subtitle="Real-time multi-chain market trends, top gainers, and trading volume."
             />
-            <MarketDashboard onSelectToken={setCoinId} activeTokenId={coinId} />
+            <MarketDashboard
+              onSelectToken={setCoinId}
+              onTrade={(id, mode) => {
+                setCoinId(id);
+                setTab("swap");
+                toast.info(`Loaded ${id.toUpperCase()} into Swap Terminal for ${mode} trade`);
+              }}
+              activeTokenId={coinId}
+            />
 
+            {/* Asset Deep Dive Section */}
             <div className="pt-4 border-t border-border/50 space-y-4">
               <div className="text-center space-y-1">
-                <h2 className="text-base font-bold text-foreground">Detailed Asset Deep Dive</h2>
+                <h2 className="text-sm sm:text-base font-bold text-foreground">
+                  Token Analysis & Live Charts
+                </h2>
                 <p className="text-xs text-muted-foreground">
-                  Select any token above or search below to view live TradingView chart &amp;
-                  metrics.
+                  Select any asset to view real-time candle charts and risk metrics.
                 </p>
               </div>
-              <div className="mx-auto max-w-3xl">
-                <div className="rounded-xl border-2 border-primary/40 bg-surface/70 p-1.5 shadow-[0_0_0_4px_rgba(20,184,166,0.08),0_10px_40px_-10px_rgba(20,184,166,0.35)] focus-within:border-primary/70 transition-all">
+              <div className="mx-auto max-w-2xl">
+                <div className="rounded-xl border border-border/60 bg-surface/70 p-1 shadow-sm">
                   <TokenSearch onSelect={setCoinId} />
                 </div>
                 <div className="mt-2 flex justify-center">
@@ -220,32 +253,18 @@ function Home() {
             </div>
           </TabsContent>
 
-          <TabsContent value="portfolio" className="space-y-4 mt-0">
-            <SectionHeader
-              title="Global Wallet Portfolio & Network Gas Tracker"
-              subtitle="Real-time multi-chain wallet balances, asset allocations, and live gas prices across ETH, SOL, BSC & Polygon."
-            />
-            <GlobalWalletBalance />
-            <NetworkGasTracker />
-          </TabsContent>
-
           <TabsContent value="swap" className="space-y-4 mt-0">
             <SectionHeader
-              title="Swap & Bridge"
-              subtitle="Multi-chain keyless swap across Ethereum, Base, Arbitrum, Polygon & BSC. Pick a token to trade."
+              title="Instant In-App DEX Swap"
+              subtitle="Trade tokens directly on-chain with automated routing and ultra-low platform fees."
             />
-            <div className="mx-auto max-w-3xl">
-              <div className="rounded-xl border border-border/60 bg-surface/70 p-1.5">
-                <TokenSearch onSelect={setCoinId} />
-              </div>
-            </div>
-            <PopularTokens onSelect={setCoinId} activeId={coinId} />
+            {/* Focused Swap Terminal */}
             <DEXWidget coinId={coinId} />
 
             <div className="pt-6 border-t border-border/60 space-y-3">
               <SectionHeader
                 title="Recent On-Chain Swaps & Transaction Log"
-                subtitle="Live history of simulated & executed swaps, fee earnings, status tracking, and CSV exports."
+                subtitle="Live history of executed swaps, fee earnings, status tracking, and receipts."
               />
               <TransactionHistory />
             </div>
@@ -269,12 +288,23 @@ function Home() {
             <CalculatorTab coinId={coinId} />
           </TabsContent>
 
-          <TabsContent value="nft" className="space-y-4 mt-0">
+          <TabsContent value="nft" className="space-y-6 mt-0">
             <SectionHeader
-              title="NFT Marketplace"
-              subtitle="List, buy and sell NFTs on Base / Zora with ultra-low gas."
+              title="NFT Digital Gallery & Collection Marketplace"
+              subtitle="Explore on-chain collectible NFTs available for trading, minting, and physical merch creation. Click any NFT to create custom streetwear."
             />
-            <NFTGallery />
+            <NFTGallery onSelectForMerch={handleSelectNFTForMerch} />
+
+            <div className="pt-6 border-t border-border/60 space-y-4">
+              <SectionHeader
+                title="Printful Physical Merch Store Configurator"
+                subtitle="Convert selected NFT artwork into physical hoodies, tees & wall art with automated Printful API order fulfillment."
+              />
+              <NFTMerchStore
+                selectedImageUrl={selectedMerchImage}
+                selectedNftTitle={selectedMerchTitle}
+              />
+            </div>
           </TabsContent>
 
           {(isEditor || isAdmin) && (
@@ -298,7 +328,10 @@ function Home() {
           )}
         </Tabs>
 
-        <footer className="border-t border-border/50 pt-4 pb-6 text-center text-xs text-muted-foreground space-y-2">
+        <footer
+          className="border-t border-border/50 pt-4 pb-6 text-center text-xs text-muted-foreground space-y-2"
+          suppressHydrationWarning
+        >
           <div className="flex justify-center items-center gap-3 flex-wrap">
             <SocialLinks />
 
@@ -347,11 +380,10 @@ function TabTrig({ value, icon, label }: { value: string; icon: React.ReactNode;
   return (
     <TabsTrigger
       value={value}
-      className="flex items-center justify-center gap-2 rounded-lg py-2 text-xs sm:text-sm font-semibold text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all"
+      className="flex items-center justify-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-mono font-bold whitespace-nowrap shrink-0 text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow transition-all"
     >
       {icon}
-      <span className="hidden sm:inline">{label}</span>
-      <span className="sm:hidden">{label.split(" ")[0]}</span>
+      <span>{label}</span>
     </TabsTrigger>
   );
 }
