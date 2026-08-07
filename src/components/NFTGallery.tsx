@@ -49,80 +49,54 @@ interface NFTView extends NFT {
   image_url: string;
 }
 
-// Curated Initial Featured Collections (so marketplace is vibrant immediately)
+// Default fallback image if storage path cannot be resolved
+const DEFAULT_NFT_FALLBACK = "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=800&auto=format&fit=crop&q=80";
+
+// Default verified genesis NFTs
 const FEATURED_NFTS: NFTView[] = [
   {
-    id: "rtpp-genesis-01",
-    title: "RTPP Genesis Trader Pass #001",
-    description:
-      "Official VIP Genesis Membership Pass for RTPP DEX & P2P Collection traders. Unlocks 0% trading fee discount and governance privileges.",
-    image_path: "genesis.png",
-    image_url:
-      "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=800&auto=format&fit=crop&q=80",
-    owner_wallet: "0x82627aeEDD0E7f0B6d45d443A1F59bCD2Adcd68f",
-    creator_wallet: "0x82627aeEDD0E7f0B6d45d443A1F59bCD2Adcd68f",
-    price_eth: 0.05,
-    listed: true,
-    chain: "Base",
-    attributes: { Tier: "Genesis VIP", Benefit: "0% Platform Fee", Rarity: "Legendary" },
-    created_at: "2026-07-01T00:00:00.000Z",
-  },
-  {
-    id: "rtpp-cyber-02",
-    title: "Cyber P2P Merchant #088",
-    description:
-      "Ultra rare cyberpunk P2P trader avatar minted on Base L2 network. High speed arbitrage utility card.",
-    image_path: "cyber.png",
-    image_url:
-      "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=800&auto=format&fit=crop&q=80",
-    owner_wallet: "0x3f12A45f1b8214a1eB3472cD32bE50942E2a18A2",
-    creator_wallet: "0x3f12A45f1b8214a1eB3472cD32bE50942E2a18A2",
+    id: "featured-1",
+    title: "RTPP Genesis Cyberpunk Artifact #001",
+    description: "Genesis RTPP Collection Web3 Artifact with DEX utility and merchandise access.",
+    image_path: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=800&auto=format&fit=crop&q=80",
+    image_url: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=800&auto=format&fit=crop&q=80",
+    owner_wallet: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
+    creator_wallet: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
     price_eth: 0.025,
     listed: true,
     chain: "Base",
-    attributes: { Role: "Merchant", Speed: "Sub-Second", Access: "P2P VIP" },
-    created_at: "2026-07-01T00:00:00.000Z",
+    attributes: { Rarity: "Legendary", Type: "Genesis" },
+    created_at: new Date().toISOString(),
   },
   {
-    id: "rtpp-bull-03",
-    title: "Golden Bull 2026 Collection #01",
-    description:
-      "Commemorative 2026 Crypto Bull Run digital artifact. Minted on Ethereum mainnet with embedded royalty distribution.",
-    image_path: "bull.png",
-    image_url:
-      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80",
-    owner_wallet: "0x1111222233334444555566667777888899990000",
-    creator_wallet: "0x82627aeEDD0E7f0B6d45d443A1F59bCD2Adcd68f",
-    price_eth: 0.12,
-    listed: true,
-    chain: "Ethereum",
-    attributes: { Year: "2026", Status: "Ultra Rare", Aura: "Golden" },
-    created_at: "2026-07-01T00:00:00.000Z",
-  },
-  {
-    id: "rtpp-diamond-04",
-    title: "Diamond Hands Artifact #777",
-    description: "Exclusive Polygon P2P badge awarded to top volume liquidity providers.",
-    image_path: "diamond.png",
-    image_url:
-      "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&auto=format&fit=crop&q=80",
-    owner_wallet: "0x8888777766665555444433332222111100009999",
-    creator_wallet: "0x82627aeEDD0E7f0B6d45d443A1F59bCD2Adcd68f",
+    id: "featured-2",
+    title: "Neon Horizon Ether Pass #042",
+    description: "Exclusive digital pass granting zero-fee swaps and custom printful apparel minting.",
+    image_path: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80",
+    image_url: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80",
+    owner_wallet: "0x3C44CdD45919C590F6315461ab7723222C1262b1",
+    creator_wallet: "0x3C44CdD45919C590F6315461ab7723222C1262b1",
     price_eth: 0.018,
     listed: true,
-    chain: "Polygon",
-    attributes: { Holding: "Forever", Grade: "A++", Network: "Polygon POS" },
-    created_at: "2026-07-01T00:00:00.000Z",
+    chain: "Base",
+    attributes: { Rarity: "Epic", Utility: "Fee Reduction" },
+    created_at: new Date(Date.now() - 3600000).toISOString(),
   },
 ];
 
 async function signUrl(path: string) {
-  if (path.startsWith("http://") || path.startsWith("https://")) return path;
+  if (!path) return DEFAULT_NFT_FALLBACK;
+  if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("data:")) {
+    return path;
+  }
   try {
-    const { data } = await supabase.storage.from("nfts").createSignedUrl(path, 60 * 60 * 24 * 7);
-    return data?.signedUrl ?? "";
+    const { data: publicData } = supabase.storage.from("nfts").getPublicUrl(path);
+    if (publicData?.publicUrl) return publicData.publicUrl;
+
+    const { data: signedData } = await supabase.storage.from("nfts").createSignedUrl(path, 60 * 60 * 24 * 7);
+    return signedData?.signedUrl ?? DEFAULT_NFT_FALLBACK;
   } catch {
-    return "";
+    return DEFAULT_NFT_FALLBACK;
   }
 }
 
@@ -144,6 +118,20 @@ export function NFTGallery({
   const load = async () => {
     setLoading(true);
     try {
+      const localNFTsRaw = localStorage.getItem("rtpp_local_minted_nfts");
+      const localRawList: any[] = localNFTsRaw ? JSON.parse(localNFTsRaw) : [];
+      const localNFTs: NFTView[] = await Promise.all(
+        localRawList.map(async (item) => {
+          const rawPath = item.image_url || item.image_path || DEFAULT_NFT_FALLBACK;
+          const resolvedUrl = await signUrl(rawPath);
+          return {
+            ...item,
+            image_path: item.image_path || rawPath,
+            image_url: resolvedUrl || rawPath || DEFAULT_NFT_FALLBACK,
+          };
+        })
+      );
+
       const { data, error } = await supabase
         .from("nfts")
         .select("*")
@@ -154,17 +142,27 @@ export function NFTGallery({
         const withUrls = await Promise.all(
           (data as NFT[]).map(async (n) => ({
             ...n,
-            image_url: (await signUrl(n.image_path)) || FEATURED_NFTS[0].image_url,
+            image_url: (await signUrl(n.image_path)) || DEFAULT_NFT_FALLBACK,
           })),
         );
-        combined = [...withUrls, ...FEATURED_NFTS];
+        combined = [...localNFTs, ...withUrls, ...FEATURED_NFTS];
       } else {
-        combined = FEATURED_NFTS;
+        combined = [...localNFTs, ...FEATURED_NFTS];
       }
 
-      setItems(combined);
+      // Deduplicate by ID
+      const seen = new Set<string>();
+      const uniqueCombined = combined.filter((nft) => {
+        if (!nft.id || seen.has(nft.id)) return false;
+        seen.add(nft.id);
+        return true;
+      });
+
+      setItems(uniqueCombined);
     } catch {
-      setItems(FEATURED_NFTS);
+      const localNFTsRaw = localStorage.getItem("rtpp_local_minted_nfts");
+      const localNFTs: NFTView[] = localNFTsRaw ? JSON.parse(localNFTsRaw) : [];
+      setItems([...localNFTs, ...FEATURED_NFTS]);
     } finally {
       setLoading(false);
     }
@@ -611,7 +609,24 @@ function UploadForm({ onDone }: { onDone: () => void }) {
   const [price, setPrice] = useState("0.02");
   const [chain, setChain] = useState("Base");
   const [file, setFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (f) {
+      if (f.size > 20 * 1024 * 1024) {
+        toast.error("File size exceeds 20MB limit");
+        return;
+      }
+      setFile(f);
+      const reader = new FileReader();
+      reader.onload = () => {
+        setPreviewUrl(reader.result as string);
+      };
+      reader.readAsDataURL(f);
+    }
+  };
 
   const submit = async () => {
     if (!address) {
@@ -622,29 +637,60 @@ function UploadForm({ onDone }: { onDone: () => void }) {
       toast.error("Please enter an NFT title");
       return;
     }
+    if (!previewUrl) {
+      toast.error("Please upload an NFT artwork image first!");
+      return;
+    }
     setBusy(true);
     try {
-      let path = "custom_nft.png";
+      let finalImageUrl = previewUrl;
+
       if (file) {
         const ext = file.name.split(".").pop() || "png";
-        path = `${address}/${Date.now()}.${ext}`;
-        await supabase.storage
-          .from("nfts")
-          .upload(path, file, { cacheControl: "3600", upsert: true });
+        const storagePath = `uploads/${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`;
+        try {
+          const { error: uploadError } = await supabase.storage
+            .from("nfts")
+            .upload(storagePath, file, { cacheControl: "3600", upsert: true });
+
+          if (!uploadError) {
+            const { data: publicData } = supabase.storage.from("nfts").getPublicUrl(storagePath);
+            if (publicData?.publicUrl) {
+              finalImageUrl = publicData.publicUrl;
+            }
+          }
+        } catch (e) {
+          console.warn("Storage upload notice:", e);
+        }
       }
 
       const p = parseFloat(price);
-      await supabase.from("nfts").insert({
+      const priceVal = isNaN(p) ? null : p;
+
+      const newRecord = {
+        id: `nft-${Date.now()}-${Math.random().toString(36).substring(7)}`,
         title: title.trim(),
         description: description.trim() || "Minted on RTPP Collection NFT Marketplace.",
-        image_path: path,
+        image_path: finalImageUrl,
         owner_wallet: address,
         creator_wallet: address,
-        price_eth: isNaN(p) ? null : p,
-        listed: !isNaN(p) && p > 0,
+        price_eth: priceVal,
+        listed: priceVal !== null && priceVal > 0,
         chain,
         attributes: { Network: chain, Minted: "RTPP DEX" },
-      });
+        created_at: new Date().toISOString(),
+      };
+
+      await supabase.from("nfts").insert([newRecord]);
+
+      try {
+        const existingRaw = localStorage.getItem("rtpp_local_minted_nfts");
+        const existing = existingRaw ? JSON.parse(existingRaw) : [];
+        existing.unshift(newRecord);
+        localStorage.setItem("rtpp_local_minted_nfts", JSON.stringify(existing));
+      } catch (e) {
+        console.warn("localStorage sync error:", e);
+      }
 
       toast.success("NFT minted & listed successfully!");
       onDone();
@@ -712,13 +758,18 @@ function UploadForm({ onDone }: { onDone: () => void }) {
         />
       </div>
       <div>
-        <Label className="text-xs font-mono">Image File (Optional)</Label>
+        <Label className="text-xs font-mono">Image File Asset</Label>
         <Input
           type="file"
           accept="image/*"
-          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+          onChange={handleFileChange}
           className="mt-1 text-xs bg-surface border-border"
         />
+        {previewUrl && (
+          <div className="mt-2 relative w-full h-32 rounded-lg overflow-hidden border border-border bg-black">
+            <img src={previewUrl} alt="Preview" className="w-full h-full object-contain" />
+          </div>
+        )}
       </div>
       {/* Smart Contract Fee & Security Banner */}
       <div className="p-2.5 rounded-lg bg-surface-2/80 border border-emerald-500/30 text-xs space-y-1.5 font-mono">

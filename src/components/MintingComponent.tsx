@@ -92,6 +92,7 @@ export function MintingComponent({ onSuccess }: { onSuccess?: () => void }) {
 
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [minting, setMinting] = useState(false);
@@ -101,7 +102,6 @@ export function MintingComponent({ onSuccess }: { onSuccess?: () => void }) {
   const [stageMessage, setStageMessage] = useState<string>("");
   const [copied, setCopied] = useState(false);
   const [contractMode, setContractMode] = useState<"direct" | "lazy">("direct");
-
   const [confirmDisconnectOpen, setConfirmDisconnectOpen] = useState(false);
 
   const handleSecureDisconnect = () => {
@@ -116,16 +116,46 @@ export function MintingComponent({ onSuccess }: { onSuccess?: () => void }) {
   const activeChainKey = chainId && VERIFIED_CONTRACTS[chainId] ? chainId : "0x2105"; // fallback Base
   const currentContract = VERIFIED_CONTRACTS[activeChainKey];
 
+  const processFile = (f: File) => {
+    if (f.size > 20 * 1024 * 1024) {
+      toast.error("File size exceeds 20MB limit");
+      return;
+    }
+    setFile(f);
+    const reader = new FileReader();
+    reader.onload = () => {
+      setPreviewUrl(reader.result as string);
+    };
+    reader.readAsDataURL(f);
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
     if (f) {
-      if (f.size > 20 * 1024 * 1024) {
-        toast.error("File size exceeds 20MB limit");
-        return;
-      }
-      setFile(f);
-      const url = URL.createObjectURL(f);
-      setPreviewUrl(url);
+      processFile(f);
+      e.target.value = "";
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    const f = e.dataTransfer.files?.[0];
+    if (f) {
+      processFile(f);
     }
   };
 
@@ -159,6 +189,11 @@ export function MintingComponent({ onSuccess }: { onSuccess?: () => void }) {
       return;
     }
 
+    if (!previewUrl) {
+      toast.error("Please upload or provide an NFT artwork image first!");
+      return;
+    }
+
     setMinting(true);
     setTxHash(null);
     setTxError(null);
@@ -166,30 +201,29 @@ export function MintingComponent({ onSuccess }: { onSuccess?: () => void }) {
     setStageMessage("Uploading media assets and pinning ERC-721 metadata...");
 
     try {
-      let imagePath = "nfts/demo-mint.png";
-      let imageUrl =
-        previewUrl ||
-        "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=800&auto=format&fit=crop&q=80";
+      let finalImageUrl = previewUrl;
 
-      // 1. Automatic Media Storage Pinning (No manual file hashing required)
+      // 1. Automatic Media Storage Pinning with fallback to Data URL / previewUrl
       if (file) {
         toast.loading("Automating Decentralized Storage Upload...", { id: "mint-step" });
         const ext = file.name.split(".").pop() || "png";
         const filename = `${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`;
-        imagePath = `uploads/${filename}`;
+        const storagePath = `uploads/${filename}`;
 
-        const { error: uploadError } = await supabase.storage.from("nfts").upload(imagePath, file, {
-          cacheControl: "3600",
-          upsert: true,
-        });
+        try {
+          const { error: uploadError } = await supabase.storage.from("nfts").upload(storagePath, file, {
+            cacheControl: "3600",
+            upsert: true,
+          });
 
-        if (uploadError) {
-          console.warn("Storage upload notice, falling back to instant URI:", uploadError.message);
-        } else {
-          const { data: publicUrlData } = supabase.storage.from("nfts").getPublicUrl(imagePath);
-          if (publicUrlData?.publicUrl) {
-            imageUrl = publicUrlData.publicUrl;
+          if (!uploadError) {
+            const { data: publicUrlData } = supabase.storage.from("nfts").getPublicUrl(storagePath);
+            if (publicUrlData?.publicUrl) {
+              finalImageUrl = publicUrlData.publicUrl;
+            }
           }
+        } catch (uploadErr) {
+          console.warn("Storage upload notice, falling back to instant URI:", uploadErr);
         }
       }
 
@@ -245,29 +279,40 @@ export function MintingComponent({ onSuccess }: { onSuccess?: () => void }) {
 
       setTxHash(executionTxHash);
 
-      // 4. Automated Database Synchronization
+      // 4. Automated Database Synchronization & Local Storage Fallback
       toast.loading("Synchronizing Minted Token to On-Chain Gallery Registry...", {
         id: "mint-step",
       });
 
       const priceNumber = parseFloat(priceEth) || 0;
 
-      const { error: dbError } = await supabase.from("nfts").insert([
-        {
-          title,
-          description: description || "Minted directly via RTPP Web3 Smart Contract Engine.",
-          image_path: imagePath,
-          owner_wallet: address,
-          creator_wallet: address,
-          price_eth: priceNumber,
-          listed: priceNumber > 0,
-          chain: currentContract.name.split(" ")[0],
-          attributes: formattedAttrs,
-        },
-      ]);
+      const newNftRecord = {
+        id: `nft-${Date.now()}-${Math.random().toString(36).substring(7)}`,
+        title,
+        description: description || "Minted directly via RTPP Web3 Smart Contract Engine.",
+        image_path: finalImageUrl,
+        owner_wallet: address,
+        creator_wallet: address,
+        price_eth: priceNumber,
+        listed: priceNumber > 0,
+        chain: currentContract.name.split(" ")[0],
+        attributes: formattedAttrs,
+        created_at: new Date().toISOString(),
+      };
+
+      const { error: dbError } = await supabase.from("nfts").insert([newNftRecord]);
 
       if (dbError) {
         console.warn("DB record sync notice:", dbError.message);
+      }
+
+      try {
+        const existingRaw = localStorage.getItem("rtpp_local_minted_nfts");
+        const existing = existingRaw ? JSON.parse(existingRaw) : [];
+        existing.unshift(newNftRecord);
+        localStorage.setItem("rtpp_local_minted_nfts", JSON.stringify(existing));
+      } catch (e) {
+        console.warn("localStorage sync error:", e);
       }
 
       setTxStatus("confirmed");
@@ -391,7 +436,7 @@ export function MintingComponent({ onSuccess }: { onSuccess?: () => void }) {
 
         {/* Main Grid: Upload & Inputs */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left Column: Drag & Drop Upload Preview (5 cols) */}
+          {/* Left Column: Drag & Drop Upload & Live Card Preview (5 cols) */}
           <div className="lg:col-span-5 space-y-3">
             <Label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
               <Upload className="h-3.5 w-3.5 text-primary" />
@@ -400,10 +445,15 @@ export function MintingComponent({ onSuccess }: { onSuccess?: () => void }) {
 
             <div
               onClick={() => fileInputRef.current?.click()}
-              className={`relative border-2 border-dashed rounded-xl p-4 flex flex-col items-center justify-center min-h-[220px] cursor-pointer transition-all ${
-                previewUrl
-                  ? "border-primary/50 bg-surface-2/40"
-                  : "border-border/80 hover:border-primary/60 bg-surface-2/20 hover:bg-surface-2/60"
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              className={`relative border-2 border-dashed rounded-xl p-3 flex flex-col items-center justify-center min-h-[160px] cursor-pointer transition-all ${
+                isDragging
+                  ? "border-primary bg-primary/10 scale-[1.02]"
+                  : previewUrl
+                    ? "border-emerald-500/50 bg-emerald-500/5"
+                    : "border-border/80 hover:border-primary/60 bg-surface-2/20 hover:bg-surface-2/60"
               }`}
             >
               <input
@@ -415,7 +465,7 @@ export function MintingComponent({ onSuccess }: { onSuccess?: () => void }) {
               />
 
               {previewUrl ? (
-                <div className="relative w-full h-48 rounded-lg overflow-hidden border border-border group">
+                <div className="relative w-full h-36 rounded-lg overflow-hidden border border-border group">
                   <img
                     src={previewUrl}
                     alt="NFT Preview"
@@ -423,29 +473,115 @@ export function MintingComponent({ onSuccess }: { onSuccess?: () => void }) {
                   />
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                     <span className="text-xs text-white font-medium bg-primary px-3 py-1.5 rounded-full flex items-center gap-1">
-                      <Upload className="h-3.5 w-3.5" /> Change File
+                      <Upload className="h-3.5 w-3.5" /> Change Image File
                     </span>
                   </div>
                 </div>
               ) : (
-                <div className="text-center space-y-2 p-4">
-                  <div className="h-12 w-12 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto">
-                    <Upload className="h-6 w-6" />
+                <div className="text-center space-y-2 p-2">
+                  <div className="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto">
+                    <Upload className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-foreground">Click to upload media</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                    <p className="text-xs font-bold text-foreground">Click or Drag &amp; Drop Image</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">
                       PNG, JPG, GIF, WEBP up to 20MB
                     </p>
                   </div>
-                  <Badge
-                    variant="outline"
-                    className="text-[10px] bg-surface text-muted-foreground border-border"
-                  >
-                    Automated Metadata PIN
-                  </Badge>
                 </div>
               )}
+            </div>
+
+            {/* Direct Image URL Option */}
+            <div className="space-y-1">
+              <Label className="text-[10px] text-muted-foreground font-mono">
+                OR Paste Image URL Direct Link:
+              </Label>
+              <Input
+                type="url"
+                placeholder="https://..."
+                value={previewUrl && !previewUrl.startsWith("data:") ? previewUrl : ""}
+                onChange={(e) => {
+                  const val = e.target.value.trim();
+                  setPreviewUrl(val || null);
+                  setFile(null);
+                }}
+                className="h-8 text-xs font-mono bg-surface-2/60 border-border"
+              />
+            </div>
+
+            {/* Reset / Clear Selected Image */}
+            {previewUrl && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setFile(null);
+                  setPreviewUrl(null);
+                  toast.info("Cleared selected artwork");
+                }}
+                className="w-full h-7 text-xs font-mono text-red-400 border-red-500/30 hover:bg-red-500/10"
+              >
+                ✕ Remove / Reset Selected Image
+              </Button>
+            )}
+
+            {/* Live Interactive Card Preview */}
+            <div className="p-3.5 rounded-2xl border border-primary/40 bg-surface-2/30 space-y-2.5 shadow-lg">
+              <div className="flex items-center justify-between text-[11px] font-mono font-bold text-primary">
+                <span className="flex items-center gap-1">
+                  <Sparkles className="h-3.5 w-3.5 text-amber-400 animate-pulse" /> LIVE NFT CARD PREVIEW
+                </span>
+                <Badge variant="outline" className="text-[9px] bg-primary/10 text-primary border-primary/30">
+                  {currentContract.name}
+                </Badge>
+              </div>
+
+              <div className="relative aspect-square w-full rounded-xl overflow-hidden border border-border bg-black/80 flex items-center justify-center group">
+                {previewUrl ? (
+                  <img
+                    src={previewUrl}
+                    alt="Live NFT Card Preview"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                ) : (
+                  <div className="text-center p-4 space-y-2 text-muted-foreground">
+                    <Upload className="h-10 w-10 mx-auto opacity-30 text-primary animate-bounce" />
+                    <p className="text-xs font-bold text-foreground">No Artwork Loaded Yet</p>
+                    <p className="text-[10px] opacity-70">
+                      Upload an image file above or paste an image URL to see live preview
+                    </p>
+                  </div>
+                )}
+                {priceEth && (
+                  <span className="absolute right-2.5 top-2.5 rounded-lg bg-primary px-2.5 py-1 text-xs font-mono font-extrabold text-primary-foreground shadow-xl border border-white/20">
+                    Ξ {priceEth} ETH
+                  </span>
+                )}
+              </div>
+
+              <div className="space-y-1 pt-1">
+                <h4 className="font-extrabold text-sm text-foreground truncate">
+                  {title.trim() || "Untitled NFT Artifact"}
+                </h4>
+                <p className="text-[11px] text-muted-foreground line-clamp-2 leading-relaxed">
+                  {description.trim() || "Minted directly via RTPP Smart Contract Engine."}
+                </p>
+                <div className="flex justify-between items-center text-[10px] font-mono text-muted-foreground pt-1">
+                  <span>Owner: <strong className="text-foreground">{address ? shortAddr(address) : "0xYour...Wallet"}</strong></span>
+                  <span className="text-emerald-400 font-semibold">Ready to Mint</span>
+                </div>
+                {attributes.length > 0 && (
+                  <div className="flex flex-wrap gap-1 pt-1.5">
+                    {attributes.filter(a => a.trait_type && a.value).map((attr, i) => (
+                      <span key={i} className="text-[9px] font-mono bg-surface px-2 py-0.5 rounded-md border border-border/80 text-foreground">
+                        {attr.trait_type}: <strong className="text-primary">{attr.value}</strong>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Smart Execution Mode Tabs */}

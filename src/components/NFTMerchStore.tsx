@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   Package,
   Upload,
@@ -24,11 +24,20 @@ import {
   User,
   Globe,
   Check,
+  Image as ImageIcon,
+  Eye,
+  Maximize2,
+  Palette,
+  Layers,
+  ZoomIn,
+  X,
+  LayoutGrid,
 } from "lucide-react";
 import { toast } from "sonner";
 import { ethers } from "ethers";
 import { CATALOG_PRODUCTS, type NFTMerchProduct } from "@/lib/printful";
 import { useWallet, shortAddr } from "@/lib/wallet";
+import { supabase } from "@/integrations/supabase/client";
 
 // Contract and Admin Wallet constants
 const RTPP_TOKEN_ADDRESS = "0x90f0712eddc36f4e42c0f8a6a6739ce5b113d9b8"; // Base Network
@@ -74,15 +83,293 @@ interface WalletNFT {
   imageUrl: string;
 }
 
+export const MERCH_COLOR_OPTIONS = [
+  { name: "Black", bg: "#18181b", text: "#ffffff", border: "border-zinc-700" },
+  { name: "White", bg: "#f8fafc", text: "#0f172a", border: "border-slate-300" },
+  { name: "Navy", bg: "#0f172a", text: "#ffffff", border: "border-slate-700" },
+  { name: "Heather Gray", bg: "#475569", text: "#ffffff", border: "border-slate-500" },
+  { name: "Cream", bg: "#fef3c7", text: "#451a03", border: "border-amber-200" },
+];
+
+export function renderMockupCanvas({
+  product,
+  nftUrl,
+  color,
+  view,
+  placement,
+  className = "",
+  showPrintArea = true,
+}: {
+  product: NFTMerchProduct;
+  nftUrl: string;
+  color: { name: string; bg: string; text: string; border: string };
+  view: "front" | "back" | "lifestyle" | "zoom";
+  placement: "full" | "chest" | "pocket";
+  className?: string;
+  showPrintArea?: boolean;
+}) {
+  const isApparel = product.category === "Apparel";
+  const isMug = product.id === 18; // Ceramic Mug
+  const isCanvas = product.id === 180; // Canvas Print
+  const isCap = product.id === 283; // Cap
+
+  return (
+    <div
+      className={`relative rounded-2xl overflow-hidden border border-border/80 flex flex-col items-center justify-center select-none shadow-2xl transition-all duration-300 ${className}`}
+      style={{ backgroundColor: color.bg, color: color.text }}
+    >
+      {/* Printful Product Header Tag */}
+      <div className="absolute top-3 left-3 z-20 flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/70 backdrop-blur-md text-[10px] font-mono text-white border border-white/20 shadow-lg">
+        <Shirt className="h-3.5 w-3.5 text-cyan-400 animate-pulse" />
+        <span className="font-bold">{product.name.split("(")[0]}</span>
+        <span className="text-white/40">•</span>
+        <span className="text-amber-300 font-bold">{color.name}</span>
+      </div>
+
+      {/* View & Quality Badges */}
+      <div className="absolute top-3 right-3 z-20 flex items-center gap-1.5">
+        <span className="px-2 py-0.5 rounded bg-emerald-500/20 backdrop-blur-md text-[9px] font-mono text-emerald-300 font-bold border border-emerald-500/40 shadow-xs">
+          300 DPI • DTG Ready
+        </span>
+        <span className="px-2 py-0.5 rounded bg-white/10 backdrop-blur-md text-[9px] font-mono text-white uppercase tracking-wider border border-white/20">
+          {view === "front" && "Front Print"}
+          {view === "back" && "Back View"}
+          {view === "lifestyle" && "Model Mockup"}
+          {view === "zoom" && "100% Detail"}
+        </span>
+      </div>
+
+      {/* Main Printful Mockup Display Stage */}
+      {view === "lifestyle" ? (
+        <div
+          className="relative w-full h-full min-h-[280px] flex items-center justify-center bg-cover bg-center"
+          style={{ backgroundImage: `url(${product.image})` }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20 backdrop-blur-[1px]" />
+          <div className="relative z-10 p-5 rounded-2xl bg-black/80 backdrop-blur-md border border-white/20 text-center max-w-[85%] space-y-3 shadow-2xl">
+            <div className="flex items-center justify-center gap-1.5 text-cyan-400 font-mono text-[10px] font-bold uppercase tracking-widest">
+              <Sparkles className="h-3.5 w-3.5 text-amber-400" /> Printful 3D Model Render
+            </div>
+            <div className="relative aspect-square w-36 h-36 mx-auto rounded-xl overflow-hidden border-2 border-white/30 shadow-2xl group bg-black/50">
+              {nftUrl ? (
+                <>
+                  <img src={nftUrl} alt="NFT Artwork" className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/10 mix-blend-overlay pointer-events-none" />
+                </>
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-xs text-white/50 font-mono">
+                  No Artwork Loaded
+                </div>
+              )}
+            </div>
+            <div>
+              <p className="text-xs font-bold text-white truncate">{product.name}</p>
+              <p className="text-[10px] font-mono text-amber-300">Custom Printed via Printful On-Demand API</p>
+            </div>
+          </div>
+        </div>
+      ) : view === "zoom" ? (
+        <div className="relative w-full h-full min-h-[280px] flex items-center justify-center p-6 bg-radial from-white/10 to-transparent">
+          <div className="relative aspect-square w-48 h-48 rounded-2xl overflow-hidden border-2 border-cyan-500/80 shadow-2xl bg-black/80">
+            {nftUrl ? (
+              <div className="relative w-full h-full">
+                <img src={nftUrl} alt="Zoomed Fabric Print" className="w-full h-full object-cover scale-150" />
+                {/* Simulated Fabric Weave Texture Overlay */}
+                <div
+                  className="absolute inset-0 opacity-20 pointer-events-none mix-blend-overlay"
+                  style={{
+                    backgroundImage: `radial-gradient(#fff 1px, transparent 0)`,
+                    backgroundSize: `4px 4px`,
+                  }}
+                />
+              </div>
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-xs text-white/50 font-mono">
+                Upload Artwork Image
+              </div>
+            )}
+            <div className="absolute inset-0 bg-gradient-to-tr from-black/30 via-transparent to-white/20 pointer-events-none" />
+            <span className="absolute bottom-2.5 right-2.5 px-2.5 py-1 rounded-lg bg-black/80 backdrop-blur-md text-[9px] font-mono text-cyan-300 font-bold border border-cyan-500/40 shadow-lg">
+              300 DPI Archival Inkjet Weave
+            </span>
+          </div>
+        </div>
+      ) : isApparel ? (
+        /* REALISTIC APPAREL MOCKUP (T-Shirt / Hoodie) */
+        <div className="relative w-full h-full min-h-[280px] flex items-center justify-center p-4">
+          <div className="relative w-72 h-72 flex items-center justify-center">
+            {/* Realistic Garment Silhouette Base */}
+            <svg
+              viewBox="0 0 200 200"
+              className="absolute inset-0 w-full h-full drop-shadow-2xl"
+              style={{ filter: "drop-shadow(0 15px 25px rgba(0,0,0,0.5))" }}
+            >
+              {/* Main Body */}
+              <path
+                d="M 55 35 Q 100 50 145 35 L 185 68 L 160 98 L 148 85 L 148 185 L 52 185 L 52 85 L 40 98 L 15 68 Z"
+                fill={color.bg}
+                stroke={color.name === "Black" ? "#3f3f46" : "#cbd5e1"}
+                strokeWidth="2"
+              />
+              {/* Collar Ribbing */}
+              <path
+                d="M 65 37 Q 100 55 135 37 Q 100 48 65 37 Z"
+                fill="none"
+                stroke={color.name === "Black" ? "#52525b" : "#94a3b8"}
+                strokeWidth="2.5"
+              />
+              {/* Sleeve Seam Lines */}
+              <path d="M 52 85 L 68 38" stroke={color.name === "Black" ? "#3f3f46" : "#cbd5e1"} strokeWidth="1.5" />
+              <path d="M 148 85 L 132 38" stroke={color.name === "Black" ? "#3f3f46" : "#cbd5e1"} strokeWidth="1.5" />
+            </svg>
+
+            {/* Inner Brand Tag inside collar */}
+            <div className="absolute top-8 text-center pointer-events-none opacity-40 font-mono text-[7px] tracking-tight uppercase" style={{ color: color.text }}>
+              <span>RTPP x PRINTFUL</span>
+              <br />
+              <span>100% COTTON • MADE IN USA</span>
+            </div>
+
+            {/* Print Area Bounding Box (Printful Guidelines) */}
+            <div
+              className={`absolute transition-all duration-300 ${
+                view === "back"
+                  ? "top-14 w-36 h-36"
+                  : placement === "full"
+                  ? "top-14 w-36 h-36"
+                  : placement === "chest"
+                  ? "top-12 w-28 h-28"
+                  : "top-12 right-16 w-14 h-14"
+              }`}
+            >
+              {/* Dotted Print Area Bounds */}
+              {showPrintArea && (
+                <div className="absolute -inset-1 border-2 border-dashed border-cyan-400/60 rounded-lg pointer-events-none flex items-center justify-center">
+                  <span className="absolute -top-3.5 bg-black/80 px-1.5 py-0.2 rounded text-[8px] font-mono text-cyan-300 font-bold border border-cyan-500/30">
+                    {placement === "pocket" ? '4" x 4" Pocket' : '12" x 16" Print Area'}
+                  </span>
+                  {/* Alignment Crosshair Center */}
+                  <div className="w-2 h-2 border-t border-l border-cyan-400/80 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-60" />
+                </div>
+              )}
+
+              {/* User Artwork Image with realistic fabric blend */}
+              <div className="relative w-full h-full rounded-md overflow-hidden shadow-2xl group">
+                {nftUrl ? (
+                  <div className="relative w-full h-full">
+                    <img src={nftUrl} alt="Printful Apparel Print" className="w-full h-full object-cover" />
+                    {/* Simulated Soft Shadow / Fabric Crease Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/5 to-black/15 pointer-events-none" />
+                  </div>
+                ) : (
+                  <div className="w-full h-full bg-cyan-500/10 border border-cyan-400/30 rounded flex flex-col items-center justify-center p-2 text-center">
+                    <Upload className="h-5 w-5 text-cyan-400 mb-1 animate-bounce" />
+                    <span className="text-[9px] font-mono text-cyan-300 font-bold">Upload Artwork</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : isMug ? (
+        /* REALISTIC CERAMIC MUG MOCKUP */
+        <div className="relative w-full h-full min-h-[280px] flex items-center justify-center p-4">
+          <div className="relative w-48 h-52 rounded-3xl bg-gradient-to-r from-slate-200 via-white to-slate-300 dark:from-slate-800 dark:via-slate-700 dark:to-slate-900 border-2 border-slate-400/60 shadow-2xl flex items-center justify-center p-4 overflow-hidden">
+            {/* Ceramic Handle */}
+            <div className="absolute -right-7 top-12 w-10 h-24 rounded-r-3xl border-4 border-slate-400/90 bg-transparent shadow-md" />
+            
+            {/* Top Rim Ellipse */}
+            <div className="absolute top-0 inset-x-0 h-4 bg-slate-300/80 dark:bg-slate-600/80 rounded-t-3xl border-b border-slate-400/50" />
+
+            {/* Mug Wrap Print Area */}
+            <div className="relative w-32 h-32 rounded-xl overflow-hidden border border-slate-400/80 shadow-2xl transform -rotate-1 group">
+              {showPrintArea && (
+                <div className="absolute -inset-1 border border-dashed border-cyan-400/80 rounded-xl pointer-events-none z-10" />
+              )}
+              {nftUrl ? (
+                <img src={nftUrl} alt="Ceramic Mug Wrap" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full bg-slate-900/60 flex flex-col items-center justify-center text-[10px] text-white/70 font-mono">
+                  <span>Mug Wrap Area</span>
+                  <span className="text-[8px] text-cyan-400">11 oz Ceramic</span>
+                </div>
+              )}
+              {/* Glossy Reflection Highlight */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent pointer-events-none" />
+            </div>
+
+            {/* Bottom Base Curve Shadow */}
+            <div className="absolute bottom-0 inset-x-0 h-3 bg-black/20" />
+          </div>
+        </div>
+      ) : isCanvas ? (
+        /* REALISTIC CANVAS PRINT MOCKUP */
+        <div className="relative w-full h-full min-h-[280px] flex items-center justify-center p-6">
+          <div className="relative w-56 h-40 rounded-sm border-[10px] border-amber-950/90 shadow-[0_25px_60px_rgba(0,0,0,0.8)] bg-stone-900 p-1 flex items-center justify-center overflow-hidden">
+            <div className="w-full h-full border border-stone-700/80 overflow-hidden relative shadow-inner">
+              {nftUrl ? (
+                <div className="relative w-full h-full">
+                  <img src={nftUrl} alt="Linen Canvas Print" className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/10 mix-blend-overlay pointer-events-none" />
+                </div>
+              ) : (
+                <div className="w-full h-full bg-stone-800 flex flex-col items-center justify-center text-xs text-amber-200/70 font-mono">
+                  <span>16" x 20" Canvas</span>
+                  <span className="text-[9px] text-amber-400/60">Gallery Wrapped</span>
+                </div>
+              )}
+            </div>
+            {/* 3D Frame Edge Depth */}
+            <div className="absolute bottom-0 right-0 w-full h-1 bg-amber-900/80" />
+          </div>
+        </div>
+      ) : (
+        /* REALISTIC EMBROIDERED CAP MOCKUP */
+        <div className="relative w-full h-full min-h-[280px] flex items-center justify-center p-4">
+          <div className="relative w-52 h-40 flex flex-col items-center justify-center">
+            {/* Cap Crown Dome */}
+            <div className="relative w-40 h-28 rounded-t-full bg-gradient-to-b from-zinc-800 via-zinc-900 to-black border-t-2 border-x-2 border-zinc-700 shadow-2xl flex items-center justify-center">
+              {/* Stitched Seams */}
+              <div className="absolute top-0 bottom-0 w-0.5 bg-zinc-700/50" />
+              
+              {/* Embroidered Patch Box */}
+              <div className="relative w-16 h-16 rounded-xl overflow-hidden border-2 border-amber-400/90 shadow-2xl bg-black">
+                {nftUrl ? (
+                  <img src={nftUrl} alt="Cap Embroidered Patch" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-zinc-900 flex items-center justify-center text-[8px] text-amber-300 font-mono text-center p-1">
+                    Front Patch
+                  </div>
+                )}
+                {/* Stitching Border Effect */}
+                <div className="absolute inset-0 border border-dashed border-amber-300/60 pointer-events-none" />
+              </div>
+            </div>
+            {/* Curved Visor Brim */}
+            <div className="w-48 h-5 rounded-b-2xl bg-zinc-950 border-b-2 border-zinc-700 shadow-2xl transform -skew-x-2" />
+          </div>
+        </div>
+      )}
+
+      {/* Footer Info Bar */}
+      <div className="absolute bottom-2 left-3 right-3 z-20 flex items-center justify-between text-[10px] font-mono text-white/90 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 shadow-lg">
+        <span className="flex items-center gap-1.5 truncate">
+          <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+          Printful Template: <strong className="text-white">{product.name.split("(")[0]}</strong>
+        </span>
+        <span className="text-emerald-400 font-extrabold shrink-0">${product.basePriceUSD.toFixed(2)} USD</span>
+      </div>
+    </div>
+  );
+}
+
 export function NFTMerchStore({ selectedImageUrl, selectedNftTitle }: NFTMerchStoreProps = {}) {
   const { address, isConnected, connect, disconnect, feeWallet, switchToBase, chainId } =
     useWallet();
 
   // Selected NFT Image & Merch State
-  const [nftImageUrl, setNftImageUrl] = useState<string>(
-    selectedImageUrl ||
-      "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&w=800&q=80",
-  );
+  const [nftImageUrl, setNftImageUrl] = useState<string>(selectedImageUrl || "");
+  const merchFileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (selectedImageUrl) {
@@ -90,10 +377,31 @@ export function NFTMerchStore({ selectedImageUrl, selectedNftTitle }: NFTMerchSt
     }
   }, [selectedImageUrl]);
 
+  const handleMerchFileSelect = (f: File) => {
+    if (f.size > 20 * 1024 * 1024) {
+      toast.error("File size exceeds 20MB limit");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      setNftImageUrl(dataUrl);
+      toast.success("Loaded custom artwork image for Printful merch!");
+    };
+    reader.readAsDataURL(f);
+  };
+
   const [selectedProduct, setSelectedProduct] = useState<NFTMerchProduct>(CATALOG_PRODUCTS[0]);
   const [quantity, setQuantity] = useState<number>(1);
   const [paymentCurrency, setPaymentCurrency] = useState<"ETH" | "USDT" | "RTPP">("ETH");
   const [confirmOrderMode, setConfirmOrderMode] = useState<boolean>(true); // true = confirm, false = draft
+
+  // Interactive Merch Mockup Studio State
+  const [merchColor, setMerchColor] = useState(MERCH_COLOR_OPTIONS[0]);
+  const [mockupView, setMockupView] = useState<"front" | "back" | "lifestyle" | "zoom">("front");
+  const [printPlacement, setPrintPlacement] = useState<"full" | "chest" | "pocket">("full");
+  const [isMockupModalOpen, setIsMockupModalOpen] = useState<boolean>(false);
+  const [isCompareModalOpen, setIsCompareModalOpen] = useState<boolean>(false);
 
   // Live Token Prices State
   const [prices, setPrices] = useState<TokenPrices>({
@@ -139,117 +447,127 @@ export function NFTMerchStore({ selectedImageUrl, selectedNftTitle }: NFTMerchSt
   const [fetchingNFTs, setFetchingNFTs] = useState<boolean>(false);
   const [selectedNftId, setSelectedNftId] = useState<string | null>(null);
 
-  // Indexer NFT Fetcher for Connected Base Wallet Address
+  // Indexer NFT Fetcher for Connected Wallet & Database
   const fetchWalletNFTs = useCallback(async (walletAddr: string) => {
-    if (!walletAddr) return;
     setFetchingNFTs(true);
-    try {
-      // Query Reservoir Base Indexer API for NFTs owned by connected wallet
-      const res = await fetch(
-        `https://api-base.reservoir.tools/users/${walletAddr}/tokens/v7?limit=12`,
-      );
-      if (res.ok) {
-        const data = await res.json();
-        if (data.tokens && data.tokens.length > 0) {
-          const parsedNFTs: WalletNFT[] = data.tokens
-            .map(
-              (
-                t: {
-                  token?: {
-                    contract?: string;
-                    tokenId?: string;
-                    name?: string;
-                    collection?: { name?: string };
-                    image?: string;
-                    media?: string;
-                  };
-                },
-                idx: number,
-              ) => ({
-                id: `${t.token?.contract || "0x"}-${t.token?.tokenId || idx}`,
-                name: t.token?.name || `#${t.token?.tokenId || idx}`,
-                collectionName: t.token?.collection?.name || "Base NFT Collection",
-                contractAddress: t.token?.contract || "0x...",
-                tokenId: t.token?.tokenId || "1",
-                imageUrl: t.token?.image || t.token?.media || "",
-              }),
-            )
-            .filter((item: WalletNFT) => Boolean(item.imageUrl));
+    let realNFTs: WalletNFT[] = [];
 
-          if (parsedNFTs.length > 0) {
-            setWalletNFTs(parsedNFTs);
-            toast.success(
-              `Indexed ${parsedNFTs.length} NFTs from wallet ${shortAddr(walletAddr)}!`,
-            );
-            setFetchingNFTs(false);
-            return;
-          }
+    // 1. Fetch from Local Storage (user minted)
+    try {
+      const localNFTsRaw = localStorage.getItem("rtpp_local_minted_nfts");
+      if (localNFTsRaw) {
+        const parsed = JSON.parse(localNFTsRaw);
+        if (Array.isArray(parsed)) {
+          const mappedLocal: WalletNFT[] = parsed
+            .map((item: { id?: string; title?: string; image_path?: string; image_url?: string }) => ({
+              id: item.id || `local-${Math.random()}`,
+              name: item.title || "Minted NFT",
+              collectionName: "RTPP Minted Collection",
+              contractAddress: RTPP_TOKEN_ADDRESS,
+              tokenId: "1",
+              imageUrl: item.image_path || item.image_url || "",
+            }))
+            .filter((item) => Boolean(item.imageUrl));
+          realNFTs = [...realNFTs, ...mappedLocal];
         }
       }
-    } catch (err) {
-      console.warn("Reservoir API fetch error, using fallback set:", err);
+    } catch (e) {
+      console.warn("LocalStorage NFT read notice:", e);
     }
 
-    // Curated fallback NFTs for connected wallet
-    const fallbackNFTs: WalletNFT[] = [
-      {
-        id: "rtpp-001",
-        name: "RTPP Genesis Pass #001",
-        collectionName: "RTPP Collection (Base)",
-        contractAddress: "0x90f0712eddc36f4e42c0f8a6a6739ce5b113d9b8",
-        tokenId: "1",
-        imageUrl:
-          "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?auto=format&fit=crop&w=800&q=80",
-      },
-      {
-        id: "base-ape-8453",
-        name: "Base Ape Club #8453",
-        collectionName: "Base Apes",
-        contractAddress: "0x4b78913a9f",
-        tokenId: "8453",
-        imageUrl:
-          "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&w=800&q=80",
-      },
-      {
-        id: "cyber-punk-4092",
-        name: "Onchain Cyber Samurai #4092",
-        collectionName: "CyberSamurais",
-        contractAddress: "0x12a84ce810",
-        tokenId: "4092",
-        imageUrl:
-          "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80",
-      },
-      {
-        id: "abstract-canvas-102",
-        name: "Abstract Base Canvas #102",
-        collectionName: "Base Generative Art",
-        contractAddress: "0x89f012d001",
-        tokenId: "102",
-        imageUrl:
-          "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80",
-      },
-      {
-        id: "builder-badge-888",
-        name: "Base Builder Badge #888",
-        collectionName: "Base Ecosystem",
-        contractAddress: "0x7710abf011",
-        tokenId: "888",
-        imageUrl:
-          "https://images.unsplash.com/photo-1614680376593-902f749f7b2c?auto=format&fit=crop&w=800&q=80",
-      },
-    ];
+    // 2. Fetch from Supabase nfts table
+    try {
+      const { data } = await supabase.from("nfts").select("*");
+      if (data && data.length > 0) {
+        const mappedSupa: WalletNFT[] = await Promise.all(
+          data.map(async (item: { id?: string; title?: string; image_path?: string; image_url?: string }) => {
+            let url = item.image_path || item.image_url || "";
+            if (url && !url.startsWith("http") && !url.startsWith("data:")) {
+              const { data: pubData } = supabase.storage.from("nfts").getPublicUrl(url);
+              url = pubData?.publicUrl || url;
+            }
+            return {
+              id: item.id || `supa-${Math.random()}`,
+              name: item.title || "User NFT",
+              collectionName: "RTPP On-Chain Collection",
+              contractAddress: RTPP_TOKEN_ADDRESS,
+              tokenId: "1",
+              imageUrl: url,
+            };
+          })
+        );
+        realNFTs = [...realNFTs, ...mappedSupa];
+      }
+    } catch (dbErr) {
+      console.warn("Supabase fetch notice:", dbErr);
+    }
 
-    setWalletNFTs(fallbackNFTs);
-    toast.success(
-      `Indexed ${fallbackNFTs.length} NFTs for connected wallet ${shortAddr(walletAddr)}`,
-    );
+    // 3. Query Reservoir Base Indexer API if connected
+    if (walletAddr) {
+      try {
+        const res = await fetch(
+          `https://api-base.reservoir.tools/users/${walletAddr}/tokens/v7?limit=12`,
+        );
+        if (res.ok) {
+          const resData = await res.json();
+          if (resData.tokens && resData.tokens.length > 0) {
+            const parsedRes: WalletNFT[] = resData.tokens
+              .map(
+                (
+                  t: {
+                    token?: {
+                      contract?: string;
+                      tokenId?: string;
+                      name?: string;
+                      collection?: { name?: string };
+                      image?: string;
+                      media?: string;
+                    };
+                  },
+                  idx: number,
+                ) => ({
+                  id: `${t.token?.contract || "0x"}-${t.token?.tokenId || idx}`,
+                  name: t.token?.name || `#${t.token?.tokenId || idx}`,
+                  collectionName: t.token?.collection?.name || "Base NFT Collection",
+                  contractAddress: t.token?.contract || "0x...",
+                  tokenId: t.token?.tokenId || "1",
+                  imageUrl: t.token?.image || t.token?.media || "",
+                }),
+              )
+              .filter((item: WalletNFT) => Boolean(item.imageUrl));
+
+            realNFTs = [...realNFTs, ...parsedRes];
+          }
+        }
+      } catch (err) {
+        console.warn("Reservoir API fetch notice:", err);
+      }
+    }
+
+    // Deduplicate by imageUrl
+    const seen = new Set<string>();
+    const unique = realNFTs.filter((nft) => {
+      if (!nft.imageUrl || seen.has(nft.imageUrl)) return false;
+      seen.add(nft.imageUrl);
+      return true;
+    });
+
+    setWalletNFTs(unique);
+
+    if (unique.length > 0) {
+      toast.success(`Indexed ${unique.length} real NFTs!`);
+      if (!nftImageUrl && unique[0]?.imageUrl) {
+        setNftImageUrl(unique[0].imageUrl);
+      }
+    } else {
+      toast.info("No minted NFTs found. Upload your custom image file below!");
+    }
+
     setFetchingNFTs(false);
-  }, []);
+  }, [nftImageUrl]);
 
   useEffect(() => {
-    if (address) {
-      fetchWalletNFTs(address);
-    }
+    fetchWalletNFTs(address || "");
   }, [address, fetchWalletNFTs]);
 
   const handleSelectWalletNFT = (nft: WalletNFT) => {
@@ -722,24 +1040,22 @@ export function NFTMerchStore({ selectedImageUrl, selectedNftTitle }: NFTMerchSt
               />
               <span>Sync Token Prices</span>
             </button>
-            <button
-              onClick={() => {
-                setNftImageUrl(
-                  `https://images.unsplash.com/photo-${
-                    [
-                      "1620641788421-7a1c342ea42e",
-                      "1634017839464-5c339ebe3cb4",
-                      "1618005182384-a83a8bd57fbe",
-                      "1579783902614-a3fb3927b675",
-                    ][Math.floor(Math.random() * 4)]
-                  }?auto=format&fit=crop&w=800&q=80`,
-                );
-                toast.info("Generated new NFT artwork image!");
+            <input
+              type="file"
+              ref={merchFileInputRef}
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) handleMerchFileSelect(f);
               }}
-              className="px-3 py-2 rounded-xl bg-surface-2 hover:bg-surface border border-border text-foreground font-mono text-xs flex items-center gap-1.5 transition-all shadow-xs"
+            />
+            <button
+              onClick={() => merchFileInputRef.current?.click()}
+              className="px-3 py-2 rounded-xl bg-primary/20 hover:bg-primary/30 text-primary border border-primary/40 font-mono text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
             >
-              <Sparkles className="h-3.5 w-3.5 text-amber-400" />
-              Random NFT Art
+              <Upload className="h-3.5 w-3.5 text-primary" />
+              Upload Image File
             </button>
           </div>
         </div>
@@ -872,30 +1188,48 @@ export function NFTMerchStore({ selectedImageUrl, selectedNftTitle }: NFTMerchSt
               )}
             </div>
 
-            {/* NFT Artwork Preview Box */}
-            <div className="relative group rounded-xl overflow-hidden border border-border bg-black/40 aspect-square max-h-[260px] flex items-center justify-center mx-auto">
-              <img
-                src={nftImageUrl}
-                alt="NFT Artwork"
-                className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                onError={() => toast.error("Invalid NFT Image URL")}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-90 p-3 flex flex-col justify-end">
-                <span className="text-[11px] font-mono text-white/90 font-bold truncate">
-                  NFT Artwork File Stream
-                </span>
-                <span className="text-[10px] font-mono text-white/60 truncate">{nftImageUrl}</span>
-              </div>
+            {/* NFT Artwork Preview Box / Upload Dropzone */}
+            <div
+              onClick={() => merchFileInputRef.current?.click()}
+              className="relative group rounded-xl overflow-hidden border-2 border-dashed border-border/80 hover:border-primary/60 bg-black/40 aspect-square max-h-[220px] flex items-center justify-center mx-auto cursor-pointer transition-all"
+            >
+              {nftImageUrl ? (
+                <>
+                  <img
+                    src={nftImageUrl}
+                    alt="Selected Artwork"
+                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                    onError={() => toast.error("Unable to render image URL")}
+                  />
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                    <span className="text-xs text-white font-medium bg-primary px-3 py-1.5 rounded-full flex items-center gap-1.5">
+                      <Upload className="h-3.5 w-3.5" /> Change Image File
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <div className="text-center p-4 space-y-2">
+                  <div className="h-12 w-12 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto">
+                    <Upload className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-foreground">Click to upload custom artwork image</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                      PNG, JPG, GIF, WEBP up to 20MB
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Image URL Input */}
+            {/* Direct Image URL Input */}
             <div className="space-y-1">
-              <label className="text-[11px] text-muted-foreground font-mono">
-                NFT Image File URL (HTTPS)
+              <label className="text-[10px] text-muted-foreground font-mono">
+                OR Paste Direct Image URL (HTTPS / IPFS):
               </label>
               <input
                 type="text"
-                value={nftImageUrl}
+                value={nftImageUrl && !nftImageUrl.startsWith("data:") ? nftImageUrl : ""}
                 onChange={(e) => setNftImageUrl(e.target.value)}
                 placeholder="https://ipfs.io/ipfs/..."
                 className="w-full px-3 py-1.5 rounded-lg bg-surface-2 border border-border text-xs font-mono text-foreground focus:outline-hidden focus:border-primary"
@@ -1009,30 +1343,34 @@ export function NFTMerchStore({ selectedImageUrl, selectedNftTitle }: NFTMerchSt
             </button>
           </div>
 
-          {/* Catalog Product Selection */}
-          <div className="panel p-4 rounded-xl border border-border/80 space-y-3">
+          {/* Catalog Product Selection & Live Mockup Studio */}
+          <div className="panel p-4 rounded-xl border border-border/80 space-y-4">
             <div className="flex justify-between items-center border-b border-border/40 pb-2">
               <span className="font-mono text-xs font-bold text-foreground flex items-center gap-1.5">
                 <span className="h-5 w-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-[11px]">
                   2
                 </span>
-                Select Merch Item
+                Select Merch Item &amp; Mockup Preview
               </span>
-              <span className="text-[10px] text-muted-foreground font-mono">
-                Variant ID: #{selectedProduct.variantId}
-              </span>
+              <button
+                onClick={() => setIsCompareModalOpen(true)}
+                className="text-[10px] font-mono text-cyan-400 hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                <LayoutGrid className="h-3 w-3" /> Compare All 5 Products
+              </button>
             </div>
 
-            <div className="grid grid-cols-1 gap-2 max-h-[260px] overflow-y-auto pr-1">
+            {/* Catalog Grid List */}
+            <div className="grid grid-cols-1 gap-2 max-h-[220px] overflow-y-auto pr-1">
               {CATALOG_PRODUCTS.map((prod) => {
                 const isSelected = selectedProduct.id === prod.id;
                 return (
                   <div
                     key={prod.id}
                     onClick={() => setSelectedProduct(prod)}
-                    className={`p-2.5 rounded-xl border transition-all cursor-pointer flex items-center gap-3 ${
+                    className={`p-2.5 rounded-xl border transition-all cursor-pointer flex items-center gap-3 group ${
                       isSelected
-                        ? "bg-primary/15 border-primary shadow-xs"
+                        ? "bg-primary/15 border-primary shadow-xs ring-1 ring-primary/40"
                         : "bg-surface-2/40 border-border/60 hover:bg-surface-2"
                     }`}
                   >
@@ -1054,6 +1392,18 @@ export function NFTMerchStore({ selectedImageUrl, selectedNftTitle }: NFTMerchSt
                         {prod.description}
                       </p>
                     </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedProduct(prod);
+                        setIsMockupModalOpen(true);
+                      }}
+                      className="px-2 py-1 rounded bg-surface hover:bg-primary/20 text-[10px] font-mono font-bold text-cyan-400 border border-border group-hover:border-primary/50 transition-colors shrink-0 flex items-center gap-1"
+                      title="Inspect HD Mockup"
+                    >
+                      <Eye className="h-3 w-3" /> Preview
+                    </button>
                   </div>
                 );
               })}
@@ -1075,6 +1425,158 @@ export function NFTMerchStore({ selectedImageUrl, selectedNftTitle }: NFTMerchSt
                 >
                   +
                 </button>
+              </div>
+            </div>
+
+            {/* LIVE PHYSICAL MERCH ITEM MOCKUP STUDIO */}
+            <div className="pt-3 border-t border-border/60 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-mono font-extrabold text-foreground flex items-center gap-1.5">
+                  <Shirt className="h-4 w-4 text-primary" /> Live Product Mockup Studio
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => setIsCompareModalOpen(true)}
+                    className="px-2 py-1 rounded-md bg-surface-2 hover:bg-surface border border-border text-[10px] font-mono font-bold text-muted-foreground hover:text-foreground flex items-center gap-1 cursor-pointer"
+                  >
+                    <LayoutGrid className="h-3 w-3 text-amber-400" /> Compare All
+                  </button>
+                  <button
+                    onClick={() => setIsMockupModalOpen(true)}
+                    className="px-2 py-1 rounded-md bg-primary/20 hover:bg-primary/30 border border-primary/40 text-[10px] font-mono font-bold text-primary flex items-center gap-1 cursor-pointer"
+                  >
+                    <Maximize2 className="h-3 w-3" /> HD Fullscreen
+                  </button>
+                </div>
+              </div>
+
+              {/* Render Selected Product Mockup Canvas */}
+              {renderMockupCanvas({
+                product: selectedProduct,
+                nftUrl: nftImageUrl,
+                color: merchColor,
+                view: mockupView,
+                placement: printPlacement,
+                className: "h-[280px] w-full",
+              })}
+
+              {/* Mockup Studio Controls */}
+              <div className="space-y-2.5 bg-surface-2/40 p-3 rounded-xl border border-border/60 text-xs font-mono">
+                {/* Product Color Swatches */}
+                <div className="space-y-1">
+                  <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                    <Palette className="h-3 w-3 text-cyan-400" /> Select Garment/Item Color:
+                  </span>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {MERCH_COLOR_OPTIONS.map((c) => (
+                      <button
+                        key={c.name}
+                        onClick={() => setMerchColor(c)}
+                        className={`px-2 py-1 rounded-lg border text-[10px] font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                          merchColor.name === c.name
+                            ? "border-primary ring-2 ring-primary/40 bg-surface"
+                            : "border-border hover:border-muted-foreground bg-surface-2/60"
+                        }`}
+                      >
+                        <span
+                          className="h-3 w-3 rounded-full border border-white/20 inline-block shrink-0"
+                          style={{ backgroundColor: c.bg }}
+                        />
+                        <span>{c.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* View Angle Switcher */}
+                <div className="space-y-1">
+                  <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                    <Eye className="h-3 w-3 text-primary" /> Mockup Angle &amp; Scene:
+                  </span>
+                  <div className="grid grid-cols-4 gap-1 text-[10px]">
+                    <button
+                      onClick={() => setMockupView("front")}
+                      className={`py-1 rounded border font-bold text-center transition-colors cursor-pointer ${
+                        mockupView === "front"
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-surface-2 hover:bg-surface border-border text-muted-foreground"
+                      }`}
+                    >
+                      Front Print
+                    </button>
+                    <button
+                      onClick={() => setMockupView("back")}
+                      className={`py-1 rounded border font-bold text-center transition-colors cursor-pointer ${
+                        mockupView === "back"
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-surface-2 hover:bg-surface border-border text-muted-foreground"
+                      }`}
+                    >
+                      Back View
+                    </button>
+                    <button
+                      onClick={() => setMockupView("lifestyle")}
+                      className={`py-1 rounded border font-bold text-center transition-colors cursor-pointer ${
+                        mockupView === "lifestyle"
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-surface-2 hover:bg-surface border-border text-muted-foreground"
+                      }`}
+                    >
+                      3D Model
+                    </button>
+                    <button
+                      onClick={() => setMockupView("zoom")}
+                      className={`py-1 rounded border font-bold text-center transition-colors cursor-pointer ${
+                        mockupView === "zoom"
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-surface-2 hover:bg-surface border-border text-muted-foreground"
+                      }`}
+                    >
+                      DPI Zoom
+                    </button>
+                  </div>
+                </div>
+
+                {/* Print Placement (Apparel only) */}
+                {selectedProduct.category === "Apparel" && (
+                  <div className="space-y-1 pt-1 border-t border-border/40">
+                    <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                      <Layers className="h-3 w-3 text-amber-400" /> Print Scale &amp; Position:
+                    </span>
+                    <div className="grid grid-cols-3 gap-1 text-[10px]">
+                      <button
+                        onClick={() => setPrintPlacement("full")}
+                        className={`py-1 rounded border font-bold text-center transition-colors cursor-pointer ${
+                          printPlacement === "full"
+                            ? "bg-amber-500/20 text-amber-300 border-amber-500/50"
+                            : "bg-surface-2 hover:bg-surface border-border text-muted-foreground"
+                        }`}
+                      >
+                        Full Graphic
+                      </button>
+                      <button
+                        onClick={() => setPrintPlacement("chest")}
+                        className={`py-1 rounded border font-bold text-center transition-colors cursor-pointer ${
+                          printPlacement === "chest"
+                            ? "bg-amber-500/20 text-amber-300 border-amber-500/50"
+                            : "bg-surface-2 hover:bg-surface border-border text-muted-foreground"
+                        }`}
+                      >
+                        Upper Chest
+                      </button>
+                      <button
+                        onClick={() => setPrintPlacement("pocket")}
+                        className={`py-1 rounded border font-bold text-center transition-colors cursor-pointer ${
+                          printPlacement === "pocket"
+                            ? "bg-amber-500/20 text-amber-300 border-amber-500/50"
+                            : "bg-surface-2 hover:bg-surface border-border text-muted-foreground"
+                        }`}
+                      >
+                        Chest Badge
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -1561,6 +2063,207 @@ export function NFTMerchStore({ selectedImageUrl, selectedNftTitle }: NFTMerchSt
               <pre className="p-3 rounded-xl bg-black/70 border border-border/60 text-cyan-300 overflow-x-auto max-h-[220px] text-[10px] leading-relaxed">
                 {JSON.stringify(lastApiPayload.response, null, 2)}
               </pre>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* HD FULLSCREEN MOCKUP INSPECTION MODAL */}
+      {isMockupModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-in fade-in duration-200">
+          <div className="bg-surface border border-border rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl p-6 space-y-5 relative">
+            <div className="flex items-center justify-between border-b border-border/60 pb-3">
+              <div>
+                <h3 className="text-base font-mono font-extrabold text-foreground flex items-center gap-2">
+                  <Maximize2 className="h-5 w-5 text-primary" />
+                  HD Physical Product Mockup Inspection Studio
+                </h3>
+                <p className="text-xs text-muted-foreground font-mono">
+                  High-definition Printful API 3D preview template for {selectedProduct.name}
+                </p>
+              </div>
+              <button
+                onClick={() => setIsMockupModalOpen(false)}
+                className="p-1.5 rounded-lg bg-surface-2 hover:bg-surface border border-border text-muted-foreground hover:text-foreground cursor-pointer"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+              {/* Large Mockup Canvas */}
+              <div className="lg:col-span-7">
+                {renderMockupCanvas({
+                  product: selectedProduct,
+                  nftUrl: nftImageUrl,
+                  color: merchColor,
+                  view: mockupView,
+                  placement: printPlacement,
+                  className: "h-[360px] sm:h-[420px] w-full",
+                })}
+              </div>
+
+              {/* Controls & Specs Column */}
+              <div className="lg:col-span-5 space-y-4 font-mono text-xs">
+                {/* Product Info Box */}
+                <div className="p-3 rounded-xl bg-surface-2/60 border border-border/80 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="font-extrabold text-foreground text-sm">{selectedProduct.name}</span>
+                    <span className="text-emerald-400 font-mono font-extrabold text-sm">
+                      ${selectedProduct.basePriceUSD.toFixed(2)} USD
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">{selectedProduct.description}</p>
+                </div>
+
+                {/* Color Selector */}
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-bold text-foreground flex items-center gap-1.5">
+                    <Palette className="h-3.5 w-3.5 text-cyan-400" /> Garment / Base Color:
+                  </label>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {MERCH_COLOR_OPTIONS.map((c) => (
+                      <button
+                        key={c.name}
+                        onClick={() => setMerchColor(c)}
+                        className={`p-2 rounded-xl border text-xs font-bold flex items-center gap-2 transition-all cursor-pointer ${
+                          merchColor.name === c.name
+                            ? "border-primary ring-2 ring-primary/40 bg-surface"
+                            : "border-border hover:border-muted-foreground bg-surface-2/40"
+                        }`}
+                      >
+                        <span
+                          className="h-4 w-4 rounded-full border border-white/30 shrink-0"
+                          style={{ backgroundColor: c.bg }}
+                        />
+                        <span className="truncate">{c.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Angle Selector */}
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-bold text-foreground flex items-center gap-1.5">
+                    <Eye className="h-3.5 w-3.5 text-primary" /> Preview Angle &amp; View:
+                  </label>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {[
+                      { id: "front", label: "Front Print" },
+                      { id: "back", label: "Back View" },
+                      { id: "lifestyle", label: "3D Model View" },
+                      { id: "zoom", label: "DPI Detail Zoom" },
+                    ].map((v) => (
+                      <button
+                        key={v.id}
+                        onClick={() => setMockupView(v.id as any)}
+                        className={`py-1.5 px-2 rounded-xl border text-xs font-bold text-center transition-all cursor-pointer ${
+                          mockupView === v.id
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-surface-2/60 hover:bg-surface border-border text-muted-foreground"
+                        }`}
+                      >
+                        {v.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Print Technical Specs */}
+                <div className="p-3 rounded-xl bg-black/40 border border-border/60 text-[11px] space-y-1 text-muted-foreground">
+                  <p className="font-bold text-foreground flex items-center gap-1">
+                    <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" /> Printful Production Specs:
+                  </p>
+                  <ul className="list-disc list-inside space-y-0.5 text-[10px]">
+                    <li>Direct-to-Garment (DTG) archival inkjet printing</li>
+                    <li>Resolution: 300+ DPI vector render accuracy</li>
+                    <li>Eco-friendly water-based Oeko-Tex certified inks</li>
+                  </ul>
+                </div>
+
+                <button
+                  onClick={() => setIsMockupModalOpen(false)}
+                  className="w-full py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-mono font-bold text-xs shadow-md transition-all cursor-pointer"
+                >
+                  Confirm &amp; Proceed with Order
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* COMPARE ALL 5 PHYSICAL PRODUCTS MODAL */}
+      {isCompareModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-in fade-in duration-200">
+          <div className="bg-surface border border-border rounded-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto shadow-2xl p-6 space-y-5 relative">
+            <div className="flex items-center justify-between border-b border-border/60 pb-3">
+              <div>
+                <h3 className="text-base font-mono font-extrabold text-foreground flex items-center gap-2">
+                  <LayoutGrid className="h-5 w-5 text-amber-400" />
+                  Compare All Physical Merch Mockups
+                </h3>
+                <p className="text-xs text-muted-foreground font-mono">
+                  See how your custom NFT artwork looks printed across all catalog products
+                </p>
+              </div>
+              <button
+                onClick={() => setIsCompareModalOpen(false)}
+                className="p-1.5 rounded-lg bg-surface-2 hover:bg-surface border border-border text-muted-foreground hover:text-foreground cursor-pointer"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {CATALOG_PRODUCTS.map((prod) => {
+                const isSelected = selectedProduct.id === prod.id;
+                return (
+                  <div
+                    key={prod.id}
+                    onClick={() => {
+                      setSelectedProduct(prod);
+                      setIsCompareModalOpen(false);
+                      toast.success(`Selected ${prod.name}`);
+                    }}
+                    className={`p-3 rounded-2xl border transition-all cursor-pointer space-y-3 group ${
+                      isSelected
+                        ? "bg-primary/10 border-primary ring-2 ring-primary/40 shadow-lg"
+                        : "bg-surface-2/40 border-border/80 hover:bg-surface-2 hover:border-primary/50"
+                    }`}
+                  >
+                    {renderMockupCanvas({
+                      product: prod,
+                      nftUrl: nftImageUrl,
+                      color: merchColor,
+                      view: "front",
+                      placement: "full",
+                      className: "h-[200px] w-full",
+                    })}
+
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs font-bold text-foreground truncate">{prod.name}</p>
+                        <p className="text-[10px] text-muted-foreground">{prod.category}</p>
+                      </div>
+                      <span className="text-xs font-mono font-extrabold text-emerald-400">
+                        ${prod.basePriceUSD.toFixed(2)}
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      className={`w-full py-1.5 rounded-xl font-mono text-[11px] font-bold transition-all cursor-pointer ${
+                        isSelected
+                          ? "bg-primary text-primary-foreground shadow-xs"
+                          : "bg-surface-2 hover:bg-primary/20 text-foreground border border-border group-hover:border-primary/50"
+                      }`}
+                    >
+                      {isSelected ? "Currently Selected" : "Select Product"}
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
