@@ -133,13 +133,55 @@ export function resolveIpfsUrl(url?: string | null): string {
 }
 
 export const MERCH_COLOR_OPTIONS = [
-  { name: "Black", bg: "#18181b", text: "#ffffff", border: "border-zinc-700", ring: "ring-zinc-400" },
-  { name: "White", bg: "#f8fafc", text: "#0f172a", border: "border-slate-300", ring: "ring-slate-400" },
-  { name: "Navy", bg: "#0f172a", text: "#ffffff", border: "border-slate-700", ring: "ring-blue-500" },
-  { name: "Heather Gray", bg: "#475569", text: "#ffffff", border: "border-slate-500", ring: "ring-slate-300" },
-  { name: "Cream", bg: "#fef3c7", text: "#451a03", border: "border-amber-200", ring: "ring-amber-400" },
-  { name: "Pastel Pink", bg: "#fce7f3", text: "#831843", border: "border-pink-300", ring: "ring-pink-400" },
-  { name: "Forest Olive", bg: "#14532d", text: "#ffffff", border: "border-emerald-700", ring: "ring-emerald-400" },
+  {
+    name: "Black",
+    bg: "#18181b",
+    text: "#ffffff",
+    border: "border-zinc-700",
+    ring: "ring-zinc-400",
+  },
+  {
+    name: "White",
+    bg: "#f8fafc",
+    text: "#0f172a",
+    border: "border-slate-300",
+    ring: "ring-slate-400",
+  },
+  {
+    name: "Navy",
+    bg: "#0f172a",
+    text: "#ffffff",
+    border: "border-slate-700",
+    ring: "ring-blue-500",
+  },
+  {
+    name: "Heather Gray",
+    bg: "#475569",
+    text: "#ffffff",
+    border: "border-slate-500",
+    ring: "ring-slate-300",
+  },
+  {
+    name: "Cream",
+    bg: "#fef3c7",
+    text: "#451a03",
+    border: "border-amber-200",
+    ring: "ring-amber-400",
+  },
+  {
+    name: "Pastel Pink",
+    bg: "#fce7f3",
+    text: "#831843",
+    border: "border-pink-300",
+    ring: "ring-pink-400",
+  },
+  {
+    name: "Forest Olive",
+    bg: "#14532d",
+    text: "#ffffff",
+    border: "border-emerald-700",
+    ring: "ring-emerald-400",
+  },
 ];
 
 export const MERCH_SIZE_OPTIONS = ["S", "M", "L", "XL", "2XL"] as const;
@@ -186,7 +228,9 @@ export function renderMockupCanvas({
         <span className="text-white/40">•</span>
         <span className="text-amber-300 font-bold">{color.name}</span>
         <span className="text-white/40">•</span>
-        <span className="text-cyan-300 font-bold px-1.5 py-0.2 rounded bg-cyan-950/80 border border-cyan-500/40">{size}</span>
+        <span className="text-cyan-300 font-bold px-1.5 py-0.2 rounded bg-cyan-950/80 border border-cyan-500/40">
+          {size}
+        </span>
       </div>
 
       {/* View & Quality Badges */}
@@ -270,7 +314,9 @@ export function renderMockupCanvas({
         <div className="relative w-full h-full min-h-[280px] flex items-center justify-center p-6">
           <div className="relative w-56 h-64 flex flex-col items-center justify-center">
             <div className="relative w-48 h-56 rounded-3xl border-2 border-white/20 shadow-2xl bg-black/30 flex items-center justify-center p-4">
-              <span className="text-[10px] text-white/40 font-mono absolute top-3">Back View (Blank Neck Print)</span>
+              <span className="text-[10px] text-white/40 font-mono absolute top-3">
+                Back View (Blank Neck Print)
+              </span>
               <div className="w-16 h-12 border border-dashed border-white/30 rounded flex items-center justify-center text-[9px] text-white/50">
                 Inner Tag
               </div>
@@ -372,7 +418,9 @@ export function renderMockupCanvas({
           <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
           Printful Template: <strong className="text-white">{product.name.split("(")[0]}</strong>
         </span>
-        <span className="text-emerald-400 font-extrabold shrink-0">${product.basePriceUSD.toFixed(2)} USD</span>
+        <span className="text-emerald-400 font-extrabold shrink-0">
+          ${product.basePriceUSD.toFixed(2)} USD
+        </span>
       </div>
     </div>
   );
@@ -383,7 +431,7 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
 
   // Selected NFT Image & Merch State
   const [nftImageUrl, setNftImageUrl] = useState<string>(
-    resolveIpfsUrl(selectedImageUrl || DEFAULT_MERCH_FALLBACK_IMAGE)
+    resolveIpfsUrl(selectedImageUrl || DEFAULT_MERCH_FALLBACK_IMAGE),
   );
   const merchFileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -459,7 +507,13 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
     const safeNftUrl = resolveIpfsUrl(nftImageUrl);
 
     // 1. Pre-flight Payload Validation: Ensure variant_id and nft_url are present and valid
-    if (!targetVariantId || isNaN(targetVariantId) || !safeNftUrl || safeNftUrl === DEFAULT_MERCH_FALLBACK_IMAGE || !safeNftUrl.startsWith("http")) {
+    if (
+      !targetVariantId ||
+      isNaN(targetVariantId) ||
+      !safeNftUrl ||
+      safeNftUrl === DEFAULT_MERCH_FALLBACK_IMAGE ||
+      !safeNftUrl.startsWith("http")
+    ) {
       console.log("Missing Variant ID or NFT URL");
       setIsGeneratingMockup(false);
       setPrintfulMockupUrl(null);
@@ -523,7 +577,7 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
     setFetchingPrices(true);
     try {
       const res = await fetch(
-        "https://api.coingecko.com/api/v3/simple/price?ids=ethereum,tether&vs_currencies=usd"
+        "https://api.coingecko.com/api/v3/simple/price?ids=ethereum,tether&vs_currencies=usd",
       );
       if (res.ok) {
         const data = await res.json();
@@ -553,123 +607,144 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
   const [selectedNftId, setSelectedNftId] = useState<string | null>(null);
 
   // Indexer NFT Fetcher for Connected Wallet & Database
-  const fetchWalletNFTs = useCallback(async (walletAddr: string) => {
-    setFetchingNFTs(true);
-    let realNFTs: WalletNFT[] = [];
+  const fetchWalletNFTs = useCallback(
+    async (walletAddr: string) => {
+      setFetchingNFTs(true);
+      let realNFTs: WalletNFT[] = [];
 
-    // 1. Fetch from Local Storage (user minted)
-    try {
-      const localNFTsRaw = localStorage.getItem("rtpp_local_minted_nfts");
-      if (localNFTsRaw) {
-        const parsed = JSON.parse(localNFTsRaw);
-        if (Array.isArray(parsed)) {
-          const mappedLocal: WalletNFT[] = parsed
-            .map((item: { id?: string; title?: string; image_path?: string; image_url?: string }) => ({
-              id: item.id || `local-${Math.random()}`,
-              name: item.title || "Minted NFT",
-              collectionName: "RTPP Minted Collection",
-              contractAddress: RTPP_TOKEN_ADDRESS,
-              tokenId: "1",
-              imageUrl: item.image_path || item.image_url || "",
-            }))
-            .filter((item) => Boolean(item.imageUrl));
-          realNFTs = [...realNFTs, ...mappedLocal];
-        }
-      }
-    } catch (e) {
-      console.warn("LocalStorage NFT read notice:", e);
-    }
-
-    // 2. Fetch from Supabase nfts table
-    try {
-      const { data } = await supabase.from("nfts").select("*");
-      if (data && data.length > 0) {
-        const mappedSupa: WalletNFT[] = await Promise.all(
-          data.map(async (item: { id?: string; title?: string; image_path?: string; image_url?: string }) => {
-            let url = item.image_path || item.image_url || "";
-            if (url && !url.startsWith("http") && !url.startsWith("data:")) {
-              const { data: pubData } = supabase.storage.from("nfts").getPublicUrl(url);
-              url = pubData?.publicUrl || url;
-            }
-            return {
-              id: item.id || `supa-${Math.random()}`,
-              name: item.title || "User NFT",
-              collectionName: "RTPP On-Chain Collection",
-              contractAddress: RTPP_TOKEN_ADDRESS,
-              tokenId: "1",
-              imageUrl: resolveIpfsUrl(url),
-            };
-          })
-        );
-        realNFTs = [...realNFTs, ...mappedSupa];
-      }
-    } catch (dbErr) {
-      console.warn("Supabase fetch notice:", dbErr);
-    }
-
-    // 3. Query Reservoir Base Indexer API if connected
-    if (walletAddr) {
+      // 1. Fetch from Local Storage (user minted)
       try {
-        const res = await fetch(`https://api-base.reservoir.tools/users/${walletAddr}/tokens/v7?limit=12`);
-        if (res.ok) {
-          const resData = await res.json();
-          if (resData.tokens && resData.tokens.length > 0) {
-            const parsedRes: WalletNFT[] = resData.tokens
+        const localNFTsRaw = localStorage.getItem("rtpp_local_minted_nfts");
+        if (localNFTsRaw) {
+          const parsed = JSON.parse(localNFTsRaw);
+          if (Array.isArray(parsed)) {
+            const mappedLocal: WalletNFT[] = parsed
               .map(
-                (
-                  t: {
-                    token?: {
-                      contract?: string;
-                      tokenId?: string;
-                      name?: string;
-                      collection?: { name?: string };
-                      image?: string;
-                      media?: string;
-                    };
-                  },
-                  idx: number
-                ) => ({
-                  id: `${t.token?.contract || "0x"}-${t.token?.tokenId || idx}`,
-                  name: t.token?.name || `#${t.token?.tokenId || idx}`,
-                  collectionName: t.token?.collection?.name || "Base NFT Collection",
-                  contractAddress: t.token?.contract || "0x...",
-                  tokenId: t.token?.tokenId || "1",
-                  imageUrl: resolveIpfsUrl(t.token?.image || t.token?.media || ""),
-                })
+                (item: {
+                  id?: string;
+                  title?: string;
+                  image_path?: string;
+                  image_url?: string;
+                }) => ({
+                  id: item.id || `local-${Math.random()}`,
+                  name: item.title || "Minted NFT",
+                  collectionName: "RTPP Minted Collection",
+                  contractAddress: RTPP_TOKEN_ADDRESS,
+                  tokenId: "1",
+                  imageUrl: item.image_path || item.image_url || "",
+                }),
               )
-              .filter((item: WalletNFT) => Boolean(item.imageUrl && item.imageUrl !== DEFAULT_MERCH_FALLBACK_IMAGE));
-
-            realNFTs = [...realNFTs, ...parsedRes];
+              .filter((item) => Boolean(item.imageUrl));
+            realNFTs = [...realNFTs, ...mappedLocal];
           }
         }
-      } catch (err) {
-        console.warn("Reservoir API fetch notice:", err);
+      } catch (e) {
+        console.warn("LocalStorage NFT read notice:", e);
       }
-    }
 
-    // Deduplicate by imageUrl
-    const seen = new Set<string>();
-    const unique = realNFTs.filter((nft) => {
-      if (!nft.imageUrl || seen.has(nft.imageUrl)) return false;
-      seen.add(nft.imageUrl);
-      return true;
-    });
+      // 2. Fetch from Supabase nfts table
+      try {
+        const { data } = await supabase.from("nfts").select("*");
+        if (data && data.length > 0) {
+          const mappedSupa: WalletNFT[] = await Promise.all(
+            data.map(
+              async (item: {
+                id?: string;
+                title?: string;
+                image_path?: string;
+                image_url?: string;
+              }) => {
+                let url = item.image_path || item.image_url || "";
+                if (url && !url.startsWith("http") && !url.startsWith("data:")) {
+                  const { data: pubData } = supabase.storage.from("nfts").getPublicUrl(url);
+                  url = pubData?.publicUrl || url;
+                }
+                return {
+                  id: item.id || `supa-${Math.random()}`,
+                  name: item.title || "User NFT",
+                  collectionName: "RTPP On-Chain Collection",
+                  contractAddress: RTPP_TOKEN_ADDRESS,
+                  tokenId: "1",
+                  imageUrl: resolveIpfsUrl(url),
+                };
+              },
+            ),
+          );
+          realNFTs = [...realNFTs, ...mappedSupa];
+        }
+      } catch (dbErr) {
+        console.warn("Supabase fetch notice:", dbErr);
+      }
 
-    setWalletNFTs(unique);
+      // 3. Query Reservoir Base Indexer API if connected
+      if (walletAddr) {
+        try {
+          const res = await fetch(
+            `https://api-base.reservoir.tools/users/${walletAddr}/tokens/v7?limit=12`,
+          );
+          if (res.ok) {
+            const resData = await res.json();
+            if (resData.tokens && resData.tokens.length > 0) {
+              const parsedRes: WalletNFT[] = resData.tokens
+                .map(
+                  (
+                    t: {
+                      token?: {
+                        contract?: string;
+                        tokenId?: string;
+                        name?: string;
+                        collection?: { name?: string };
+                        image?: string;
+                        media?: string;
+                      };
+                    },
+                    idx: number,
+                  ) => ({
+                    id: `${t.token?.contract || "0x"}-${t.token?.tokenId || idx}`,
+                    name: t.token?.name || `#${t.token?.tokenId || idx}`,
+                    collectionName: t.token?.collection?.name || "Base NFT Collection",
+                    contractAddress: t.token?.contract || "0x...",
+                    tokenId: t.token?.tokenId || "1",
+                    imageUrl: resolveIpfsUrl(t.token?.image || t.token?.media || ""),
+                  }),
+                )
+                .filter((item: WalletNFT) =>
+                  Boolean(item.imageUrl && item.imageUrl !== DEFAULT_MERCH_FALLBACK_IMAGE),
+                );
 
-    if (unique.length > 0) {
-      toast.success(`Indexed ${unique.length} real NFTs!`);
-      if (!nftImageUrl || nftImageUrl === DEFAULT_MERCH_FALLBACK_IMAGE) {
-        if (unique[0]?.imageUrl) {
-          setNftImageUrl(unique[0].imageUrl);
+              realNFTs = [...realNFTs, ...parsedRes];
+            }
+          }
+        } catch (err) {
+          console.warn("Reservoir API fetch notice:", err);
         }
       }
-    } else {
-      toast.info("No minted NFTs found. Upload your custom image file below!");
-    }
 
-    setFetchingNFTs(false);
-  }, [nftImageUrl]);
+      // Deduplicate by imageUrl
+      const seen = new Set<string>();
+      const unique = realNFTs.filter((nft) => {
+        if (!nft.imageUrl || seen.has(nft.imageUrl)) return false;
+        seen.add(nft.imageUrl);
+        return true;
+      });
+
+      setWalletNFTs(unique);
+
+      if (unique.length > 0) {
+        toast.success(`Indexed ${unique.length} real NFTs!`);
+        if (!nftImageUrl || nftImageUrl === DEFAULT_MERCH_FALLBACK_IMAGE) {
+          if (unique[0]?.imageUrl) {
+            setNftImageUrl(unique[0].imageUrl);
+          }
+        }
+      } else {
+        toast.info("No minted NFTs found. Upload your custom image file below!");
+      }
+
+      setFetchingNFTs(false);
+    },
+    [nftImageUrl],
+  );
 
   useEffect(() => {
     fetchWalletNFTs(address || "");
@@ -850,7 +925,7 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
 
           toast.info("Requesting wallet signature for Printful NFT Merch Redemption...");
           await signer.signMessage(
-            `Confirm Printful NFT Merch Redemption for ${selectedProduct.name} ($${totalUSD.toFixed(2)} USD incl. 2.5% Platform Fee) from connected wallet: ${userAddress}`
+            `Confirm Printful NFT Merch Redemption for ${selectedProduct.name} ($${totalUSD.toFixed(2)} USD incl. 2.5% Platform Fee) from connected wallet: ${userAddress}`,
           );
 
           if (paymentCurrency === "ETH") {
@@ -862,7 +937,9 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
               value: amountWei,
             });
 
-            toast.info(`Payment Transaction Submitted: ${shortAddr(tx.hash)}. Awaiting block verification...`);
+            toast.info(
+              `Payment Transaction Submitted: ${shortAddr(tx.hash)}. Awaiting block verification...`,
+            );
             await tx.wait();
             txHash = tx.hash;
             toast.success("Native ETH Crypto Payment Verified on Base Network!");
@@ -873,7 +950,9 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
 
             // CRITICAL SECURITY FIX: Must approve UNISWAP_V3_ROUTER as spender (NOT admin wallet)
             const approveTx = await tokenContract.approve(UNISWAP_V3_ROUTER, amountWei);
-            toast.info(`Step 1/2 Submitted: Waiting for Approval Tx ${shortAddr(approveTx.hash)} on Base...`);
+            toast.info(
+              `Step 1/2 Submitted: Waiting for Approval Tx ${shortAddr(approveTx.hash)} on Base...`,
+            );
             await approveTx.wait();
             toast.success("RTPP ERC20 Token Allowance Approved!");
 
@@ -883,9 +962,10 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
             txHash = `0xusdt_${Date.now()}`;
             toast.success("USDT Payment Authorized!");
           }
-        } catch (err: any) {
+        } catch (err: unknown) {
           console.warn("Wallet Payment Notice:", err);
-          if (err?.code === "ACTION_REJECTED" || err?.message?.includes("rejected")) {
+          const eObj = err as { code?: string; message?: string };
+          if (eObj?.code === "ACTION_REJECTED" || eObj?.message?.includes("rejected")) {
             toast.error("Transaction signature rejected by user wallet.");
             setOrdering(false);
             setApprovalStep(false);
@@ -1048,7 +1128,8 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
             Phygital Web3 Store
           </h2>
           <p className="text-xs text-slate-300 font-mono leading-relaxed">
-            Mint or select your NFT artwork to preview on custom apparel, mugs & canvases. Pay seamlessly in ETH, USDT or RTPP to dispatch automated Printful orders.
+            Mint or select your NFT artwork to preview on custom apparel, mugs & canvases. Pay
+            seamlessly in ETH, USDT or RTPP to dispatch automated Printful orders.
           </p>
         </div>
 
@@ -1057,11 +1138,17 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
           {/* Oracle Ticker Badge */}
           <div className="px-3 py-2 rounded-xl bg-black/60 border border-slate-800 text-[10px] font-mono text-slate-300 flex items-center justify-between sm:justify-start gap-3">
             <div className="flex items-center gap-1.5">
-              <RefreshCw className={`h-3 w-3 text-cyan-400 ${fetchingPrices ? "animate-spin" : ""}`} />
-              <span>ETH: <strong className="text-white">${prices.ETH.toFixed(0)}</strong></span>
+              <RefreshCw
+                className={`h-3 w-3 text-cyan-400 ${fetchingPrices ? "animate-spin" : ""}`}
+              />
+              <span>
+                ETH: <strong className="text-white">${prices.ETH.toFixed(0)}</strong>
+              </span>
             </div>
             <span className="text-slate-600">•</span>
-            <div>RTPP: <strong className="text-rose-400">${prices.RTPP.toFixed(2)}</strong></div>
+            <div>
+              RTPP: <strong className="text-rose-400">${prices.RTPP.toFixed(2)}</strong>
+            </div>
           </div>
 
           {/* Wallet Connection */}
@@ -1095,7 +1182,9 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 text-amber-400 shrink-0" />
             <span>
-              <strong>Network Warning:</strong> Connected to <strong className="text-amber-200">{getNetworkName(chainId)}</strong>. Please switch to <strong>Base Network</strong> for RTPP token settlement.
+              <strong>Network Warning:</strong> Connected to{" "}
+              <strong className="text-amber-200">{getNetworkName(chainId)}</strong>. Please switch
+              to <strong>Base Network</strong> for RTPP token settlement.
             </span>
           </div>
           <button
@@ -1112,7 +1201,9 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
         <button
           onClick={() => setActiveMobileTab("nft")}
           className={`flex-1 py-2 rounded-lg font-bold flex items-center justify-center gap-1.5 transition-all ${
-            activeMobileTab === "nft" ? "bg-primary text-primary-foreground shadow-xs" : "text-slate-400 hover:text-slate-200"
+            activeMobileTab === "nft"
+              ? "bg-primary text-primary-foreground shadow-xs"
+              : "text-slate-400 hover:text-slate-200"
           }`}
         >
           <ImageIcon className="h-3.5 w-3.5" /> 1. NFT Hub
@@ -1120,7 +1211,9 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
         <button
           onClick={() => setActiveMobileTab("studio")}
           className={`flex-1 py-2 rounded-lg font-bold flex items-center justify-center gap-1.5 transition-all ${
-            activeMobileTab === "studio" ? "bg-primary text-primary-foreground shadow-xs" : "text-slate-400 hover:text-slate-200"
+            activeMobileTab === "studio"
+              ? "bg-primary text-primary-foreground shadow-xs"
+              : "text-slate-400 hover:text-slate-200"
           }`}
         >
           <Shirt className="h-3.5 w-3.5" /> 2. Mockup Studio
@@ -1128,7 +1221,9 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
         <button
           onClick={() => setActiveMobileTab("checkout")}
           className={`flex-1 py-2 rounded-lg font-bold flex items-center justify-center gap-1.5 transition-all ${
-            activeMobileTab === "checkout" ? "bg-primary text-primary-foreground shadow-xs" : "text-slate-400 hover:text-slate-200"
+            activeMobileTab === "checkout"
+              ? "bg-primary text-primary-foreground shadow-xs"
+              : "text-slate-400 hover:text-slate-200"
           }`}
         >
           <CreditCard className="h-3.5 w-3.5" /> 3. Checkout
@@ -1140,7 +1235,9 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
         {/* ========================================== */}
         {/* COLUMN 1: NFT HUB & ARTWORK SELECTOR (3.5 cols) */}
         {/* ========================================== */}
-        <div className={`lg:col-span-4 xl:col-span-3 space-y-4 ${activeMobileTab !== "nft" ? "hidden lg:block" : "block"}`}>
+        <div
+          className={`lg:col-span-4 xl:col-span-3 space-y-4 ${activeMobileTab !== "nft" ? "hidden lg:block" : "block"}`}
+        >
           <div className="rounded-2xl p-4 sm:p-5 bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl space-y-4 shadow-xl">
             <div className="flex justify-between items-center border-b border-slate-800 pb-3">
               <span className="font-mono text-xs font-bold text-white flex items-center gap-2">
@@ -1193,7 +1290,9 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
 
             {/* Image URL Input */}
             <div className="space-y-1">
-              <label className="text-[10px] text-slate-400 font-mono">Or paste direct image URL (HTTPS / IPFS):</label>
+              <label className="text-[10px] text-slate-400 font-mono">
+                Or paste direct image URL (HTTPS / IPFS):
+              </label>
               <input
                 type="text"
                 value={nftImageUrl && !nftImageUrl.startsWith("data:") ? nftImageUrl : ""}
@@ -1225,7 +1324,9 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
               {fetchingNFTs ? (
                 <div className="p-3 text-center space-y-1.5 rounded-xl bg-slate-950/60 border border-slate-800">
                   <Loader2 className="h-4 w-4 animate-spin mx-auto text-cyan-400" />
-                  <p className="text-[11px] font-mono text-slate-400">Indexing NFTs from Base Network...</p>
+                  <p className="text-[11px] font-mono text-slate-400">
+                    Indexing NFTs from Base Network...
+                  </p>
                 </div>
               ) : walletNFTs.length > 0 ? (
                 <div className="grid grid-cols-2 gap-2 max-h-[200px] overflow-y-auto pr-1">
@@ -1296,7 +1397,9 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
         {/* ========================================== */}
         {/* COLUMN 2: LIVE PRODUCT MOCKUP STUDIO (5 cols) */}
         {/* ========================================== */}
-        <div className={`lg:col-span-8 xl:col-span-6 space-y-4 ${activeMobileTab !== "studio" ? "hidden lg:block" : "block"}`}>
+        <div
+          className={`lg:col-span-8 xl:col-span-6 space-y-4 ${activeMobileTab !== "studio" ? "hidden lg:block" : "block"}`}
+        >
           <div className="rounded-2xl p-4 sm:p-5 bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl space-y-4 shadow-xl">
             {/* Header & Product Catalog Selector */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-800 pb-3 gap-2">
@@ -1334,9 +1437,17 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
                           : "bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700"
                       }`}
                     >
-                      <img src={prod.image} alt={prod.name} className="h-10 w-10 rounded-lg object-cover mb-1 border border-white/10" />
-                      <span className="text-[10px] font-bold line-clamp-1">{prod.name.split(" ")[0]}</span>
-                      <span className="text-[9px] text-emerald-400 font-extrabold">${prod.basePriceUSD.toFixed(0)}</span>
+                      <img
+                        src={prod.image}
+                        alt={prod.name}
+                        className="h-10 w-10 rounded-lg object-cover mb-1 border border-white/10"
+                      />
+                      <span className="text-[10px] font-bold line-clamp-1">
+                        {prod.name.split(" ")[0]}
+                      </span>
+                      <span className="text-[9px] text-emerald-400 font-extrabold">
+                        ${prod.basePriceUSD.toFixed(0)}
+                      </span>
                     </button>
                   );
                 })
@@ -1375,7 +1486,9 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
                         onClick={() => setMerchColor(c)}
                         title={c.name}
                         className={`h-8 w-8 rounded-full border-2 transition-all flex items-center justify-center cursor-pointer shadow-md ${
-                          isActive ? `${c.border} ring-2 ${c.ring} scale-110` : "border-slate-700 hover:scale-105"
+                          isActive
+                            ? `${c.border} ring-2 ${c.ring} scale-110`
+                            : "border-slate-700 hover:scale-105"
                         }`}
                         style={{ backgroundColor: c.bg }}
                       >
@@ -1427,7 +1540,9 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
                     <button
                       onClick={() => setMockupView("front")}
                       className={`py-1 rounded-lg border font-bold text-center transition-colors ${
-                        mockupView === "front" ? "bg-cyan-500 text-black border-cyan-400" : "bg-slate-900 border-slate-800 text-slate-400"
+                        mockupView === "front"
+                          ? "bg-cyan-500 text-black border-cyan-400"
+                          : "bg-slate-900 border-slate-800 text-slate-400"
                       }`}
                     >
                       Front
@@ -1435,7 +1550,9 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
                     <button
                       onClick={() => setMockupView("lifestyle")}
                       className={`py-1 rounded-lg border font-bold text-center transition-colors ${
-                        mockupView === "lifestyle" ? "bg-cyan-500 text-black border-cyan-400" : "bg-slate-900 border-slate-800 text-slate-400"
+                        mockupView === "lifestyle"
+                          ? "bg-cyan-500 text-black border-cyan-400"
+                          : "bg-slate-900 border-slate-800 text-slate-400"
                       }`}
                     >
                       3D Model
@@ -1453,7 +1570,9 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
                       <button
                         onClick={() => setPrintPlacement("full")}
                         className={`py-1 rounded-lg border font-bold text-center transition-colors ${
-                          printPlacement === "full" ? "bg-amber-500/20 text-amber-300 border-amber-500/50" : "bg-slate-900 border-slate-800 text-slate-400"
+                          printPlacement === "full"
+                            ? "bg-amber-500/20 text-amber-300 border-amber-500/50"
+                            : "bg-slate-900 border-slate-800 text-slate-400"
                         }`}
                       >
                         Full
@@ -1461,7 +1580,9 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
                       <button
                         onClick={() => setPrintPlacement("chest")}
                         className={`py-1 rounded-lg border font-bold text-center transition-colors ${
-                          printPlacement === "chest" ? "bg-amber-500/20 text-amber-300 border-amber-500/50" : "bg-slate-900 border-slate-800 text-slate-400"
+                          printPlacement === "chest"
+                            ? "bg-amber-500/20 text-amber-300 border-amber-500/50"
+                            : "bg-slate-900 border-slate-800 text-slate-400"
                         }`}
                       >
                         Chest
@@ -1504,7 +1625,9 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
         {/* ========================================== */}
         {/* COLUMN 3: CRYPTO CHECKOUT & ORDER DISPATCH (3.5 cols) */}
         {/* ========================================== */}
-        <div className={`lg:col-span-12 xl:col-span-3 space-y-4 ${activeMobileTab !== "checkout" ? "hidden lg:block" : "block"}`}>
+        <div
+          className={`lg:col-span-12 xl:col-span-3 space-y-4 ${activeMobileTab !== "checkout" ? "hidden lg:block" : "block"}`}
+        >
           <div className="rounded-2xl p-4 sm:p-5 bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl space-y-4 shadow-xl">
             <div className="flex justify-between items-center border-b border-slate-800 pb-3">
               <span className="font-mono text-xs font-bold text-white flex items-center gap-2">
@@ -1599,7 +1722,9 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
                     type="text"
                     maxLength={2}
                     value={recipient.country_code}
-                    onChange={(e) => setRecipient({ ...recipient, country_code: e.target.value.toUpperCase() })}
+                    onChange={(e) =>
+                      setRecipient({ ...recipient, country_code: e.target.value.toUpperCase() })
+                    }
                     placeholder="Country (US) *"
                     className="w-full px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-200 font-bold uppercase focus:outline-hidden focus:border-cyan-500"
                   />
@@ -1647,7 +1772,9 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
                 <span>Total:</span>
                 <div className="text-right">
                   <div>${totalUSD.toFixed(2)} USD</div>
-                  <div className="text-emerald-400 font-extrabold text-[11px]">≈ {activeCryptoAmount}</div>
+                  <div className="text-emerald-400 font-extrabold text-[11px]">
+                    ≈ {activeCryptoAmount}
+                  </div>
                 </div>
               </div>
             </div>
@@ -1697,10 +1824,14 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
                 <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1 font-mono text-[11px]">
                   <div className="flex justify-between items-center">
                     <span className="text-white font-bold">Order #{trackingResult.id}</span>
-                    <span className="text-cyan-400 font-bold uppercase">{trackingResult.status}</span>
+                    <span className="text-cyan-400 font-bold uppercase">
+                      {trackingResult.status}
+                    </span>
                   </div>
                   {trackingResult.tracking_number && (
-                    <div className="text-slate-400 text-[10px]">Tracking #: {trackingResult.tracking_number}</div>
+                    <div className="text-slate-400 text-[10px]">
+                      Tracking #: {trackingResult.tracking_number}
+                    </div>
                   )}
                 </div>
               )}
@@ -1715,9 +1846,13 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
           <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-4xl p-6 space-y-4 relative shadow-2xl">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <h3 className="text-sm font-mono font-bold text-white flex items-center gap-2">
-                <Maximize2 className="h-4 w-4 text-cyan-400" /> HD Mockup Preview - {selectedProduct.name}
+                <Maximize2 className="h-4 w-4 text-cyan-400" /> HD Mockup Preview -{" "}
+                {selectedProduct.name}
               </h3>
-              <button onClick={() => setIsMockupModalOpen(false)} className="p-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white">
+              <button
+                onClick={() => setIsMockupModalOpen(false)}
+                className="p-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -1744,7 +1879,10 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
               <h3 className="text-sm font-mono font-bold text-white flex items-center gap-2">
                 <LayoutGrid className="h-4 w-4 text-amber-400" /> Compare All Physical Merch Mockups
               </h3>
-              <button onClick={() => setIsCompareModalOpen(false)} className="p-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white">
+              <button
+                onClick={() => setIsCompareModalOpen(false)}
+                className="p-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -1758,7 +1896,9 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
                     toast.success(`Selected ${prod.name}`);
                   }}
                   className={`p-3 rounded-2xl border transition-all cursor-pointer space-y-2 ${
-                    selectedProduct.id === prod.id ? "bg-cyan-500/10 border-cyan-400" : "bg-slate-950 border-slate-800 hover:border-slate-600"
+                    selectedProduct.id === prod.id
+                      ? "bg-cyan-500/10 border-cyan-400"
+                      : "bg-slate-950 border-slate-800 hover:border-slate-600"
                   }`}
                 >
                   {renderMockupCanvas({

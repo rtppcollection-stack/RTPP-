@@ -211,10 +211,12 @@ export function MintingComponent({ onSuccess }: { onSuccess?: () => void }) {
         const storagePath = `uploads/${filename}`;
 
         try {
-          const { error: uploadError } = await supabase.storage.from("nfts").upload(storagePath, file, {
-            cacheControl: "3600",
-            upsert: true,
-          });
+          const { error: uploadError } = await supabase.storage
+            .from("nfts")
+            .upload(storagePath, file, {
+              cacheControl: "3600",
+              upsert: true,
+            });
 
           if (!uploadError) {
             const { data: publicUrlData } = supabase.storage.from("nfts").getPublicUrl(storagePath);
@@ -483,7 +485,9 @@ export function MintingComponent({ onSuccess }: { onSuccess?: () => void }) {
                     <Upload className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-foreground">Click or Drag &amp; Drop Image</p>
+                    <p className="text-xs font-bold text-foreground">
+                      Click or Drag &amp; Drop Image
+                    </p>
                     <p className="text-[10px] text-muted-foreground mt-0.5">
                       PNG, JPG, GIF, WEBP up to 20MB
                     </p>
@@ -531,9 +535,13 @@ export function MintingComponent({ onSuccess }: { onSuccess?: () => void }) {
             <div className="p-3.5 rounded-2xl border border-primary/40 bg-surface-2/30 space-y-2.5 shadow-lg">
               <div className="flex items-center justify-between text-[11px] font-mono font-bold text-primary">
                 <span className="flex items-center gap-1">
-                  <Sparkles className="h-3.5 w-3.5 text-amber-400 animate-pulse" /> LIVE NFT CARD PREVIEW
+                  <Sparkles className="h-3.5 w-3.5 text-amber-400 animate-pulse" /> LIVE NFT CARD
+                  PREVIEW
                 </span>
-                <Badge variant="outline" className="text-[9px] bg-primary/10 text-primary border-primary/30">
+                <Badge
+                  variant="outline"
+                  className="text-[9px] bg-primary/10 text-primary border-primary/30"
+                >
                   {currentContract.name}
                 </Badge>
               </div>
@@ -569,16 +577,26 @@ export function MintingComponent({ onSuccess }: { onSuccess?: () => void }) {
                   {description.trim() || "Minted directly via RTPP Smart Contract Engine."}
                 </p>
                 <div className="flex justify-between items-center text-[10px] font-mono text-muted-foreground pt-1">
-                  <span>Owner: <strong className="text-foreground">{address ? shortAddr(address) : "0xYour...Wallet"}</strong></span>
+                  <span>
+                    Owner:{" "}
+                    <strong className="text-foreground">
+                      {address ? shortAddr(address) : "0xYour...Wallet"}
+                    </strong>
+                  </span>
                   <span className="text-emerald-400 font-semibold">Ready to Mint</span>
                 </div>
                 {attributes.length > 0 && (
                   <div className="flex flex-wrap gap-1 pt-1.5">
-                    {attributes.filter(a => a.trait_type && a.value).map((attr, i) => (
-                      <span key={i} className="text-[9px] font-mono bg-surface px-2 py-0.5 rounded-md border border-border/80 text-foreground">
-                        {attr.trait_type}: <strong className="text-primary">{attr.value}</strong>
-                      </span>
-                    ))}
+                    {attributes
+                      .filter((a) => a.trait_type && a.value)
+                      .map((attr, i) => (
+                        <span
+                          key={i}
+                          className="text-[9px] font-mono bg-surface px-2 py-0.5 rounded-md border border-border/80 text-foreground"
+                        >
+                          {attr.trait_type}: <strong className="text-primary">{attr.value}</strong>
+                        </span>
+                      ))}
                   </div>
                 )}
               </div>

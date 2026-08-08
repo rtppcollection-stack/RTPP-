@@ -30,7 +30,12 @@ export function resolveIpfsUrl(url?: string | null): string {
     const cid = trimmed.replace(/^\/?ipfs\//, "");
     return `https://ipfs.io/ipfs/${cid}`;
   }
-  if (trimmed.startsWith("http://") || trimmed.startsWith("https://") || trimmed.startsWith("data:") || trimmed.startsWith("/")) {
+  if (
+    trimmed.startsWith("http://") ||
+    trimmed.startsWith("https://") ||
+    trimmed.startsWith("data:") ||
+    trimmed.startsWith("/")
+  ) {
     return trimmed;
   }
   if (trimmed.startsWith("Qm") || trimmed.startsWith("bafy")) {
@@ -521,7 +526,7 @@ export async function getPrintfulProductsFromApi(): Promise<NFTMerchProduct[]> {
 
   if (!res.error && Array.isArray(res.data?.result) && res.data.result.length > 0) {
     const rawList = res.data.result;
-    
+
     return rawList.slice(0, 12).map((item) => {
       let variantId = 4012;
       let category = item.type_name || item.type || "Apparel";
@@ -545,9 +550,15 @@ export async function getPrintfulProductsFromApi(): Promise<NFTMerchProduct[]> {
         variantId = 10450;
         category = "Accessories";
         basePriceUSD = 22.0;
-      } else if (category.toLowerCase().includes("hoodie") || category.toLowerCase().includes("sweatshirt")) {
+      } else if (
+        category.toLowerCase().includes("hoodie") ||
+        category.toLowerCase().includes("sweatshirt")
+      ) {
         basePriceUSD = 42.0;
-      } else if (category.toLowerCase().includes("mug") || category.toLowerCase().includes("drinkware")) {
+      } else if (
+        category.toLowerCase().includes("mug") ||
+        category.toLowerCase().includes("drinkware")
+      ) {
         basePriceUSD = 18.0;
       }
 
@@ -557,8 +568,12 @@ export async function getPrintfulProductsFromApi(): Promise<NFTMerchProduct[]> {
         category,
         variantId,
         basePriceUSD,
-        image: item.image || "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=600&auto=format&fit=crop&q=80",
-        description: item.description || `Official ${item.title} printed with your high-res NFT artwork via Printful API.`,
+        image:
+          item.image ||
+          "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=600&auto=format&fit=crop&q=80",
+        description:
+          item.description ||
+          `Official ${item.title} printed with your high-res NFT artwork via Printful API.`,
       };
     });
   }

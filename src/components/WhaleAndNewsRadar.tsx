@@ -309,7 +309,7 @@ async function fetchRealCryptoNews(): Promise<NewsItem[]> {
     /* fallback to static array below */
   }
 
-  return INITIAL_FALLBACK_NEWS;
+  return INITIAL_NEWS;
 }
 
 async function fetchRealLiveWhaleTxs(): Promise<WhaleTx[]> {

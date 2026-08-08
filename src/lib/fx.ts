@@ -32,27 +32,42 @@ export const DEFAULT_EXCHANGE_RATES: Record<LangCode, number> = {
   hi: 83.5,
 };
 
-export function formatCurrency(value: number, currency: string, locale = "en-US"): string {
-  if (!isFinite(value)) return "-";
+export function formatCurrency(value?: number | null, currency?: string, locale = "en-US"): string {
+  if (value === undefined || value === null || !isFinite(value) || isNaN(value)) {
+    return "0.00";
+  }
+  const cleanCurrency =
+    typeof currency === "string" && currency.trim() ? currency.trim().toUpperCase() : "";
+
   try {
+    if (!cleanCurrency || cleanCurrency === "USD") {
+      return new Intl.NumberFormat(locale, {
+        minimumFractionDigits: value >= 100 ? 2 : value >= 1 ? 2 : 4,
+        maximumFractionDigits: value >= 100 ? 2 : value >= 1 ? 2 : 6,
+      }).format(value);
+    }
     return new Intl.NumberFormat(locale, {
       style: "currency",
-      currency,
-      maximumFractionDigits: value >= 100 ? 0 : value >= 1 ? 2 : 6,
-      minimumFractionDigits: 0,
+      currency: cleanCurrency,
+      maximumFractionDigits: value >= 100 ? 2 : value >= 1 ? 2 : 6,
+      minimumFractionDigits: 2,
     }).format(value);
   } catch {
-    return `${value.toLocaleString(locale, { maximumFractionDigits: 2 })} ${currency}`;
+    return value.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 4 });
   }
 }
 
-export function formatNumber(value: number, digits = 2, locale = "en-US"): string {
-  if (!isFinite(value)) return "-";
+export function formatNumber(value?: number | null, digits = 2, locale = "en-US"): string {
+  if (value === undefined || value === null || !isFinite(value) || isNaN(value)) {
+    return "0.00";
+  }
   return value.toLocaleString(locale, { maximumFractionDigits: digits });
 }
 
-export function formatCryptoPriceUsd(price: number): string {
-  if (!isFinite(price) || price === 0) return "0.00";
+export function formatCryptoPriceUsd(price?: number | null): string {
+  if (price === undefined || price === null || !isFinite(price) || isNaN(price) || price === 0) {
+    return "0.00";
+  }
   if (price >= 1) {
     return price.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 4 });
   }
@@ -65,8 +80,10 @@ export function formatCryptoPriceUsd(price: number): string {
   return price.toFixed(8);
 }
 
-export function formatCryptoPriceMmk(mmk: number): string {
-  if (!isFinite(mmk) || mmk === 0) return "0";
+export function formatCryptoPriceMmk(mmk?: number | null): string {
+  if (mmk === undefined || mmk === null || !isFinite(mmk) || isNaN(mmk) || mmk === 0) {
+    return "0";
+  }
   if (mmk >= 100) {
     return Math.round(mmk).toLocaleString("en-US");
   }
@@ -76,8 +93,10 @@ export function formatCryptoPriceMmk(mmk: number): string {
   return mmk.toFixed(4);
 }
 
-export function formatCompact(value: number, locale = "en-US"): string {
-  if (!isFinite(value)) return "-";
+export function formatCompact(value?: number | null, locale = "en-US"): string {
+  if (value === undefined || value === null || !isFinite(value) || isNaN(value)) {
+    return "$0.00";
+  }
   return new Intl.NumberFormat(locale, { notation: "compact", maximumFractionDigits: 2 }).format(
     value,
   );

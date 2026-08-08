@@ -18,7 +18,10 @@ if (typeof process !== "undefined" && typeof process.setMaxListeners === "functi
 }
 
 const GLOBAL_ERROR_KEY = "__rtpp_error_listeners_attached__";
-if (typeof globalThis !== "undefined" && !(globalThis as Record<string, unknown>)[GLOBAL_ERROR_KEY]) {
+if (
+  typeof globalThis !== "undefined" &&
+  !(globalThis as Record<string, unknown>)[GLOBAL_ERROR_KEY]
+) {
   (globalThis as Record<string, unknown>)[GLOBAL_ERROR_KEY] = true;
   if (typeof globalThis.addEventListener === "function") {
     globalThis.addEventListener("error", (event) => record((event as ErrorEvent).error ?? event));

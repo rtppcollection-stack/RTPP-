@@ -50,7 +50,8 @@ interface NFTView extends NFT {
 }
 
 // Default fallback image if storage path cannot be resolved
-const DEFAULT_NFT_FALLBACK = "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=800&auto=format&fit=crop&q=80";
+const DEFAULT_NFT_FALLBACK =
+  "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=800&auto=format&fit=crop&q=80";
 
 // Default verified genesis NFTs
 const FEATURED_NFTS: NFTView[] = [
@@ -58,8 +59,10 @@ const FEATURED_NFTS: NFTView[] = [
     id: "featured-1",
     title: "RTPP Genesis Cyberpunk Artifact #001",
     description: "Genesis RTPP Collection Web3 Artifact with DEX utility and merchandise access.",
-    image_path: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=800&auto=format&fit=crop&q=80",
-    image_url: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=800&auto=format&fit=crop&q=80",
+    image_path:
+      "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=800&auto=format&fit=crop&q=80",
+    image_url:
+      "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=800&auto=format&fit=crop&q=80",
     owner_wallet: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
     creator_wallet: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
     price_eth: 0.025,
@@ -71,9 +74,12 @@ const FEATURED_NFTS: NFTView[] = [
   {
     id: "featured-2",
     title: "Neon Horizon Ether Pass #042",
-    description: "Exclusive digital pass granting zero-fee swaps and custom printful apparel minting.",
-    image_path: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80",
-    image_url: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80",
+    description:
+      "Exclusive digital pass granting zero-fee swaps and custom printful apparel minting.",
+    image_path:
+      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80",
+    image_url:
+      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80",
     owner_wallet: "0x3C44CdD45919C590F6315461ab7723222C1262b1",
     creator_wallet: "0x3C44CdD45919C590F6315461ab7723222C1262b1",
     price_eth: 0.018,
@@ -98,14 +104,20 @@ async function signUrl(path: string) {
   if (trimmed.startsWith("Qm") || trimmed.startsWith("bafy")) {
     return `https://ipfs.io/ipfs/${trimmed}`;
   }
-  if (trimmed.startsWith("http://") || trimmed.startsWith("https://") || trimmed.startsWith("data:")) {
+  if (
+    trimmed.startsWith("http://") ||
+    trimmed.startsWith("https://") ||
+    trimmed.startsWith("data:")
+  ) {
     return trimmed;
   }
   try {
     const { data: publicData } = supabase.storage.from("nfts").getPublicUrl(trimmed);
     if (publicData?.publicUrl) return publicData.publicUrl;
 
-    const { data: signedData } = await supabase.storage.from("nfts").createSignedUrl(trimmed, 60 * 60 * 24 * 7);
+    const { data: signedData } = await supabase.storage
+      .from("nfts")
+      .createSignedUrl(trimmed, 60 * 60 * 24 * 7);
     return signedData?.signedUrl ?? DEFAULT_NFT_FALLBACK;
   } catch {
     return DEFAULT_NFT_FALLBACK;
@@ -131,17 +143,18 @@ export function NFTGallery({
     setLoading(true);
     try {
       const localNFTsRaw = localStorage.getItem("rtpp_local_minted_nfts");
-      const localRawList: any[] = localNFTsRaw ? JSON.parse(localNFTsRaw) : [];
+      const localRawList: Record<string, unknown>[] = localNFTsRaw ? JSON.parse(localNFTsRaw) : [];
       const localNFTs: NFTView[] = await Promise.all(
-        localRawList.map(async (item) => {
+        localRawList.map(async (rawItem) => {
+          const item = rawItem as Record<string, string>;
           const rawPath = item.image_url || item.image_path || DEFAULT_NFT_FALLBACK;
           const resolvedUrl = await signUrl(rawPath);
           return {
             ...item,
             image_path: item.image_path || rawPath,
             image_url: resolvedUrl || rawPath || DEFAULT_NFT_FALLBACK,
-          };
-        })
+          } as unknown as NFTView;
+        }),
       );
 
       const { data, error } = await supabase

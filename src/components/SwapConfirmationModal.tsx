@@ -171,7 +171,9 @@ export function SwapConfirmationModal({
     }
 
     setSwapping(true);
-    const toastId = toast.loading(`Routing 0x Swap & 0.2% Commission ($${platformFeeUSD.toFixed(2)}) to ${shortAddr(ADMIN_FEE_WALLET)}...`);
+    const toastId = toast.loading(
+      `Routing 0x Swap & 0.2% Commission ($${platformFeeUSD.toFixed(2)}) to ${shortAddr(ADMIN_FEE_WALLET)}...`,
+    );
 
     try {
       // 1. Calculate Wei
@@ -218,7 +220,8 @@ export function SwapConfirmationModal({
 
       const sym = tokenDetail?.symbol?.toUpperCase() || "RTPP";
       toast.success(
-        `0x Swap Confirmed! Received ~${receiveAmount.toLocaleString(undefined, {
+        `0x Swap Confirmed! Received ~${(receiveAmount || 0).toLocaleString("en-US", {
+          minimumFractionDigits: 2,
           maximumFractionDigits: 2,
         })} ${sym}. 0.2% Commission collected to Admin Treasury (${shortAddr(ADMIN_FEE_WALLET)}).`,
       );
@@ -527,7 +530,8 @@ export function SwapConfirmationModal({
                     </div>
                     <div className="text-sm font-bold text-success h-7 flex items-center">
                       ~
-                      {receiveAmount.toLocaleString(undefined, {
+                      {(receiveAmount || 0).toLocaleString("en-US", {
+                        minimumFractionDigits: 2,
                         maximumFractionDigits: 2,
                       })}{" "}
                       <span className="ml-1 text-xs text-foreground uppercase">

@@ -12,7 +12,12 @@ export const Route = createFileRoute("/api/printful/mockup")({
           const numVariantId = Number(variantId);
           const strImageUrl = typeof imageUrl === "string" ? imageUrl.trim() : "";
 
-          if (!numVariantId || isNaN(numVariantId) || !strImageUrl || !strImageUrl.startsWith("http")) {
+          if (
+            !numVariantId ||
+            isNaN(numVariantId) ||
+            !strImageUrl ||
+            !strImageUrl.startsWith("http")
+          ) {
             console.log("Missing Variant ID or NFT URL");
             return new Response(
               JSON.stringify({

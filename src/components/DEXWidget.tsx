@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowDown,
@@ -360,7 +360,10 @@ export function DEXWidget({ coinId }: Props) {
     setFeeBps,
   } = useWallet();
 
-  // Selected Tokens
+  // Selected Tokens & Live Prices State
+  const [tokensList, setTokensList] = useState<SwapToken[]>(SUPPORTED_SWAP_TOKENS);
+  const [isFetchingPrices, setIsFetchingPrices] = useState<boolean>(false);
+
   const [fromToken, setFromToken] = useState<SwapToken>(SUPPORTED_SWAP_TOKENS[0]); // BTC
   const [toToken, setToToken] = useState<SwapToken>(SUPPORTED_SWAP_TOKENS[3]); // ETH
 
@@ -369,6 +372,78 @@ export function DEXWidget({ coinId }: Props) {
   const [slippage, setSlippage] = useState<number>(0.5); // 0.5%
   const [busy, setBusy] = useState(false);
   const [lastTxHash, setLastTxHash] = useState<string | null>(null);
+
+  // Live Token Price Fetching (CoinGecko / CryptoCompare / DexScreener API)
+  const fetchLiveTokenPrices = useCallback(async () => {
+    setIsFetchingPrices(true);
+    try {
+      // 1. Fetch live prices from CoinGecko public simple price API
+      const res = await fetch(
+        "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,wrapped-bitcoin,coinbase-wrapper-btc,ethereum,solana,binancecoin,polygon-ecosystem-token,tether,usd-coin,aerodrome-finance,pancakeswap-token,uniswap,brett,degen-base&vs_currencies=usd",
+      );
+      let cgData: Record<string, { usd: number }> = {};
+      if (res.ok) {
+        cgData = await res.json();
+      }
+
+      // 2. Fetch RTPP token price from GeckoTerminal Base pool
+      let rtppPrice = 0.00000616;
+      try {
+        const rtppDetail = await fetchCoinDetail("rtpp-token");
+        if (rtppDetail?.market_data?.current_price?.usd) {
+          rtppPrice = rtppDetail.market_data.current_price.usd;
+        }
+      } catch {
+        /* fallback silently */
+      }
+
+      const livePriceMap: Record<string, number> = {
+        RTPP: rtppPrice,
+        BTC: cgData["bitcoin"]?.usd || 68500,
+        WBTC: cgData["wrapped-bitcoin"]?.usd || cgData["bitcoin"]?.usd || 68480,
+        cbBTC: cgData["coinbase-wrapper-btc"]?.usd || cgData["bitcoin"]?.usd || 68495,
+        BTCB: cgData["bitcoin"]?.usd || 68490,
+        ETH: cgData["ethereum"]?.usd || 3450,
+        SOL: cgData["solana"]?.usd || 185,
+        BNB: cgData["binancecoin"]?.usd || 580,
+        POL: cgData["polygon-ecosystem-token"]?.usd || 0.55,
+        USDT: cgData["tether"]?.usd || 1.0,
+        USDC: cgData["usd-coin"]?.usd || 1.0,
+        AERO: cgData["aerodrome-finance"]?.usd || 1.3,
+        CAKE: cgData["pancakeswap-token"]?.usd || 2.9,
+        UNI: cgData["uniswap"]?.usd || 8.4,
+        BRETT: cgData["brett"]?.usd || 0.12,
+        DEGEN: cgData["degen-base"]?.usd || 0.015,
+      };
+
+      setTokensList((prev) =>
+        prev.map((t) => {
+          const liveP = livePriceMap[t.symbol];
+          return liveP && liveP > 0 ? { ...t, priceUSD: liveP } : t;
+        }),
+      );
+
+      setFromToken((prev) => {
+        const liveP = livePriceMap[prev.symbol];
+        return liveP && liveP > 0 ? { ...prev, priceUSD: liveP } : prev;
+      });
+
+      setToToken((prev) => {
+        const liveP = livePriceMap[prev.symbol];
+        return liveP && liveP > 0 ? { ...prev, priceUSD: liveP } : prev;
+      });
+    } catch (err) {
+      console.warn("Live token price update notice:", err);
+    } finally {
+      setIsFetchingPrices(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchLiveTokenPrices();
+    const interval = setInterval(fetchLiveTokenPrices, 60000); // 60s periodic live update
+    return () => clearInterval(interval);
+  }, [fetchLiveTokenPrices]);
 
   // Dialog states for token selection & Admin Fee Dashboard
   const [selectTokenMode, setSelectTokenMode] = useState<"from" | "to" | null>(null);
@@ -397,8 +472,8 @@ export function DEXWidget({ coinId }: Props) {
   };
 
   const favoriteTokensList = useMemo(() => {
-    return SUPPORTED_SWAP_TOKENS.filter((t) => favoriteSymbols.includes(t.symbol));
-  }, [favoriteSymbols]);
+    return tokensList.filter((t) => favoriteSymbols.includes(t.symbol));
+  }, [favoriteSymbols, tokensList]);
 
   const [adminModalOpen, setAdminModalOpen] = useState(false);
   const [swapConfirmModalOpen, setSwapConfirmModalOpen] = useState(false);
@@ -555,8 +630,12 @@ export function DEXWidget({ coinId }: Props) {
 
       // 2. Fetch 0x API Quote with mandatory feeRecipient and buyTokenPercentageFee
       const quoteRes = await get0xSwapQuote({
-        sellToken: fromToken.address && fromToken.address.startsWith("0x") ? fromToken.address : fromToken.symbol,
-        buyToken: toToken.address && toToken.address.startsWith("0x") ? toToken.address : toToken.symbol,
+        sellToken:
+          fromToken.address && fromToken.address.startsWith("0x")
+            ? fromToken.address
+            : fromToken.symbol,
+        buyToken:
+          toToken.address && toToken.address.startsWith("0x") ? toToken.address : toToken.symbol,
         sellAmountWei,
         takerAddress: address || targetAdminWallet,
         chainId: chain.chainId,
@@ -599,7 +678,7 @@ export function DEXWidget({ coinId }: Props) {
             }
           } else {
             // Send platform fee commission transaction to Admin Treasury directly
-            const ethFeeAmount = Number((valueUSDIn * commFeePct / 3450).toFixed(6));
+            const ethFeeAmount = Number(((valueUSDIn * commFeePct) / 3450).toFixed(6));
             if (ethFeeAmount > 0) {
               executedTxHash = await sendEth(targetAdminWallet, ethFeeAmount);
             }
@@ -731,7 +810,7 @@ export function DEXWidget({ coinId }: Props) {
 
   // Filtered Tokens for modal with contract address lookup support
   const searchLower = tokenSearch.toLowerCase().trim();
-  let filteredTokens = SUPPORTED_SWAP_TOKENS.filter(
+  let filteredTokens = tokensList.filter(
     (t) =>
       t.symbol.toLowerCase().includes(searchLower) ||
       t.name.toLowerCase().includes(searchLower) ||
@@ -896,7 +975,7 @@ export function DEXWidget({ coinId }: Props) {
                 size="xs"
                 variant="outline"
                 onClick={() => {
-                  const rtpp = SUPPORTED_SWAP_TOKENS.find(
+                  const rtpp = tokensList.find(
                     (t) => t.address.toLowerCase() === "0x90f0712eddc36f4e42c0f8a6a6739ce5b113d9b8",
                   );
                   if (rtpp) {
@@ -960,8 +1039,8 @@ export function DEXWidget({ coinId }: Props) {
                 { from: "ETH", to: "WBTC", label: "ETH → WBTC" },
                 { from: "SOL", to: "WBTC", label: "SOL → WBTC" },
               ].map((pair) => {
-                const fTok = SUPPORTED_SWAP_TOKENS.find((t) => t.symbol === pair.from);
-                const tTok = SUPPORTED_SWAP_TOKENS.find((t) => t.symbol === pair.to);
+                const fTok = tokensList.find((t) => t.symbol === pair.from);
+                const tTok = tokensList.find((t) => t.symbol === pair.to);
                 if (!fTok || !tTok) return null;
                 const active = fromToken.symbol === pair.from && toToken.symbol === pair.to;
                 return (

@@ -272,6 +272,14 @@ function Home() {
             </div>
           </TabsContent>
 
+          <TabsContent value="portfolio" className="space-y-4 mt-0">
+            <SectionHeader
+              title="Multi-Chain Crypto Portfolio & Base Asset Vault"
+              subtitle="Real-time on-chain token balance tracking, USD valuations, and asset breakdown for Base Chain and major Web3 networks."
+            />
+            <GlobalWalletBalance />
+          </TabsContent>
+
           <TabsContent value="whale" className="space-y-4 mt-0">
             <WhaleAndNewsRadar />
           </TabsContent>
@@ -440,7 +448,11 @@ function CalculatorTab({ coinId }: { coinId: string }) {
               </span>
             </div>
             <div className="font-mono text-sm font-bold text-primary">
-              ${priceUSD.toLocaleString(undefined, { maximumFractionDigits: priceUSD > 1 ? 4 : 8 })}
+              $
+              {(priceUSD || 0).toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: (priceUSD || 0) > 1 ? 4 : 8,
+              })}
             </div>
           </div>
         </div>
