@@ -53,7 +53,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [feeWallet, setFeeWalletState] = useState<string>(
     "0x82627aeEDD0E7f0B6d45d443A1F59bCD2Adcd68f",
   );
-  const [feeBps, setFeeBpsState] = useState<number>(10);
+  const [feeBps, setFeeBpsState] = useState<number>(20);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -62,9 +62,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       const savedBps = localStorage.getItem("rtpp_fee_rate_bps");
       if (savedBps) {
         const val = Number(savedBps);
-        setFeeBpsState(val > 0 ? val : 10);
+        setFeeBpsState(val > 0 ? val : 20);
       } else {
-        setFeeBpsState(10);
+        setFeeBpsState(20);
       }
     }
   }, []);

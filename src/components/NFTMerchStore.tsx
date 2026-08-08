@@ -454,21 +454,33 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
 
   // Fetch Printful Official Mockup from Printful Mockup API
   const fetchPrintfulMockup = useCallback(async () => {
-    if (!nftImageUrl || nftImageUrl === DEFAULT_MERCH_FALLBACK_IMAGE) return;
+    const rawVariantId = getVariantId(selectedProduct, merchColor.name);
+    const targetVariantId = Math.floor(Number(rawVariantId));
+    const safeNftUrl = resolveIpfsUrl(nftImageUrl);
 
-    const targetVariantId = getVariantId(selectedProduct, merchColor.name);
+    // 1. Pre-flight Payload Validation: Ensure variant_id and nft_url are present and valid
+    if (!targetVariantId || isNaN(targetVariantId) || !safeNftUrl || safeNftUrl === DEFAULT_MERCH_FALLBACK_IMAGE || !safeNftUrl.startsWith("http")) {
+      console.log("Missing Variant ID or NFT URL");
+      setIsGeneratingMockup(false);
+      setPrintfulMockupUrl(null);
+      return;
+    }
+
     setIsGeneratingMockup(true);
 
     try {
+      // 2. Correct JSON Payload: Convert variant_id to integer and nft_url to valid string
+      const payload = {
+        productId: Math.floor(Number(selectedProduct.id || 71)),
+        variantId: targetVariantId,
+        imageUrl: String(safeNftUrl).trim(),
+        color: String(merchColor.name || ""),
+      };
+
       const res = await fetch("/api/printful/mockup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          productId: selectedProduct.id,
-          variantId: targetVariantId,
-          imageUrl: resolveIpfsUrl(nftImageUrl),
-          color: merchColor.name,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const json = await res.json().catch(() => null);
@@ -476,6 +488,9 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
       if (json?.mockupUrl) {
         setPrintfulMockupUrl(json.mockupUrl);
       } else {
+        if (json?.error) {
+          console.log(`Printful API notice: ${json.error}`);
+        }
         setPrintfulMockupUrl(null);
       }
     } catch (err) {
