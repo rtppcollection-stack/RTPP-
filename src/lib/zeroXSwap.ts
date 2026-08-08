@@ -50,8 +50,22 @@ export async function get0xSwapQuote(params: ZeroXQuoteParams): Promise<ZeroXQuo
     affiliateAddress: ADMIN_FEE_WALLET,
   });
 
+  const apiKey =
+    (typeof process !== "undefined" && process.env?.NEXT_PUBLIC_ZEROX_API_KEY) ||
+    (typeof process !== "undefined" && process.env?.ZEROX_API_KEY) ||
+    (typeof import.meta !== "undefined" &&
+      (import.meta as unknown as { env?: Record<string, string> }).env?.VITE_ZEROX_API_KEY) ||
+    "";
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (apiKey) {
+    headers["0x-api-key"] = apiKey;
+  }
+
   try {
-    const res = await fetch(`${baseUrl}/swap/v1/quote?${queryParams.toString()}`);
+    const res = await fetch(`${baseUrl}/swap/v1/quote?${queryParams.toString()}`, { headers });
     if (res.ok) {
       const data = await res.json();
       return {

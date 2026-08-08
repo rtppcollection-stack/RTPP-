@@ -529,15 +529,84 @@ export function DEXWidget({ coinId }: Props) {
 
   // Calculations
   const amtInNum = parseFloat(amountIn) || 0;
-  const valueUSDIn = amtInNum * fromToken.priceUSD;
+  const fromPrice = fromToken.priceUSD || 0;
+  const toPrice = toToken.priceUSD || 0;
+  const valueUSDIn = amtInNum * fromPrice;
 
   const platformFeeBps = feeBps; // default 30 bps = 0.3%
   const platformFeePct = platformFeeBps / 10_000;
   const platformFeeUSD = valueUSDIn * platformFeePct;
   const platformFeeTokenAmt = amtInNum * platformFeePct;
 
-  const netValueUSD = valueUSDIn - platformFeeUSD;
-  const estimatedAmountOut = toToken.priceUSD > 0 ? netValueUSD / toToken.priceUSD : 0;
+  const netValueUSD = Math.max(0, valueUSDIn - platformFeeUSD);
+
+  // Live 0x API Quote state
+  const [live0xQuote, setLive0xQuote] = useState<{
+    buyAmount?: string;
+    price?: string;
+    loading?: boolean;
+  } | null>(null);
+
+  useEffect(() => {
+    if (amtInNum <= 0) {
+      setLive0xQuote(null);
+      return;
+    }
+
+    let cancelled = false;
+    const fetchQuote = async () => {
+      try {
+        const decIn = fromToken.decimals || 18;
+        const rawWei =
+          BigInt(Math.floor(amtInNum * 1e9)) * BigInt(Math.pow(10, Math.max(0, decIn - 9)));
+        const sellAmountWei = rawWei > 0n ? rawWei.toString() : "100000000000000000";
+
+        const res = await fetch("/api/0x-swap", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sellToken:
+              fromToken.address && fromToken.address.startsWith("0x")
+                ? fromToken.address
+                : fromToken.symbol,
+            buyToken:
+              toToken.address && toToken.address.startsWith("0x")
+                ? toToken.address
+                : toToken.symbol,
+            sellAmount: sellAmountWei,
+            takerAddress: address || ADMIN_FEE_WALLET,
+            chainId: chain.chainId,
+          }),
+        });
+
+        if (res.ok && !cancelled) {
+          const data = await res.json();
+          setLive0xQuote(data);
+        }
+      } catch {
+        /* ignore background quote errors */
+      }
+    };
+
+    const timer = setTimeout(fetchQuote, 400);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [amtInNum, fromToken, toToken, address, chain.chainId]);
+
+  const liveBuyAmountNum = useMemo(() => {
+    if (live0xQuote?.buyAmount && BigInt(live0xQuote.buyAmount) > 0n) {
+      const dec = toToken.decimals || 18;
+      return Number(BigInt(live0xQuote.buyAmount)) / Math.pow(10, dec);
+    }
+    return 0;
+  }, [live0xQuote, toToken.decimals]);
+
+  const estimatedAmountOut = useMemo(() => {
+    if (liveBuyAmountNum > 0) return liveBuyAmountNum;
+    return toPrice > 0 ? netValueUSD / toPrice : 0;
+  }, [liveBuyAmountNum, netValueUSD, toPrice]);
 
   // Swap route URL
   const dexUrl = chain.dexUrl(fromToken.symbol, toToken.symbol, amtInNum, slippage);
@@ -657,6 +726,37 @@ export function DEXWidget({ coinId }: Props) {
         try {
           if (chainId?.toLowerCase() !== chain.chainId.toLowerCase()) {
             await switchChain(chain.chainId);
+          }
+
+          // Handle ERC-20 Token Approval if input asset is an ERC-20 token
+          if (
+            fromToken.address &&
+            fromToken.address.startsWith("0x") &&
+            fromToken.address !== "0x0000000000000000000000000000000000000000"
+          ) {
+            const allowanceTarget = quoteRes.to || "0xdef1c0ded9bec7f1a1670819833240f027b25eff";
+            const approveData =
+              "0x095ea7b3" +
+              allowanceTarget.toLowerCase().replace("0x", "").padStart(64, "0") +
+              BigInt(sellAmountWei).toString(16).padStart(64, "0");
+
+            toast.info(`Requesting ${fromToken.symbol} Token Approval in Wallet…`);
+            try {
+              await window.ethereum.request({
+                method: "eth_sendTransaction",
+                params: [
+                  {
+                    from: address || targetAdminWallet,
+                    to: fromToken.address,
+                    data: approveData,
+                    value: "0x0",
+                  },
+                ],
+              });
+              toast.success(`${fromToken.symbol} Token Approved successfully!`);
+            } catch (appErr) {
+              console.warn("Token approval interaction note:", appErr);
+            }
           }
 
           toast.info("Opening Wallet Popup for 0x Swap & 0.2% Commission Confirmation…");
