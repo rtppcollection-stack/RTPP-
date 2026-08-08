@@ -224,10 +224,8 @@ function Home() {
             />
             <MarketDashboard
               onSelectToken={setCoinId}
-              onTrade={(id, mode) => {
+              onTrade={(id, _mode) => {
                 setCoinId(id);
-                setTab("swap");
-                toast.info(`Loaded ${id.toUpperCase()} into Swap Terminal for ${mode} trade`);
               }}
               activeTokenId={coinId}
             />

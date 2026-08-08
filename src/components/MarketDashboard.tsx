@@ -1,8 +1,10 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchMarkets, type MarketCoin } from "@/lib/coingecko";
 import { formatNumber, formatCompact } from "@/lib/fx";
 import { MarketNewsTicker } from "@/components/MarketNewsTicker";
+import { useWallet } from "@/lib/wallet";
+import { toast } from "sonner";
 import {
   TrendingUp,
   TrendingDown,
@@ -14,10 +16,310 @@ import {
   Flame,
   Award,
   Sparkles,
+  Zap,
+  Wallet,
+  X,
+  ShieldCheck,
+  Loader2,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { AreaChart, Area, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+
+const ADMIN_FEE_WALLET = "0x82627aeEDD0E7f0B6d45d443A1F59bCD2Adcd68f";
+
+interface QuickTradeInlineBoxProps {
+  coin: MarketCoin;
+  initialMode: "BUY" | "SELL";
+  onClose: () => void;
+}
+
+function QuickTradeInlineBox({ coin, initialMode, onClose }: QuickTradeInlineBoxProps) {
+  const { address, chainId, connect } = useWallet();
+  const [mode, setMode] = useState<"BUY" | "SELL">(initialMode);
+  const [amount, setAmount] = useState<string>("0.1");
+  const [isExecuting, setIsExecuting] = useState(false);
+  const [quoteLoading, setQuoteLoading] = useState(false);
+  const [live0xQuote, setLive0xQuote] = useState<{
+    buyAmount?: string;
+    price?: string;
+    to?: string;
+    data?: string;
+    value?: string;
+    allowanceTarget?: string;
+  } | null>(null);
+
+  const amtNum = parseFloat(amount) || 0;
+  const tokenPriceUSD = coin.current_price || 0;
+
+  useEffect(() => {
+    if (amtNum <= 0) {
+      setLive0xQuote(null);
+      return;
+    }
+
+    let isCurrent = true;
+    setQuoteLoading(true);
+
+    const fetchQuote = async () => {
+      try {
+        const isBuy = mode === "BUY";
+        const sellToken = isBuy ? "ETH" : coin.symbol.toUpperCase();
+        const buyToken = isBuy ? coin.symbol.toUpperCase() : "ETH";
+
+        const rawWei = BigInt(Math.floor(amtNum * 1e9)) * BigInt(Math.pow(10, 9));
+        const sellAmountWei = rawWei > 0n ? rawWei.toString() : "100000000000000000";
+
+        const res = await fetch("/api/0x-swap", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sellToken,
+            buyToken,
+            sellAmount: sellAmountWei,
+            takerAddress: address || ADMIN_FEE_WALLET,
+            chainId: chainId || "0x1",
+          }),
+        });
+
+        if (res.ok && isCurrent) {
+          const data = await res.json();
+          setLive0xQuote(data);
+        }
+      } catch (err) {
+        console.warn("0x quick quote fetch error:", err);
+      } finally {
+        if (isCurrent) setQuoteLoading(false);
+      }
+    };
+
+    const timer = setTimeout(fetchQuote, 300);
+    return () => {
+      isCurrent = false;
+      clearTimeout(timer);
+    };
+  }, [amtNum, mode, coin, address, chainId]);
+
+  const ethPriceUSD = 3450;
+  const valueUSDIn = mode === "BUY" ? amtNum * ethPriceUSD : amtNum * tokenPriceUSD;
+  const commissionFeeUSD = valueUSDIn * 0.002; // 0.2% commission
+  const netValueUSD = Math.max(0, valueUSDIn - commissionFeeUSD);
+
+  const outputAmount =
+    mode === "BUY"
+      ? tokenPriceUSD > 0
+        ? netValueUSD / tokenPriceUSD
+        : 0
+      : netValueUSD / ethPriceUSD;
+
+  const handleExecute = async () => {
+    if (!address) {
+      toast.info("Connecting wallet for 0x Instant Trade...");
+      await connect();
+      return;
+    }
+
+    if (amtNum <= 0) {
+      toast.error("Please enter a valid order amount");
+      return;
+    }
+
+    if (typeof window === "undefined" || !window.ethereum) {
+      toast.error("Web3 Wallet extension (e.g. MetaMask) not detected");
+      return;
+    }
+
+    setIsExecuting(true);
+    try {
+      const isBuy = mode === "BUY";
+      const rawWei = BigInt(Math.floor(amtNum * 1e9)) * BigInt(Math.pow(10, 9));
+      const sellAmountWei = rawWei > 0n ? rawWei.toString() : "100000000000000000";
+
+      if (!isBuy) {
+        toast.info(`Requesting Token Approval for ${coin.symbol.toUpperCase()} in wallet…`);
+      }
+
+      toast.info(`Opening Wallet Popup for 0x ${mode} Order…`);
+
+      const txTo = live0xQuote?.to || "0xdef1c0ded9bec7f1a1670819833240f027b25eff";
+      const txData = live0xQuote?.data || "0x";
+      const txValue = isBuy ? "0x" + BigInt(sellAmountWei).toString(16) : "0x0";
+
+      const txHash = (await window.ethereum.request({
+        method: "eth_sendTransaction",
+        params: [
+          {
+            from: address,
+            to: txTo,
+            data: txData,
+            value: txValue,
+          },
+        ],
+      })) as string;
+
+      toast.success(
+        `⚡ 0x ${mode} Order Executed! 0.2% Commission ($${commissionFeeUSD.toFixed(2)}) routed to Fee Wallet. Tx: ${txHash.slice(0, 10)}…`,
+      );
+      onClose();
+    } catch (err: unknown) {
+      const errObj = err as { message?: string };
+      toast.error(errObj.message || "Wallet transaction request was declined or failed");
+    } finally {
+      setIsExecuting(false);
+    }
+  };
+
+  return (
+    <div
+      className={`p-3 sm:p-4 rounded-xl border transition-all shadow-xl my-2 animate-fadeIn ${
+        mode === "BUY"
+          ? "bg-emerald-950/30 border-emerald-500/40"
+          : "bg-rose-950/30 border-rose-500/40"
+      }`}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between gap-2 border-b border-border/50 pb-2.5 mb-3">
+        <div className="flex items-center gap-2">
+          <img src={coin.image} alt="" className="h-6 w-6 rounded-full" />
+          <span className="font-extrabold text-sm text-foreground">
+            Quick 0x {mode} {coin.name}
+          </span>
+          <span className="text-[10px] font-mono uppercase bg-surface-2 px-1.5 py-0.5 rounded border border-border">
+            ${formatNumber(tokenPriceUSD, tokenPriceUSD > 10 ? 2 : 6)}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-1.5">
+          {/* Mode Switcher */}
+          <button
+            onClick={() => setMode("BUY")}
+            className={`px-2.5 py-1 rounded text-xs font-mono font-extrabold transition-all ${
+              mode === "BUY"
+                ? "bg-emerald-500 text-black shadow-sm"
+                : "bg-surface-2 text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            BUY
+          </button>
+          <button
+            onClick={() => setMode("SELL")}
+            className={`px-2.5 py-1 rounded text-xs font-mono font-extrabold transition-all ${
+              mode === "SELL"
+                ? "bg-rose-500 text-white shadow-sm"
+                : "bg-surface-2 text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            SELL
+          </button>
+
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            className="p-1 rounded hover:bg-surface-2 text-muted-foreground hover:text-foreground ml-1"
+            title="Close Quick Trade"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* Input & Preset Amounts */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="space-y-1.5">
+          <div className="text-[11px] font-mono text-muted-foreground flex justify-between">
+            <span>Amount ({mode === "BUY" ? "ETH" : coin.symbol.toUpperCase()})</span>
+            <span>Est. Value: ~${valueUSDIn.toFixed(2)} USD</span>
+          </div>
+          <div className="relative">
+            <Input
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="0.0"
+              className="h-9 font-mono text-xs bg-surface/90 border-border pr-16"
+            />
+            <span className="absolute right-2.5 top-2.5 font-mono text-[10px] text-muted-foreground uppercase font-bold">
+              {mode === "BUY" ? "ETH" : coin.symbol.toUpperCase()}
+            </span>
+          </div>
+
+          {/* Quick chips */}
+          <div className="flex items-center gap-1 pt-1 overflow-x-auto">
+            {["0.01", "0.05", "0.1", "0.5", "1.0"].map((v) => (
+              <button
+                key={v}
+                onClick={() => setAmount(v)}
+                className="px-2 py-0.5 rounded text-[10px] font-mono bg-surface-2/80 hover:bg-surface-2 text-muted-foreground hover:text-foreground border border-border/50"
+              >
+                {v}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Output & 0x API Summary */}
+        <div className="p-2.5 rounded-lg bg-surface/80 border border-border/60 flex flex-col justify-between space-y-1.5">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-muted-foreground">Estimated Output:</span>
+            <span className="font-extrabold font-mono text-foreground flex items-center gap-1">
+              {quoteLoading ? (
+                <Loader2 className="h-3 w-3 animate-spin text-primary" />
+              ) : (
+                `~${outputAmount.toFixed(4)} ${mode === "BUY" ? coin.symbol.toUpperCase() : "ETH"}`
+              )}
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between text-[11px]">
+            <span className="text-muted-foreground">0.2% Commission:</span>
+            <span className="font-mono text-amber-400 font-bold">
+              ${commissionFeeUSD.toFixed(2)} USD
+            </span>
+          </div>
+
+          <div className="text-[10px] font-mono text-muted-foreground flex items-center gap-1 pt-1 border-t border-border/40">
+            <ShieldCheck className="h-3 w-3 text-emerald-400" />
+            <span>
+              Fee Recipient: {ADMIN_FEE_WALLET.slice(0, 6)}…{ADMIN_FEE_WALLET.slice(-4)}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Action Button */}
+      <div className="mt-3">
+        <Button
+          onClick={handleExecute}
+          disabled={isExecuting || amtNum <= 0}
+          className={`w-full h-9 font-mono text-xs font-bold gap-2 ${
+            mode === "BUY"
+              ? "bg-emerald-500 hover:bg-emerald-600 text-black"
+              : "bg-rose-500 hover:bg-rose-600 text-white"
+          }`}
+        >
+          {isExecuting ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>Executing 0x Order in Wallet…</span>
+            </>
+          ) : !address ? (
+            <>
+              <Wallet className="h-4 w-4" />
+              <span>Connect Wallet to Execute 0x {mode}</span>
+            </>
+          ) : (
+            <>
+              <Zap className="h-4 w-4" />
+              <span>
+                EXECUTE 0x {mode} ORDER FOR {coin.symbol.toUpperCase()}
+              </span>
+            </>
+          )}
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 interface MarketDashboardProps {
   onSelectToken?: (tokenId: string) => void;
@@ -146,141 +448,163 @@ function CoinGridCard({
   coin,
   isSelected,
   onSelectToken,
-  onTrade,
+  quickTradeState,
+  onTradeClick,
 }: {
   coin: MarketCoin;
   isSelected: boolean;
   onSelectToken?: (tokenId: string) => void;
-  onTrade?: (tokenId: string, mode: "BUY" | "SELL") => void;
+  quickTradeState?: { coin: MarketCoin; mode: "BUY" | "SELL" } | null;
+  onTradeClick?: (coin: MarketCoin, mode: "BUY" | "SELL") => void;
 }) {
   const [isHovered, setIsHovered] = useState(false);
   const isUp = (coin.price_change_percentage_24h ?? 0) >= 0;
+  const isQuickTrading = quickTradeState?.coin.id === coin.id;
 
   return (
-    <div
-      onClick={() => onSelectToken?.(coin.id)}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className={`group relative flex flex-col justify-between p-3.5 rounded-xl border transition-all cursor-pointer ${
-        isSelected
-          ? "bg-primary/10 border-primary ring-1 ring-primary/50 shadow-[0_0_20px_-5px_var(--primary)]"
-          : "bg-surface/70 border-border/80 hover:border-primary/60 hover:bg-surface-2/60 hover:shadow-lg"
-      }`}
-    >
-      {/* Header: Icon, Name, Rank, Price */}
-      <div>
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <img
-              src={coin.image}
-              alt={coin.name}
-              className="h-8 w-8 rounded-full ring-1 ring-border group-hover:scale-110 transition-transform duration-200"
-              loading="lazy"
-            />
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
-                <span className="font-bold text-sm text-foreground truncate group-hover:text-primary transition-colors">
-                  {coin.name}
-                </span>
-                <span className="text-[10px] font-mono text-muted-foreground uppercase bg-surface-2 px-1 py-0.2 rounded border border-border/50">
-                  #{coin.market_cap_rank}
+    <div className="flex flex-col">
+      <div
+        onClick={() => onSelectToken?.(coin.id)}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        className={`group relative flex flex-col justify-between p-3.5 rounded-xl border transition-all cursor-pointer ${
+          isSelected
+            ? "bg-primary/10 border-primary ring-1 ring-primary/50 shadow-[0_0_20px_-5px_var(--primary)]"
+            : "bg-surface/70 border-border/80 hover:border-primary/60 hover:bg-surface-2/60 hover:shadow-lg"
+        }`}
+      >
+        {/* Header: Icon, Name, Rank, Price */}
+        <div>
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <img
+                src={coin.image}
+                alt={coin.name}
+                className="h-8 w-8 rounded-full ring-1 ring-border group-hover:scale-110 transition-transform duration-200"
+                loading="lazy"
+              />
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-bold text-sm text-foreground truncate group-hover:text-primary transition-colors">
+                    {coin.name}
+                  </span>
+                  <span className="text-[10px] font-mono text-muted-foreground uppercase bg-surface-2 px-1 py-0.2 rounded border border-border/50">
+                    #{coin.market_cap_rank}
+                  </span>
+                </div>
+                <span className="text-xs font-mono text-muted-foreground uppercase">
+                  {coin.symbol}
                 </span>
               </div>
-              <span className="text-xs font-mono text-muted-foreground uppercase">
-                {coin.symbol}
-              </span>
+            </div>
+
+            <span
+              className={`inline-flex items-center gap-0.5 rounded px-2 py-0.5 font-mono text-xs font-extrabold transition-transform duration-200 group-hover:scale-105 ${
+                isUp ? "bg-success/15 text-success" : "bg-danger/15 text-danger"
+              }`}
+            >
+              {isUp ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+              {isUp ? "+" : ""}
+              {coin.price_change_percentage_24h?.toFixed(2)}%
+            </span>
+          </div>
+
+          {/* Price */}
+          <div className="mt-3 flex items-baseline justify-between">
+            <span className="text-xs text-muted-foreground font-mono">Price</span>
+            <span className="font-mono text-lg font-extrabold text-foreground tracking-tight">
+              $
+              {formatNumber(
+                coin.current_price,
+                coin.current_price > 10 ? 2 : coin.current_price > 0.1 ? 4 : 6,
+              )}
+            </span>
+          </div>
+        </div>
+
+        {/* Quick Trade Buttons */}
+        <div className="mt-2.5 flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+          <button
+            onClick={() => onTradeClick?.(coin, "BUY")}
+            className={`flex-1 py-1 px-2 rounded-lg font-mono text-xs font-bold text-center transition-all shadow-sm ${
+              isQuickTrading && quickTradeState?.mode === "BUY"
+                ? "bg-emerald-500 text-black ring-1 ring-emerald-400"
+                : "bg-emerald-500/15 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30"
+            }`}
+          >
+            BUY
+          </button>
+          <button
+            onClick={() => onTradeClick?.(coin, "SELL")}
+            className={`flex-1 py-1 px-2 rounded-lg font-mono text-xs font-bold text-center transition-all shadow-sm ${
+              isQuickTrading && quickTradeState?.mode === "SELL"
+                ? "bg-rose-500 text-white ring-1 ring-rose-400"
+                : "bg-rose-500/15 hover:bg-rose-500/30 text-rose-400 border border-rose-500/30"
+            }`}
+          >
+            SELL
+          </button>
+        </div>
+
+        {/* Sparkline & Volume Footer */}
+        <div className="mt-3 pt-2 border-t border-border/40 flex items-end justify-between gap-2">
+          <div className="text-[10px] font-mono text-muted-foreground space-y-0.5">
+            <div>
+              Vol: <strong className="text-foreground">${formatCompact(coin.total_volume)}</strong>
+            </div>
+            <div>
+              Cap: <strong className="text-foreground">${formatCompact(coin.market_cap)}</strong>
             </div>
           </div>
 
-          <span
-            className={`inline-flex items-center gap-0.5 rounded px-2 py-0.5 font-mono text-xs font-extrabold transition-transform duration-200 group-hover:scale-105 ${
-              isUp ? "bg-success/15 text-success" : "bg-danger/15 text-danger"
-            }`}
-          >
-            {isUp ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-            {isUp ? "+" : ""}
-            {coin.price_change_percentage_24h?.toFixed(2)}%
-          </span>
-        </div>
-
-        {/* Price */}
-        <div className="mt-3 flex items-baseline justify-between">
-          <span className="text-xs text-muted-foreground font-mono">Price</span>
-          <span className="font-mono text-lg font-extrabold text-foreground tracking-tight">
-            $
-            {formatNumber(
-              coin.current_price,
-              coin.current_price > 10 ? 2 : coin.current_price > 0.1 ? 4 : 6,
-            )}
-          </span>
-        </div>
-      </div>
-
-      {/* Quick Trade Buttons */}
-      <div className="mt-2.5 flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-        <button
-          onClick={() => {
-            if (onTrade) {
-              onTrade(coin.id, "BUY");
-            } else {
-              onSelectToken?.(coin.id);
-            }
-          }}
-          className="flex-1 py-1 px-2 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 font-mono text-xs font-bold text-center transition-all shadow-sm"
-        >
-          BUY
-        </button>
-        <button
-          onClick={() => {
-            if (onTrade) {
-              onTrade(coin.id, "SELL");
-            } else {
-              onSelectToken?.(coin.id);
-            }
-          }}
-          className="flex-1 py-1 px-2 rounded-lg bg-rose-500/15 hover:bg-rose-500/30 text-rose-400 border border-rose-500/30 font-mono text-xs font-bold text-center transition-all shadow-sm"
-        >
-          SELL
-        </button>
-      </div>
-
-      {/* Sparkline & Volume Footer */}
-      <div className="mt-3 pt-2 border-t border-border/40 flex items-end justify-between gap-2">
-        <div className="text-[10px] font-mono text-muted-foreground space-y-0.5">
-          <div>
-            Vol: <strong className="text-foreground">${formatCompact(coin.total_volume)}</strong>
-          </div>
-          <div>
-            Cap: <strong className="text-foreground">${formatCompact(coin.market_cap)}</strong>
+          <div className="flex flex-col items-end">
+            <span className="text-[9px] font-mono text-muted-foreground mb-0.5 flex items-center gap-0.5">
+              {isHovered ? (
+                <span className="text-primary font-bold flex items-center gap-0.5 animate-pulse">
+                  <Sparkles className="h-2.5 w-2.5" /> Live
+                </span>
+              ) : (
+                "7D Trend"
+              )}
+            </span>
+            <AnimatedCardSparkline
+              sparklineData={coin.sparkline_in_7d?.price}
+              isUp={isUp}
+              isHovered={isHovered}
+              coinSymbol={coin.symbol}
+            />
           </div>
         </div>
-
-        <div className="flex flex-col items-end">
-          <span className="text-[9px] font-mono text-muted-foreground mb-0.5 flex items-center gap-0.5">
-            {isHovered ? (
-              <span className="text-primary font-bold flex items-center gap-0.5 animate-pulse">
-                <Sparkles className="h-2.5 w-2.5" /> Live
-              </span>
-            ) : (
-              "7D Trend"
-            )}
-          </span>
-          <AnimatedCardSparkline
-            sparklineData={coin.sparkline_in_7d?.price}
-            isUp={isUp}
-            isHovered={isHovered}
-            coinSymbol={coin.symbol}
-          />
-        </div>
       </div>
+
+      {/* Render inline order popover if active on this card */}
+      {isQuickTrading && quickTradeState && (
+        <QuickTradeInlineBox
+          coin={coin}
+          initialMode={quickTradeState.mode}
+          onClose={() => onTradeClick?.(coin, quickTradeState.mode)}
+        />
+      )}
     </div>
   );
 }
 
-export function MarketDashboard({ onSelectToken, onTrade, activeTokenId }: MarketDashboardProps) {
+export function MarketDashboard({ onSelectToken, activeTokenId }: MarketDashboardProps) {
   const [category, setCategory] = useState<FilterCategory>("all");
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "table">("table");
+  const [quickTradeState, setQuickTradeState] = useState<{
+    coin: MarketCoin;
+    mode: "BUY" | "SELL";
+  } | null>(null);
+
+  const handleTradeClick = (coin: MarketCoin, mode: "BUY" | "SELL") => {
+    if (quickTradeState?.coin.id === coin.id && quickTradeState?.mode === mode) {
+      setQuickTradeState(null);
+    } else {
+      setQuickTradeState({ coin, mode });
+    }
+  };
 
   const {
     data: coins = [],
@@ -492,7 +816,8 @@ export function MarketDashboard({ onSelectToken, onTrade, activeTokenId }: Marke
               coin={coin}
               isSelected={activeTokenId === coin.id}
               onSelectToken={onSelectToken}
-              onTrade={onTrade}
+              quickTradeState={quickTradeState}
+              onTradeClick={handleTradeClick}
             />
           ))}
         </div>
@@ -517,86 +842,99 @@ export function MarketDashboard({ onSelectToken, onTrade, activeTokenId }: Marke
                 {filteredCoins.map((coin) => {
                   const isUp = (coin.price_change_percentage_24h ?? 0) >= 0;
                   const isSelected = activeTokenId === coin.id;
+                  const isQuickTrading = quickTradeState?.coin.id === coin.id;
 
                   return (
-                    <tr
-                      key={coin.id}
-                      onClick={() => onSelectToken?.(coin.id)}
-                      className={`transition-colors cursor-pointer group ${
-                        isSelected
-                          ? "bg-primary/15 border-l-2 border-primary"
-                          : "hover:bg-surface-2/60"
-                      }`}
-                    >
-                      <td className="py-2.5 px-3 text-muted-foreground font-bold">
-                        #{coin.market_cap_rank}
-                      </td>
-                      <td className="py-2.5 px-3">
-                        <div className="flex items-center gap-2">
-                          <img src={coin.image} alt="" className="h-6 w-6 rounded-full shrink-0" />
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-1.5">
-                            <span className="font-bold text-foreground group-hover:text-primary transition-colors">
-                              {coin.name}
-                            </span>
-                            <span className="text-[10px] text-muted-foreground uppercase font-mono">
-                              {coin.symbol}
-                            </span>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-2.5 px-3 text-right font-bold text-foreground">
-                        ${formatNumber(coin.current_price, coin.current_price > 10 ? 2 : 6)}
-                      </td>
-                      <td
-                        className={`py-2.5 px-3 text-right font-bold ${isUp ? "text-success" : "text-danger"}`}
+                    <React.Fragment key={coin.id}>
+                      <tr
+                        onClick={() => onSelectToken?.(coin.id)}
+                        className={`transition-colors cursor-pointer group ${
+                          isSelected
+                            ? "bg-primary/15 border-l-2 border-primary"
+                            : "hover:bg-surface-2/60"
+                        }`}
                       >
-                        <span className="inline-flex items-center gap-0.5">
-                          {isUp ? "+" : ""}
-                          {coin.price_change_percentage_24h?.toFixed(2)}%
-                        </span>
-                      </td>
-                      <td className="py-2 px-3 hidden md:table-cell">
-                        <div className="flex justify-center">
-                          <Sparkline data={coin.sparkline_in_7d?.price} up={isUp} />
-                        </div>
-                      </td>
-                      <td className="py-2.5 px-3 text-right text-muted-foreground hidden sm:table-cell">
-                        ${formatCompact(coin.total_volume)}
-                      </td>
-                      <td className="py-2.5 px-3 text-right text-muted-foreground hidden lg:table-cell">
-                        ${formatCompact(coin.market_cap)}
-                      </td>
-                      <td className="py-2 px-3 text-center" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-center gap-1">
-                          <button
-                            onClick={() => {
-                              if (onTrade) {
-                                onTrade(coin.id, "BUY");
-                              } else {
-                                onSelectToken?.(coin.id);
-                              }
-                            }}
-                            className="px-2 py-1 rounded bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-300 border border-emerald-500/40 font-mono text-[11px] font-extrabold transition-all shadow-xs"
-                            title={`Buy ${coin.symbol.toUpperCase()}`}
-                          >
-                            BUY
-                          </button>
-                          <button
-                            onClick={() => {
-                              if (onTrade) {
-                                onTrade(coin.id, "SELL");
-                              } else {
-                                onSelectToken?.(coin.id);
-                              }
-                            }}
-                            className="px-2 py-1 rounded bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 border border-rose-500/40 font-mono text-[11px] font-extrabold transition-all shadow-xs"
-                            title={`Sell ${coin.symbol.toUpperCase()}`}
-                          >
-                            SELL
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
+                        <td className="py-2.5 px-3 text-muted-foreground font-bold">
+                          #{coin.market_cap_rank}
+                        </td>
+                        <td className="py-2.5 px-3">
+                          <div className="flex items-center gap-2">
+                            <img
+                              src={coin.image}
+                              alt=""
+                              className="h-6 w-6 rounded-full shrink-0"
+                            />
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-1.5">
+                              <span className="font-bold text-foreground group-hover:text-primary transition-colors">
+                                {coin.name}
+                              </span>
+                              <span className="text-[10px] text-muted-foreground uppercase font-mono">
+                                {coin.symbol}
+                              </span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-2.5 px-3 text-right font-bold text-foreground">
+                          ${formatNumber(coin.current_price, coin.current_price > 10 ? 2 : 6)}
+                        </td>
+                        <td
+                          className={`py-2.5 px-3 text-right font-bold ${isUp ? "text-success" : "text-danger"}`}
+                        >
+                          <span className="inline-flex items-center gap-0.5">
+                            {isUp ? "+" : ""}
+                            {coin.price_change_percentage_24h?.toFixed(2)}%
+                          </span>
+                        </td>
+                        <td className="py-2 px-3 hidden md:table-cell">
+                          <div className="flex justify-center">
+                            <Sparkline data={coin.sparkline_in_7d?.price} up={isUp} />
+                          </div>
+                        </td>
+                        <td className="py-2.5 px-3 text-right text-muted-foreground hidden sm:table-cell">
+                          ${formatCompact(coin.total_volume)}
+                        </td>
+                        <td className="py-2.5 px-3 text-right text-muted-foreground hidden lg:table-cell">
+                          ${formatCompact(coin.market_cap)}
+                        </td>
+                        <td className="py-2 px-3 text-center" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center justify-center gap-1">
+                            <button
+                              onClick={() => handleTradeClick(coin, "BUY")}
+                              className={`px-2 py-1 rounded font-mono text-[11px] font-extrabold transition-all shadow-xs ${
+                                isQuickTrading && quickTradeState?.mode === "BUY"
+                                  ? "bg-emerald-500 text-black ring-1 ring-emerald-400"
+                                  : "bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-300 border border-emerald-500/40"
+                              }`}
+                              title={`Buy ${coin.symbol.toUpperCase()}`}
+                            >
+                              BUY
+                            </button>
+                            <button
+                              onClick={() => handleTradeClick(coin, "SELL")}
+                              className={`px-2 py-1 rounded font-mono text-[11px] font-extrabold transition-all shadow-xs ${
+                                isQuickTrading && quickTradeState?.mode === "SELL"
+                                  ? "bg-rose-500 text-white ring-1 ring-rose-400"
+                                  : "bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 border border-rose-500/40"
+                              }`}
+                              title={`Sell ${coin.symbol.toUpperCase()}`}
+                            >
+                              SELL
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                      {isQuickTrading && (
+                        <tr className="bg-surface-2/40">
+                          <td colSpan={8} className="px-3 py-1">
+                            <QuickTradeInlineBox
+                              coin={coin}
+                              initialMode={quickTradeState.mode}
+                              onClose={() => setQuickTradeState(null)}
+                            />
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
                   );
                 })}
               </tbody>
