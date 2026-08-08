@@ -316,11 +316,14 @@ export async function topUpPrintfulWallet(amountUSD: number | string, sourceTxHa
 }
 
 /**
- * Variant Mapping Helper
+ * Variant Mapping Helper for Universal Merch Types
  */
 export function getVariantId(product: NFTMerchProduct, colorName: string): number {
+  const c = colorName.toLowerCase();
+
+  // 1. Gildan 5000 Heavyweight T-Shirt (ID 71)
   if (product.id === 71) {
-    switch (colorName.toLowerCase()) {
+    switch (c) {
       case "white":
         return 4011;
       case "navy":
@@ -338,6 +341,51 @@ export function getVariantId(product: NFTMerchProduct, colorName: string): numbe
         return 4012;
     }
   }
+
+  // 2. Cotton Heritage Premium Hoodie (ID 170)
+  if (product.id === 170) {
+    switch (c) {
+      case "white":
+        return 8202;
+      case "navy":
+        return 8203;
+      case "heather gray":
+        return 8204;
+      case "cream":
+        return 8205;
+      case "pastel pink":
+        return 8206;
+      case "forest olive":
+        return 8207;
+      case "black":
+      default:
+        return 8201;
+    }
+  }
+
+  // 3. White Ceramic Mug (ID 18)
+  if (product.id === 18) {
+    return 1320; // 11 oz standard
+  }
+
+  // 4. Vintage Snapback Cap (ID 283)
+  if (product.id === 283) {
+    switch (c) {
+      case "navy":
+        return 10451;
+      case "white":
+        return 10452;
+      case "black":
+      default:
+        return 10450;
+    }
+  }
+
+  // 5. Canvas Print (ID 180)
+  if (product.id === 180) {
+    return 8840;
+  }
+
   return product.variantId;
 }
 
@@ -346,6 +394,7 @@ export interface PrintfulMockupRequest {
   variantId: number;
   imageUrl: string;
   color?: string;
+  placement?: string;
 }
 
 /**
@@ -355,8 +404,25 @@ export async function generatePrintfulMockup(params: PrintfulMockupRequest) {
   const productId = params.productId || 71;
   const imageUrl = resolveIpfsUrl(params.imageUrl);
 
+  // Determine optimal print placement based on product type
+  let placement = params.placement || "front";
+  if (productId === 180 || productId === 18) {
+    placement = "default";
+  }
+
+  const createBody = {
+    variant_ids: [params.variantId],
+    format: "jpg",
+    files: [
+      {
+        placement,
+        image_url: imageUrl,
+      },
+    ],
+  };
+
   // 1. Initiate Printful Mockup Generator Task: POST /mockup-generator/create-task/${productId}
-  const taskRes = await printfulFetch<{
+  let taskRes = await printfulFetch<{
     code: number;
     result: {
       task_key: string;
@@ -364,17 +430,23 @@ export async function generatePrintfulMockup(params: PrintfulMockupRequest) {
     };
   }>(`/mockup-generator/create-task/${productId}`, {
     method: "POST",
-    body: JSON.stringify({
-      variant_ids: [params.variantId],
-      format: "jpg",
-      files: [
-        {
-          placement: "default",
-          image_url: imageUrl,
-        },
-      ],
-    }),
+    body: JSON.stringify(createBody),
   });
+
+  // If placement 'front' failed, retry with placement 'default'
+  if (taskRes.error && placement !== "default") {
+    createBody.files[0].placement = "default";
+    taskRes = await printfulFetch<{
+      code: number;
+      result: {
+        task_key: string;
+        status: string;
+      };
+    }>(`/mockup-generator/create-task/${productId}`, {
+      method: "POST",
+      body: JSON.stringify(createBody),
+    });
+  }
 
   if (taskRes.error || !taskRes.data?.result?.task_key) {
     return {
@@ -426,6 +498,73 @@ export async function generatePrintfulMockup(params: PrintfulMockupRequest) {
     error: "Printful mockup generation timed out",
     rawPayload: taskRes.rawPayload,
   };
+}
+
+/**
+ * Fetch dynamic product catalog directly from Printful API
+ */
+export async function getPrintfulProductsFromApi(): Promise<NFTMerchProduct[]> {
+  const res = await printfulFetch<{
+    code: number;
+    result: Array<{
+      id: number;
+      title: string;
+      brand_name?: string;
+      model_name?: string;
+      type?: string;
+      type_name?: string;
+      image?: string;
+      variant_count?: number;
+      description?: string;
+    }>;
+  }>("/products");
+
+  if (!res.error && Array.isArray(res.data?.result) && res.data.result.length > 0) {
+    const rawList = res.data.result;
+    
+    return rawList.slice(0, 12).map((item) => {
+      let variantId = 4012;
+      let category = item.type_name || item.type || "Apparel";
+      let basePriceUSD = 24.99;
+
+      if (item.id === 71) {
+        variantId = 4012;
+        basePriceUSD = 24.99;
+      } else if (item.id === 170) {
+        variantId = 8201;
+        basePriceUSD = 44.99;
+      } else if (item.id === 18) {
+        variantId = 1320;
+        category = "Home & Living";
+        basePriceUSD = 16.5;
+      } else if (item.id === 180) {
+        variantId = 8840;
+        category = "Wall Art";
+        basePriceUSD = 38.0;
+      } else if (item.id === 283) {
+        variantId = 10450;
+        category = "Accessories";
+        basePriceUSD = 22.0;
+      } else if (category.toLowerCase().includes("hoodie") || category.toLowerCase().includes("sweatshirt")) {
+        basePriceUSD = 42.0;
+      } else if (category.toLowerCase().includes("mug") || category.toLowerCase().includes("drinkware")) {
+        basePriceUSD = 18.0;
+      }
+
+      return {
+        id: item.id,
+        name: item.title,
+        category,
+        variantId,
+        basePriceUSD,
+        image: item.image || "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=600&auto=format&fit=crop&q=80",
+        description: item.description || `Official ${item.title} printed with your high-res NFT artwork via Printful API.`,
+      };
+    });
+  }
+
+  // Return fallback curated catalog if Printful API key is pending or offline
+  return CATALOG_PRODUCTS;
 }
 
 /**

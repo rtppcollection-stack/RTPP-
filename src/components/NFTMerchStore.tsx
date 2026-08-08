@@ -408,6 +408,34 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
   };
 
   const [selectedProduct, setSelectedProduct] = useState<NFTMerchProduct>(CATALOG_PRODUCTS[0]);
+  const [catalogProducts, setCatalogProducts] = useState<NFTMerchProduct[]>(CATALOG_PRODUCTS);
+  const [isLoadingCatalog, setIsLoadingCatalog] = useState<boolean>(false);
+
+  // Dynamic Product Catalog Fetch from Printful API (/api/printful/products)
+  const fetchCatalogProducts = useCallback(async () => {
+    setIsLoadingCatalog(true);
+    try {
+      const res = await fetch("/api/printful/products");
+      if (res.ok) {
+        const json = await res.json();
+        if (Array.isArray(json.products) && json.products.length > 0) {
+          setCatalogProducts(json.products);
+          setSelectedProduct((prev) => {
+            const found = json.products.find((p: NFTMerchProduct) => p.id === prev.id);
+            return found || json.products[0];
+          });
+        }
+      }
+    } catch (err) {
+      console.warn("Printful dynamic catalog fetch notice:", err);
+    } finally {
+      setIsLoadingCatalog(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCatalogProducts();
+  }, [fetchCatalogProducts]);
   const [quantity, setQuantity] = useState<number>(1);
   const [paymentCurrency, setPaymentCurrency] = useState<"ETH" | "USDT" | "RTPP">("ETH");
   const [confirmOrderMode, setConfirmOrderMode] = useState<boolean>(true); // true = confirm, false = draft
@@ -1271,26 +1299,33 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
               </button>
             </div>
 
-            {/* Catalog Items Selector (Pill Tabs) */}
+            {/* Catalog Items Selector (Pill Tabs - Dynamically Loaded from Printful Catalog API) */}
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5">
-              {CATALOG_PRODUCTS.map((prod) => {
-                const isSelected = selectedProduct.id === prod.id;
-                return (
-                  <button
-                    key={prod.id}
-                    onClick={() => setSelectedProduct(prod)}
-                    className={`p-2 rounded-xl border text-left font-mono transition-all flex flex-col items-center text-center cursor-pointer ${
-                      isSelected
-                        ? "bg-cyan-500/20 border-cyan-400 text-white ring-1 ring-cyan-400/50 shadow-md"
-                        : "bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700"
-                    }`}
-                  >
-                    <img src={prod.image} alt="" className="h-10 w-10 rounded-lg object-cover mb-1 border border-white/10" />
-                    <span className="text-[10px] font-bold line-clamp-1">{prod.name.split(" ")[0]}</span>
-                    <span className="text-[9px] text-emerald-400 font-extrabold">${prod.basePriceUSD.toFixed(0)}</span>
-                  </button>
-                );
-              })}
+              {isLoadingCatalog ? (
+                <div className="col-span-2 sm:col-span-5 p-3 rounded-xl bg-slate-950/60 border border-slate-800 text-center font-mono text-xs text-slate-400 flex items-center justify-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin text-cyan-400" />
+                  <span>Syncing Dynamic Catalog from Printful API...</span>
+                </div>
+              ) : (
+                catalogProducts.map((prod) => {
+                  const isSelected = selectedProduct.id === prod.id;
+                  return (
+                    <button
+                      key={prod.id}
+                      onClick={() => setSelectedProduct(prod)}
+                      className={`p-2 rounded-xl border text-left font-mono transition-all flex flex-col items-center text-center cursor-pointer ${
+                        isSelected
+                          ? "bg-cyan-500/20 border-cyan-400 text-white ring-1 ring-cyan-400/50 shadow-md"
+                          : "bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700"
+                      }`}
+                    >
+                      <img src={prod.image} alt={prod.name} className="h-10 w-10 rounded-lg object-cover mb-1 border border-white/10" />
+                      <span className="text-[10px] font-bold line-clamp-1">{prod.name.split(" ")[0]}</span>
+                      <span className="text-[9px] text-emerald-400 font-extrabold">${prod.basePriceUSD.toFixed(0)}</span>
+                    </button>
+                  );
+                })
+              )}
             </div>
 
             {/* MAIN REALISTIC 3D MOCKUP CANVAS */}
@@ -1699,7 +1734,7 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
               </button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {CATALOG_PRODUCTS.map((prod) => (
+              {catalogProducts.map((prod) => (
                 <div
                   key={prod.id}
                   onClick={() => {
