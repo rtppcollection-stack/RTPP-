@@ -14,6 +14,31 @@ export function getPrintfulApiKey(): string {
 
 const PRINTFUL_BASE_URL = "https://api.printful.com";
 
+export function resolveIpfsUrl(url?: string | null): string {
+  if (!url || typeof url !== "string") {
+    return "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=800&auto=format&fit=crop&q=80";
+  }
+  const trimmed = url.trim();
+  if (!trimmed) {
+    return "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=800&auto=format&fit=crop&q=80";
+  }
+  if (trimmed.startsWith("ipfs://")) {
+    const cid = trimmed.replace(/^ipfs:\/\/(ipfs\/)?/, "");
+    return `https://ipfs.io/ipfs/${cid}`;
+  }
+  if (trimmed.startsWith("ipfs/") || trimmed.startsWith("/ipfs/")) {
+    const cid = trimmed.replace(/^\/?ipfs\//, "");
+    return `https://ipfs.io/ipfs/${cid}`;
+  }
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://") || trimmed.startsWith("data:") || trimmed.startsWith("/")) {
+    return trimmed;
+  }
+  if (trimmed.startsWith("Qm") || trimmed.startsWith("bafy")) {
+    return `https://ipfs.io/ipfs/${trimmed}`;
+  }
+  return trimmed;
+}
+
 export interface PrintfulShippingAddress {
   name: string;
   address1: string;
@@ -287,6 +312,119 @@ export async function topUpPrintfulWallet(amountUSD: number | string, sourceTxHa
     currency: "USD",
     sourceTxHash,
     details: `Printful Merchant Wallet funded with $${numericAmount} USD via USDC auto-swap settlement.`,
+  };
+}
+
+/**
+ * Variant Mapping Helper
+ */
+export function getVariantId(product: NFTMerchProduct, colorName: string): number {
+  if (product.id === 71) {
+    switch (colorName.toLowerCase()) {
+      case "white":
+        return 4011;
+      case "navy":
+        return 4013;
+      case "heather gray":
+        return 4014;
+      case "cream":
+        return 4015;
+      case "pastel pink":
+        return 4016;
+      case "forest olive":
+        return 4017;
+      case "black":
+      default:
+        return 4012;
+    }
+  }
+  return product.variantId;
+}
+
+export interface PrintfulMockupRequest {
+  productId?: number;
+  variantId: number;
+  imageUrl: string;
+  color?: string;
+}
+
+/**
+ * Task 5: Generate official realistic Printful product mockup using Printful Mockup Generator API
+ */
+export async function generatePrintfulMockup(params: PrintfulMockupRequest) {
+  const productId = params.productId || 71;
+  const imageUrl = resolveIpfsUrl(params.imageUrl);
+
+  // 1. Initiate Printful Mockup Generator Task: POST /mockup-generator/create-task/${productId}
+  const taskRes = await printfulFetch<{
+    code: number;
+    result: {
+      task_key: string;
+      status: string;
+    };
+  }>(`/mockup-generator/create-task/${productId}`, {
+    method: "POST",
+    body: JSON.stringify({
+      variant_ids: [params.variantId],
+      format: "jpg",
+      files: [
+        {
+          placement: "default",
+          image_url: imageUrl,
+        },
+      ],
+    }),
+  });
+
+  if (taskRes.error || !taskRes.data?.result?.task_key) {
+    return {
+      error: taskRes.error || "Unable to initiate Printful mockup generator task",
+      rawPayload: taskRes.rawPayload,
+    };
+  }
+
+  const taskKey = taskRes.data.result.task_key;
+
+  // 2. Poll Printful Task Status: GET /mockup-generator/task?task_key=${taskKey}
+  for (let attempt = 0; attempt < 8; attempt++) {
+    await new Promise((r) => setTimeout(r, 1200));
+
+    const pollRes = await printfulFetch<{
+      code: number;
+      result: {
+        status: string;
+        mockups?: Array<{
+          variant_ids?: number[];
+          mockup_url?: string;
+          extra_mockups?: Array<{ title?: string; mockup_url?: string }>;
+        }>;
+        error?: string;
+      };
+    }>(`/mockup-generator/task?task_key=${taskKey}`);
+
+    if (pollRes.data?.result) {
+      const { status, mockups, error } = pollRes.data.result;
+      if (status === "completed" && mockups && mockups.length > 0) {
+        const mockupUrl = mockups[0].mockup_url || mockups[0].extra_mockups?.[0]?.mockup_url;
+        if (mockupUrl) {
+          return {
+            mockupUrl,
+            rawPayload: pollRes.rawPayload,
+          };
+        }
+      }
+      if (status === "failed") {
+        return {
+          error: error || "Printful mockup generation task failed",
+          rawPayload: pollRes.rawPayload,
+        };
+      }
+    }
+  }
+
+  return {
+    error: "Printful mockup generation timed out",
+    rawPayload: taskRes.rawPayload,
   };
 }
 

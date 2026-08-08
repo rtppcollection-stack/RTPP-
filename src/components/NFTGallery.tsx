@@ -86,14 +86,26 @@ const FEATURED_NFTS: NFTView[] = [
 
 async function signUrl(path: string) {
   if (!path) return DEFAULT_NFT_FALLBACK;
-  if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("data:")) {
-    return path;
+  const trimmed = path.trim();
+  if (trimmed.startsWith("ipfs://")) {
+    const cid = trimmed.replace(/^ipfs:\/\/(ipfs\/)?/, "");
+    return `https://ipfs.io/ipfs/${cid}`;
+  }
+  if (trimmed.startsWith("ipfs/") || trimmed.startsWith("/ipfs/")) {
+    const cid = trimmed.replace(/^\/?ipfs\//, "");
+    return `https://ipfs.io/ipfs/${cid}`;
+  }
+  if (trimmed.startsWith("Qm") || trimmed.startsWith("bafy")) {
+    return `https://ipfs.io/ipfs/${trimmed}`;
+  }
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://") || trimmed.startsWith("data:")) {
+    return trimmed;
   }
   try {
-    const { data: publicData } = supabase.storage.from("nfts").getPublicUrl(path);
+    const { data: publicData } = supabase.storage.from("nfts").getPublicUrl(trimmed);
     if (publicData?.publicUrl) return publicData.publicUrl;
 
-    const { data: signedData } = await supabase.storage.from("nfts").createSignedUrl(path, 60 * 60 * 24 * 7);
+    const { data: signedData } = await supabase.storage.from("nfts").createSignedUrl(trimmed, 60 * 60 * 24 * 7);
     return signedData?.signedUrl ?? DEFAULT_NFT_FALLBACK;
   } catch {
     return DEFAULT_NFT_FALLBACK;
@@ -363,6 +375,10 @@ export function NFTGallery({
                   src={nft.image_url}
                   alt={nft.title}
                   className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = DEFAULT_NFT_FALLBACK;
+                  }}
                 />
                 <span className="absolute left-2 top-2 rounded-full bg-black/70 backdrop-blur-xs px-2 py-0.5 text-[9px] font-mono font-semibold text-white border border-white/10">
                   {nft.chain || "Base"}
@@ -388,9 +404,9 @@ export function NFTGallery({
                       e.stopPropagation();
                       onSelectForMerch(nft.image_url, nft.title);
                     }}
-                    className="w-full mt-1 py-1.5 px-2 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 text-[10px] font-mono font-bold flex items-center justify-center gap-1 transition-all"
+                    className="w-full mt-1 py-1.5 px-2 rounded-lg bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 border border-cyan-500/30 text-[10px] font-mono font-bold flex items-center justify-center gap-1 transition-all"
                   >
-                    <span>👕 Create Printful Merch</span>
+                    <span>👕 Create Custom Streetwear</span>
                   </button>
                 )}
               </div>
@@ -467,6 +483,10 @@ function NFTDetail({
           src={nft.image_url}
           alt={nft.title}
           className="h-full w-full object-contain rounded-lg"
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = DEFAULT_NFT_FALLBACK;
+          }}
         />
       </div>
       <div className="flex flex-col p-5 space-y-3 bg-surface text-foreground">
@@ -590,9 +610,9 @@ function NFTDetail({
                   onSelectForMerch(nft.image_url, nft.title);
                   onClose();
                 }}
-                className="w-full gap-2 bg-rose-600 hover:bg-rose-500 text-white font-mono text-xs font-extrabold shadow-md shadow-rose-500/20"
+                className="w-full gap-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-mono text-xs font-extrabold shadow-md shadow-cyan-500/20"
               >
-                <span>👕 Order Printful Merch with this NFT Artwork</span>
+                <span>👕 Create Custom Streetwear in Phygital Studio</span>
               </Button>
             </div>
           )}

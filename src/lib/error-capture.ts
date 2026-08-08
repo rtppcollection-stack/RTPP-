@@ -8,11 +8,24 @@ function record(error: unknown) {
   lastCapturedError = { error, at: Date.now() };
 }
 
-if (typeof globalThis.addEventListener === "function") {
-  globalThis.addEventListener("error", (event) => record((event as ErrorEvent).error ?? event));
-  globalThis.addEventListener("unhandledrejection", (event) =>
-    record((event as PromiseRejectionEvent).reason),
-  );
+// Increase EventEmitter max listeners in Node environment to prevent MaxListenersExceededWarning
+if (typeof process !== "undefined" && typeof process.setMaxListeners === "function") {
+  try {
+    process.setMaxListeners(50);
+  } catch {
+    /* noop */
+  }
+}
+
+const GLOBAL_ERROR_KEY = "__rtpp_error_listeners_attached__";
+if (typeof globalThis !== "undefined" && !(globalThis as Record<string, unknown>)[GLOBAL_ERROR_KEY]) {
+  (globalThis as Record<string, unknown>)[GLOBAL_ERROR_KEY] = true;
+  if (typeof globalThis.addEventListener === "function") {
+    globalThis.addEventListener("error", (event) => record((event as ErrorEvent).error ?? event));
+    globalThis.addEventListener("unhandledrejection", (event) =>
+      record((event as PromiseRejectionEvent).reason),
+    );
+  }
 }
 
 export function consumeLastCapturedError(): unknown {

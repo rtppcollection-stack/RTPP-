@@ -35,6 +35,7 @@ import {
   ArrowLeftRight,
   Calculator,
   Images,
+  Shirt,
   Radar,
   ShieldCheck,
   Loader2,
@@ -94,12 +95,8 @@ function Home() {
   const handleSelectNFTForMerch = (imageUrl: string, title?: string) => {
     setSelectedMerchImage(imageUrl);
     if (title) setSelectedMerchTitle(title);
-    toast.success(`Selected "${title || "NFT Artwork"}" for Printful Merch Configurator!`);
-    setTimeout(() => {
-      document
-        .getElementById("printful-merch-configurator")
-        ?.scrollIntoView({ behavior: "smooth" });
-    }, 100);
+    toast.success(`Selected "${title || "NFT Artwork"}" for Phygital Studio!`);
+    setTab("merch");
   };
 
   // Determine grid columns dynamically for nav tabs
@@ -188,7 +185,12 @@ function Home() {
               <TabTrig
                 value="nft"
                 icon={<Images className="h-4 w-4 text-rose-400" />}
-                label={t("nav.mint")}
+                label={t("nav.mint") || "NFT Hub"}
+              />
+              <TabTrig
+                value="merch"
+                icon={<Shirt className="h-4 w-4 text-cyan-400" />}
+                label="👕 Phygital Studio"
               />
 
               {/* Editor Role Navigation Feature */}
@@ -291,20 +293,20 @@ function Home() {
           <TabsContent value="nft" className="space-y-6 mt-0">
             <SectionHeader
               title="NFT Digital Gallery & Collection Marketplace"
-              subtitle="Explore on-chain collectible NFTs available for trading, minting, and physical merch creation. Click any NFT to create custom streetwear."
+              subtitle="Explore on-chain collectible NFTs available for trading, minting, and physical merch creation. Click 'Create Custom Streetwear' on any NFT to load it in the Phygital Studio."
             />
             <NFTGallery onSelectForMerch={handleSelectNFTForMerch} />
+          </TabsContent>
 
-            <div className="pt-6 border-t border-border/60 space-y-4">
-              <SectionHeader
-                title="Printful Physical Merch Store Configurator"
-                subtitle="Convert selected NFT artwork into physical hoodies, tees & wall art with automated Printful API order fulfillment."
-              />
-              <NFTMerchStore
-                selectedImageUrl={selectedMerchImage}
-                selectedNftTitle={selectedMerchTitle}
-              />
-            </div>
+          <TabsContent value="merch" className="space-y-6 mt-0">
+            <SectionHeader
+              title="Phygital Web3 Studio & Printful Merch Configurator"
+              subtitle="Preview and customize selected NFT artwork onto high quality apparel, mugs & canvases with automated Printful order fulfillment."
+            />
+            <NFTMerchStore
+              selectedImageUrl={selectedMerchImage}
+              selectedNftTitle={selectedMerchTitle}
+            />
           </TabsContent>
 
           {(isEditor || isAdmin) && (

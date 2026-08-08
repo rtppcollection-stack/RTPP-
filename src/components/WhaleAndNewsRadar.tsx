@@ -236,69 +236,80 @@ const INITIAL_NEWS: NewsItem[] = [
 
 async function fetchRealCryptoNews(): Promise<NewsItem[]> {
   try {
-    const res = await fetch("https://min-api.cryptocompare.com/data/v2/news/?lang=EN");
-    if (!res.ok) throw new Error("Network response not ok");
-    const json = await res.json();
-    if (json && Array.isArray(json.Data)) {
-      return json.Data.map((itemObj: unknown) => {
-        const item = (itemObj as Record<string, unknown>) || {};
-        const categoriesStr = String(item.categories || "").toLowerCase();
-        let category: NewsItem["category"] = "Altcoins";
-        if (categoriesStr.includes("btc") || categoriesStr.includes("bitcoin"))
-          category = "Bitcoin";
-        else if (categoriesStr.includes("eth") || categoriesStr.includes("ethereum"))
-          category = "Ethereum";
-        else if (categoriesStr.includes("defi")) category = "DeFi";
-        else if (categoriesStr.includes("regulation") || categoriesStr.includes("sec"))
-          category = "Regulation";
-        else if (categoriesStr.includes("macro") || categoriesStr.includes("fed"))
-          category = "Macro";
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
 
-        const title = String(item.title || "");
-        const titleLower = title.toLowerCase();
-        let sentiment: NewsItem["sentiment"] = "neutral";
-        if (
-          titleLower.includes("surge") ||
-          titleLower.includes("soar") ||
-          titleLower.includes("bull") ||
-          titleLower.includes("rally") ||
-          titleLower.includes("gain") ||
-          titleLower.includes("record")
-        ) {
-          sentiment = "bullish";
-        } else if (
-          titleLower.includes("drop") ||
-          titleLower.includes("crash") ||
-          titleLower.includes("bear") ||
-          titleLower.includes("fall") ||
-          titleLower.includes("hack") ||
-          titleLower.includes("plunge")
-        ) {
-          sentiment = "bearish";
-        }
+    const res = await fetch("https://min-api.cryptocompare.com/data/v2/news/?lang=EN", {
+      signal: controller.signal,
+      headers: { Accept: "application/json" },
+    }).catch(() => null);
 
-        const sourceInfo = item.source_info as Record<string, unknown> | undefined;
-        const bodyStr = String(item.body || "");
-        const pubTime = Number(item.published_on) ? Number(item.published_on) * 1000 : Date.now();
+    clearTimeout(timeoutId);
 
-        return {
-          id: String(item.id || Date.now() + Math.random()),
-          title: title,
-          source: String(sourceInfo?.name || item.source || "Crypto News"),
-          url: String(item.url || "https://cryptocompare.com"),
-          publishedAt: pubTime,
-          category,
-          sentiment,
-          summary: bodyStr ? bodyStr.slice(0, 180) + "..." : title,
-          readTime: `${Math.max(2, Math.min(8, Math.round(bodyStr.length / 300)))} min read`,
-          isCached: false,
-        };
-      });
+    if (res && res.ok) {
+      const json = await res.json().catch(() => null);
+      if (json && Array.isArray(json.Data) && json.Data.length > 0) {
+        return json.Data.map((itemObj: unknown) => {
+          const item = (itemObj as Record<string, unknown>) || {};
+          const categoriesStr = String(item.categories || "").toLowerCase();
+          let category: NewsItem["category"] = "Altcoins";
+          if (categoriesStr.includes("btc") || categoriesStr.includes("bitcoin"))
+            category = "Bitcoin";
+          else if (categoriesStr.includes("eth") || categoriesStr.includes("ethereum"))
+            category = "Ethereum";
+          else if (categoriesStr.includes("defi")) category = "DeFi";
+          else if (categoriesStr.includes("regulation") || categoriesStr.includes("sec"))
+            category = "Regulation";
+          else if (categoriesStr.includes("macro") || categoriesStr.includes("fed"))
+            category = "Macro";
+
+          const title = String(item.title || "");
+          const titleLower = title.toLowerCase();
+          let sentiment: NewsItem["sentiment"] = "neutral";
+          if (
+            titleLower.includes("surge") ||
+            titleLower.includes("soar") ||
+            titleLower.includes("bull") ||
+            titleLower.includes("rally") ||
+            titleLower.includes("gain") ||
+            titleLower.includes("record")
+          ) {
+            sentiment = "bullish";
+          } else if (
+            titleLower.includes("drop") ||
+            titleLower.includes("crash") ||
+            titleLower.includes("bear") ||
+            titleLower.includes("fall") ||
+            titleLower.includes("hack") ||
+            titleLower.includes("plunge")
+          ) {
+            sentiment = "bearish";
+          }
+
+          const sourceInfo = item.source_info as Record<string, unknown> | undefined;
+          const bodyStr = String(item.body || "");
+          const pubTime = Number(item.published_on) ? Number(item.published_on) * 1000 : Date.now();
+
+          return {
+            id: String(item.id || Date.now() + Math.random()),
+            title: title,
+            source: String(sourceInfo?.name || item.source || "Crypto News"),
+            url: String(item.url || "https://coindesk.com"),
+            publishedAt: pubTime,
+            category,
+            sentiment,
+            summary: bodyStr ? bodyStr.slice(0, 180) + "..." : title,
+            readTime: `${Math.max(2, Math.min(8, Math.round(bodyStr.length / 300)))} min read`,
+            isCached: false,
+          };
+        });
+      }
     }
-  } catch (e) {
-    console.warn("Error fetching real crypto news, fallbacking to cache", e);
+  } catch {
+    /* fallback to static array below */
   }
-  return [];
+
+  return INITIAL_FALLBACK_NEWS;
 }
 
 async function fetchRealLiveWhaleTxs(): Promise<WhaleTx[]> {

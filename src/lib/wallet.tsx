@@ -112,8 +112,24 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     window.ethereum.on?.("accountsChanged", onAcc);
     window.ethereum.on?.("chainChanged", onChain);
     return () => {
-      window.ethereum?.removeListener?.("accountsChanged", onAcc);
-      window.ethereum?.removeListener?.("chainChanged", onChain);
+      const eth = window.ethereum;
+      if (!eth) return;
+      if (typeof eth.removeListener === "function") {
+        try {
+          eth.removeListener("accountsChanged", onAcc);
+          eth.removeListener("chainChanged", onChain);
+        } catch {
+          /* noop */
+        }
+      }
+      if (typeof (eth as { off?: (e: string, h: unknown) => void }).off === "function") {
+        try {
+          (eth as { off: (e: string, h: unknown) => void }).off("accountsChanged", onAcc);
+          (eth as { off: (e: string, h: unknown) => void }).off("chainChanged", onChain);
+        } catch {
+          /* noop */
+        }
+      }
     };
   }, [refresh]);
 

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 
 export type OrderMode = "BUY" | "SELL";
 
@@ -61,23 +61,45 @@ export function useOrderShortcuts({
 }: OrderShortcutsConfig = {}): UseOrderShortcutsReturn {
   const [activeMode, setActiveMode] = useState<OrderMode>(defaultMode);
 
+  const callbacksRef = useRef({
+    onBuy,
+    onSell,
+    onFlipTokens,
+    onExecute,
+    onCancel,
+    onMax,
+    onHalf,
+  });
+
+  useEffect(() => {
+    callbacksRef.current = {
+      onBuy,
+      onSell,
+      onFlipTokens,
+      onExecute,
+      onCancel,
+      onMax,
+      onHalf,
+    };
+  }, [onBuy, onSell, onFlipTokens, onExecute, onCancel, onMax, onHalf]);
+
   const triggerBuy = useCallback(() => {
     setActiveMode("BUY");
-    onBuy?.();
-  }, [onBuy]);
+    callbacksRef.current.onBuy?.();
+  }, []);
 
   const triggerSell = useCallback(() => {
     setActiveMode("SELL");
-    onSell?.();
-  }, [onSell]);
+    callbacksRef.current.onSell?.();
+  }, []);
 
   const triggerFlip = useCallback(() => {
-    onFlipTokens?.();
-  }, [onFlipTokens]);
+    callbacksRef.current.onFlipTokens?.();
+  }, []);
 
   const triggerExecute = useCallback(() => {
-    onExecute?.();
-  }, [onExecute]);
+    callbacksRef.current.onExecute?.();
+  }, []);
 
   useEffect(() => {
     if (!enabled) return;
@@ -91,9 +113,11 @@ export function useOrderShortcuts({
           target.tagName === "SELECT" ||
           target.isContentEditable);
 
+      const cb = callbacksRef.current;
+
       // Handle Ctrl+Enter or Cmd+Enter for instant execution even inside inputs if desired
       if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
-        if (onExecute) {
+        if (cb.onExecute) {
           event.preventDefault();
           triggerExecute();
         }
@@ -102,8 +126,8 @@ export function useOrderShortcuts({
 
       // Handle Escape for cancel/clear
       if (event.key === "Escape") {
-        if (onCancel) {
-          onCancel();
+        if (cb.onCancel) {
+          cb.onCancel();
         }
         return;
       }
@@ -131,21 +155,21 @@ export function useOrderShortcuts({
           break;
         case "f": // FLIP tokens shortcut
         case "x":
-          if (onFlipTokens) {
+          if (cb.onFlipTokens) {
             event.preventDefault();
             triggerFlip();
           }
           break;
         case "m": // MAX amount shortcut
-          if (onMax) {
+          if (cb.onMax) {
             event.preventDefault();
-            onMax();
+            cb.onMax();
           }
           break;
         case "h": // HALF amount shortcut
-          if (onHalf) {
+          if (cb.onHalf) {
             event.preventDefault();
-            onHalf();
+            cb.onHalf();
           }
           break;
         default:
@@ -155,19 +179,7 @@ export function useOrderShortcuts({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [
-    enabled,
-    ignoreWhenInputFocused,
-    onExecute,
-    onCancel,
-    onFlipTokens,
-    onMax,
-    onHalf,
-    triggerBuy,
-    triggerSell,
-    triggerFlip,
-    triggerExecute,
-  ]);
+  }, [enabled, ignoreWhenInputFocused, triggerBuy, triggerSell, triggerFlip, triggerExecute]);
 
   const shortcuts: OrderShortcutItem[] = useMemo(
     () => [
