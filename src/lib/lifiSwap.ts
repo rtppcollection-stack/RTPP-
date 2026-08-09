@@ -102,7 +102,7 @@ export async function getLifiSwapQuote(params: LifiQuoteParams): Promise<LifiQuo
     feeRecipient: targetFeeWallet,
     feePercentage: "0.0025",
     referrer: targetFeeWallet,
-    integrator: "rtpp-multi-chain",
+    integrator: "rtpp",
   });
 
   const apiKey =
