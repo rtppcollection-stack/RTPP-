@@ -7,6 +7,19 @@ import {
 export const ADMIN_FEE_WALLET = PRIMARY_ADMIN_EVM_WALLET;
 export { PLATFORM_FEE_PERCENTAGE };
 
+export const RTPP_CONTRACT_ADDRESS = "0x90f0712eddc36f4e42c0f8a6a6739ce5b113d9b8";
+
+export function isRTPPToken(tokenAddrOrSymbol: string | undefined | null): boolean {
+  if (!tokenAddrOrSymbol) return false;
+  const clean = tokenAddrOrSymbol.trim().toLowerCase();
+  return clean === RTPP_CONTRACT_ADDRESS.toLowerCase() || clean === "rtpp";
+}
+
+export interface LifiRouteOptions {
+  maxPriceImpact?: number;
+  [key: string]: unknown;
+}
+
 export interface LifiQuoteParams {
   fromChain: string; // Chain ID or key, e.g. "1", "137", "8453", "56", "solana"
   toChain: string; // Chain ID or key
@@ -14,6 +27,8 @@ export interface LifiQuoteParams {
   toToken: string; // Token contract address or symbol
   fromAmountWei: string;
   fromAddress: string;
+  maxPriceImpact?: number;
+  routeOptions?: LifiRouteOptions;
 }
 
 export interface LifiGasCost {
@@ -91,6 +106,10 @@ export async function getLifiSwapQuote(params: LifiQuoteParams): Promise<LifiQuo
   const takerAddress =
     params.fromAddress && params.fromAddress.length > 10 ? params.fromAddress : targetFeeWallet;
 
+  const isRTPPTrade = isRTPPToken(params.fromToken) || isRTPPToken(params.toToken);
+  const effectiveMaxPriceImpact =
+    params.routeOptions?.maxPriceImpact ?? params.maxPriceImpact ?? (isRTPPTrade ? 1 : 0.05);
+
   const queryParams = new URLSearchParams({
     fromChain,
     toChain,
@@ -103,6 +122,7 @@ export async function getLifiSwapQuote(params: LifiQuoteParams): Promise<LifiQuo
     feePercentage: "0.0025",
     referrer: targetFeeWallet,
     integrator: "rtpp",
+    maxPriceImpact: effectiveMaxPriceImpact.toString(),
   });
 
   const apiKey =

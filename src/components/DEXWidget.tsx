@@ -28,6 +28,7 @@ import {
   ADMIN_FEE_WALLET,
   PLATFORM_FEE_PERCENTAGE,
   LifiQuoteResult,
+  isRTPPToken,
 } from "@/lib/lifiSwap";
 import { getAdminFeeWallet } from "@/lib/adminWallets";
 import { useI18n } from "@/lib/i18n";
@@ -458,6 +459,12 @@ export function DEXWidget({ coinId: _coinId }: Props) {
       const toTokenAddr =
         toToken.isNative || !toToken.address.startsWith("0x") ? toToken.symbol : toToken.address;
 
+      const isRTPPTrade =
+        isRTPPToken(fromToken.address) ||
+        isRTPPToken(fromToken.symbol) ||
+        isRTPPToken(toToken.address) ||
+        isRTPPToken(toToken.symbol);
+
       const quote = await getLifiSwapQuote({
         fromChain: fromToken.chainId,
         toChain: toToken.chainId,
@@ -465,6 +472,9 @@ export function DEXWidget({ coinId: _coinId }: Props) {
         toToken: toTokenAddr,
         fromAmountWei,
         fromAddress: address || ADMIN_FEE_WALLET,
+        routeOptions: {
+          maxPriceImpact: isRTPPTrade ? 1 : 0.05,
+        },
       });
 
       if (quote.error) {
@@ -591,6 +601,12 @@ export function DEXWidget({ coinId: _coinId }: Props) {
       const toTokenAddr =
         toToken.isNative || !toToken.address.startsWith("0x") ? toToken.symbol : toToken.address;
 
+      const isRTPPTrade =
+        isRTPPToken(fromToken.address) ||
+        isRTPPToken(fromToken.symbol) ||
+        isRTPPToken(toToken.address) ||
+        isRTPPToken(toToken.symbol);
+
       // 1. Fetch fresh quote with exact user wallet address
       const freshQuote = await getLifiSwapQuote({
         fromChain: fromToken.chainId,
@@ -599,6 +615,9 @@ export function DEXWidget({ coinId: _coinId }: Props) {
         toToken: toTokenAddr,
         fromAmountWei,
         fromAddress: address,
+        routeOptions: {
+          maxPriceImpact: isRTPPTrade ? 1 : 0.05,
+        },
       });
 
       if (freshQuote.error || !freshQuote.transactionRequest) {
