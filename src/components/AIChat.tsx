@@ -38,28 +38,32 @@ const QUICK_PROMPTS_MY = [
 ];
 
 export function AIChat() {
-  const { address } = useWallet();
+  const { address, mounted } = useWallet();
   const { lang } = useI18n();
   const isBurmese = lang === "my";
   const quickPrompts = isBurmese ? QUICK_PROMPTS_MY : QUICK_PROMPTS_EN;
 
+  const [hasMounted, setHasMounted] = useState(false);
   const [open, setOpen] = useState(false);
   const [isAdminMode] = useState(false);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
 
-  const isOwnerWallet = (address || "").toLowerCase() === ADMIN_WALLET.toLowerCase();
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  const isOwnerWallet =
+    hasMounted && mounted && (address || "").toLowerCase() === ADMIN_WALLET.toLowerCase();
   const activeIsAdmin = isOwnerWallet || isAdminMode;
 
   const [messages, setMessages] = useState<Msg[]>(() => [
     {
       role: "assistant",
-      content: activeIsAdmin
-        ? "👨‍💻 **RTPP Master Admin AI Support:**\n\nFull administrative mode active. Ask about fee routing, Printful webhook status, smart contracts, or system configuration."
-        : isBurmese
-          ? "Hello! 👋 ကျွန်တော်ကတော့ **RTPP 24/7 ဖောက်သည်ဝန်ဆောင်မှု AI** ဖြစ်ပါတယ်။\n\nRTPP Web Platform ဝန်ဆောင်မှုများနှင့် ပတ်သက်၍ လွတ်လပ်စွာ မေးမြန်းနိုင်ပါတယ်:\n• 🛍️ **Printful NFT Merch Store** (Crypto ဖြင့် အင်္ကျီ၊ ခွက်များ မှာယူခြင်း)\n• ⚡ **DEX Swap & Bridge** (EVM ၅ လိုင်းစလုံးတွင် 0.30% Fee routing)\n• 🔥 **RTPP Token & Base Pool** (`0x90f0712...` Base Network)\n• 🎨 **Free NFT Marketplace** (100% Free Lazy Minting)\n• 📊 **P2P Profit/Loss Calculator** (USD/MMK တွက်ချက်မှု)\n• 🔒 **Wallet Security & Safety** (လုံခြုံစိတ်ချရသော စနစ်)\n\n*🔒 မှတ်ချက်: RTPP Support သည် သင့် Private Key သို့မဟုတ် Seed Phrase ကို မည်သည့်အခါမျှ တောင်းဆိုမည်မဟုတ်ပါ!*"
-          : "Hello! 👋 I am **RTPP 24/7 Customer Support AI**.\n\nI am here to help you navigate and answer any questions about our Web3 platform:\n• 🛍️ **Printful Merch Store** (Order physical apparel with RTPP, ETH, USDT)\n• ⚡ **DEX Swap & Bridge** (Multi-chain swaps with transparent 0.30% fee routing)\n• 🔥 **RTPP Token & Base Pool** (Base contract `0x90f0712eddc...`)\n• 🎨 **NFT Marketplace** (100% Free gasless Lazy Minting)\n• 📊 **P2P Calculator** (PnL, target exit & fee math in USD & MMK)\n• 🔒 **Wallet Safety & Non-Custodial Security**\n\n*🔒 Note: RTPP Support will NEVER ask for your private key or seed phrase!*",
+      content: isBurmese
+        ? "Hello! 👋 ကျွန်တော်ကတော့ **RTPP Master Admin AI Support** ဖြစ်ပါတယ်။\n\nRTPP Web Platform ဝန်ဆောင်မှုများနှင့် ပတ်သက်၍ လွတ်လပ်စွာ မေးမြန်းနိုင်ပါတယ်:\n• 🛍️ **Printful NFT Merch Store** (Crypto ဖြင့် အင်္ကျီ၊ ခွက်များ မှာယူခြင်း)\n• ⚡ **DEX Swap & Bridge** (EVM ၅ လိုင်းစလုံးတွင် 0.30% Fee routing)\n• 🔥 **RTPP Token & Base Pool** (`0x90f0712...` Base Network)\n• 🎨 **Free NFT Marketplace** (100% Free Lazy Minting)\n• 📊 **P2P Profit/Loss Calculator** (USD/MMK တွက်ချက်မှု)\n• 🔒 **Wallet Security & Safety** (လုံခြုံစိတ်ချရသော စနစ်)\n\n*🔒 မှတ်ချက်: RTPP Support သည် သင့် Private Key သို့မဟုတ် Seed Phrase ကို မည်သည့်အခါမျှ တောင်းဆိုမည်မဟုတ်ပါ!*"
+        : "Hello! 👋 I am **RTPP Master Admin AI Support** — your Proactive Market Analyst & Empathetic User Success Partner.\n\nI am here to assist with platform queries, smart contracts, and real-time market data:\n• ⚡ **DEX Swap & Bridge** (Multi-chain routing & fee math)\n• 📈 **Proactive Market Analysis** (Live prices, volatility & momentum)\n• 🛍️ **Printful Merch Store** (Physical Web3 apparel orders)\n• 🔥 **RTPP Token & Base Pool** (`0x90f0712eddc...`)\n• 🎨 **NFT Marketplace** (100% Free gasless Lazy Minting)\n• 📊 **P2P Calculator** (PnL, target exit & fee math)\n\n*🔒 Note: RTPP Support will NEVER ask for your private key or seed phrase!*",
     },
   ]);
 
@@ -69,10 +73,10 @@ export function AIChat() {
         {
           role: "assistant",
           content: activeIsAdmin
-            ? "👨‍💻 **RTPP Master Admin AI Support:**\n\nFull administrative mode active. Ask about fee routing, Printful webhook status, smart contracts, or system configuration."
+            ? "👨‍💻 **RTPP Master Admin AI Support:**\n\nFull administrative mode active as Proactive Market Analyst & Empathetic User Success Partner. Ask about fee routing, Printful webhook status, smart contracts, or system configuration."
             : isBurmese
-              ? "Hello! 👋 ကျွန်တော်ကတော့ **RTPP 24/7 ဖောက်သည်ဝန်ဆောင်မှု AI** ဖြစ်ပါတယ်။\n\nRTPP Web Platform ဝန်ဆောင်မှုများနှင့် ပတ်သက်၍ လွတ်လပ်စွာ မေးမြန်းနိုင်ပါတယ်:\n• 🛍️ **Printful NFT Merch Store** (Crypto ဖြင့် အင်္ကျီ၊ ခွက်များ မှာယူခြင်း)\n• ⚡ **DEX Swap & Bridge** (EVM ၅ လိုင်းစလုံးတွင် 0.30% Fee routing)\n• 🔥 **RTPP Token & Base Pool** (`0x90f0712...` Base Network)\n• 🎨 **Free NFT Marketplace** (100% Free Lazy Minting)\n• 📊 **P2P Profit/Loss Calculator** (USD/MMK တွက်ချက်မှု)\n• 🔒 **Wallet Security & Safety** (လုံခြုံစိတ်ချရသော စနစ်)\n\n*🔒 မှတ်ချက်: RTPP Support သည် သင့် Private Key သို့မဟုတ် Seed Phrase ကို မည်သည့်အခါမျှ တောင်းဆိုမည်မဟုတ်ပါ!*"
-              : "Hello! 👋 I am **RTPP 24/7 Customer Support AI**.\n\nI am here to help you navigate and answer any questions about our Web3 platform:\n• 🛍️ **Printful Merch Store** (Order physical apparel with RTPP, ETH, USDT)\n• ⚡ **DEX Swap & Bridge** (Multi-chain swaps with transparent 0.30% fee routing)\n• 🔥 **RTPP Token & Base Pool** (Base contract `0x90f0712eddc...`)\n• 🎨 **NFT Marketplace** (100% Free gasless Lazy Minting)\n• 📊 **P2P Calculator** (PnL, target exit & fee math in USD & MMK)\n• 🔒 **Wallet Safety & Non-Custodial Security**\n\n*🔒 Note: RTPP Support will NEVER ask for your private key or seed phrase!*",
+              ? "Hello! 👋 ကျွန်တော်ကတော့ **RTPP Master Admin AI Support** ဖြစ်ပါတယ်။\n\nRTPP Web Platform ဝန်ဆောင်မှုများနှင့် ပတ်သက်၍ လွတ်လပ်စွာ မေးမြန်းနိုင်ပါတယ်:\n• 🛍️ **Printful NFT Merch Store** (Crypto ဖြင့် အင်္ကျီ၊ ခွက်များ မှာယူခြင်း)\n• ⚡ **DEX Swap & Bridge** (EVM ၅ လိုင်းစလုံးတွင် 0.30% Fee routing)\n• 🔥 **RTPP Token & Base Pool** (`0x90f0712...` Base Network)\n• 🎨 **Free NFT Marketplace** (100% Free Lazy Minting)\n• 📊 **P2P Profit/Loss Calculator** (USD/MMK တွက်ချက်မှု)\n• 🔒 **Wallet Security & Safety** (လုံခြုံစိတ်ချရသော စနစ်)\n\n*🔒 မှတ်ချက်: RTPP Support သည် သင့် Private Key သို့မဟုတ် Seed Phrase ကို မည်သည့်အခါမျှ တောင်းဆိုမည်မဟုတ်ပါ!*"
+              : "Hello! 👋 I am **RTPP Master Admin AI Support** — your Proactive Market Analyst & Empathetic User Success Partner.\n\nI am here to assist with platform queries, smart contracts, and real-time market data:\n• ⚡ **DEX Swap & Bridge** (Multi-chain routing & fee math)\n• 📈 **Proactive Market Analysis** (Live prices, volatility & momentum)\n• 🛍️ **Printful Merch Store** (Physical Web3 apparel orders)\n• 🔥 **RTPP Token & Base Pool** (`0x90f0712eddc...`)\n• 🎨 **NFT Marketplace** (100% Free gasless Lazy Minting)\n• 📊 **P2P Calculator** (PnL, target exit & fee math)\n\n*🔒 Note: RTPP Support will NEVER ask for your private key or seed phrase!*",
         },
       ]);
     }

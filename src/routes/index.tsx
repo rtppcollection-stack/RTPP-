@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useCallback, lazy, Suspense, memo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { I18nProvider, useI18n } from "@/lib/i18n";
 import { WalletProvider } from "@/lib/wallet";
@@ -10,23 +10,10 @@ import { TokenSearch } from "@/components/TokenSearch";
 import { PopularTokens } from "@/components/PopularTokens";
 import { TokenPanel } from "@/components/TokenPanel";
 import { MarketDashboard } from "@/components/MarketDashboard";
-import { GlobalWalletBalance } from "@/components/GlobalWalletBalance";
-import { NetworkGasTracker } from "@/components/NetworkGasTracker";
 import { WalletButton } from "@/components/WalletButton";
-import { NFTGallery } from "@/components/NFTGallery";
-import { NFTMerchStore } from "@/components/NFTMerchStore";
-import { DEXWidget } from "@/components/DEXWidget";
-import { TransactionHistory } from "@/components/TransactionHistory";
-import { WhaleAndNewsRadar } from "@/components/WhaleAndNewsRadar";
 import { RiskBadge } from "@/components/RiskGauge";
 import { RTPPTokenHeroCard } from "@/components/RTPPTokenHeroCard";
-import { AIChat } from "@/components/AIChat";
 import { SocialLinks } from "@/components/SocialLinks";
-import { AppTour } from "@/components/AppTour";
-import { PnLCalculator, PnLHistoryPanel, ScenariosTable } from "@/components/PnLCalculator";
-import { PositionSizeCalculator } from "@/components/PositionSizeCalculator";
-import { EditorPanel } from "@/components/EditorPanel";
-import { MonitorLogsPanel } from "@/components/MonitorLogsPanel";
 import { useUserRole } from "@/hooks/useUserRole";
 import { fetchCoinDetail } from "@/lib/coingecko";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -45,9 +32,60 @@ import {
 } from "lucide-react";
 import { toast, Toaster } from "sonner";
 
+// Lazy-loaded heavy modules for instant initial load & code-splitting
+const GlobalWalletBalance = lazy(() =>
+  import("@/components/GlobalWalletBalance").then((m) => ({ default: m.GlobalWalletBalance })),
+);
+const NFTGallery = lazy(() =>
+  import("@/components/NFTGallery").then((m) => ({ default: m.NFTGallery })),
+);
+const NFTMerchStore = lazy(() =>
+  import("@/components/NFTMerchStore").then((m) => ({ default: m.NFTMerchStore })),
+);
+const DEXWidget = lazy(() =>
+  import("@/components/DEXWidget").then((m) => ({ default: m.DEXWidget })),
+);
+const TransactionHistory = lazy(() =>
+  import("@/components/TransactionHistory").then((m) => ({ default: m.TransactionHistory })),
+);
+const WhaleAndNewsRadar = lazy(() =>
+  import("@/components/WhaleAndNewsRadar").then((m) => ({ default: m.WhaleAndNewsRadar })),
+);
+const AIChat = lazy(() => import("@/components/AIChat").then((m) => ({ default: m.AIChat })));
+const AppTour = lazy(() => import("@/components/AppTour").then((m) => ({ default: m.AppTour })));
+const PositionSizeCalculator = lazy(() =>
+  import("@/components/PositionSizeCalculator").then((m) => ({
+    default: m.PositionSizeCalculator,
+  })),
+);
+const PnLCalculator = lazy(() =>
+  import("@/components/PnLCalculator").then((m) => ({ default: m.PnLCalculator })),
+);
+const ScenariosTable = lazy(() =>
+  import("@/components/PnLCalculator").then((m) => ({ default: m.ScenariosTable })),
+);
+const PnLHistoryPanel = lazy(() =>
+  import("@/components/PnLCalculator").then((m) => ({ default: m.PnLHistoryPanel })),
+);
+const EditorPanel = lazy(() =>
+  import("@/components/EditorPanel").then((m) => ({ default: m.EditorPanel })),
+);
+const MonitorLogsPanel = lazy(() =>
+  import("@/components/MonitorLogsPanel").then((m) => ({ default: m.MonitorLogsPanel })),
+);
+
 function AppToaster() {
   const { theme } = useTheme();
   return <Toaster position="top-right" theme={theme} richColors />;
+}
+
+function TabSkeleton() {
+  return (
+    <div className="panel p-8 flex flex-col items-center justify-center gap-3 min-h-[280px] text-muted-foreground animate-pulse">
+      <Loader2 className="h-7 w-7 animate-spin text-primary" />
+      <span className="text-xs font-mono">Loading module...</span>
+    </div>
+  );
 }
 
 export const Route = createFileRoute("/")({
@@ -74,7 +112,9 @@ export const Route = createFileRoute("/")({
       <I18nProvider>
         <WalletProvider>
           <Home />
-          <AIChat />
+          <Suspense fallback={null}>
+            <AIChat />
+          </Suspense>
           <AppToaster />
         </WalletProvider>
       </I18nProvider>
@@ -92,17 +132,16 @@ function Home() {
   const [selectedMerchImage, setSelectedMerchImage] = useState<string>("");
   const [selectedMerchTitle, setSelectedMerchTitle] = useState<string>("");
 
-  const handleSelectNFTForMerch = (imageUrl: string, title?: string) => {
+  const handleSelectNFTForMerch = useCallback((imageUrl: string, title?: string) => {
     setSelectedMerchImage(imageUrl);
     if (title) setSelectedMerchTitle(title);
     toast.success(`Selected "${title || "NFT Artwork"}" for Phygital Studio!`);
     setTab("merch");
-  };
+  }, []);
 
-  // Determine grid columns dynamically for nav tabs
-  const extraTabsCount =
-    (isAdmin ? 2 : 0) + (!isAdmin && isEditor ? 1 : 0) + (!isAdmin && isMonitor ? 1 : 0);
-  const totalTabs = 6 + extraTabsCount;
+  const handleTrade = useCallback((id: string) => {
+    setCoinId(id);
+  }, []);
 
   return (
     <div
@@ -144,7 +183,9 @@ function Home() {
             <div className="flex items-center gap-1 sm:gap-1.5">
               <ThemeToggle />
               <div className="hidden md:block">
-                <AppTour currentTab={tab} onTabChange={setTab} />
+                <Suspense fallback={null}>
+                  <AppTour currentTab={tab} onTabChange={setTab} />
+                </Suspense>
               </div>
               <WalletButton />
               <LanguageSwitcher />
@@ -224,9 +265,7 @@ function Home() {
             />
             <MarketDashboard
               onSelectToken={setCoinId}
-              onTrade={(id, _mode) => {
-                setCoinId(id);
-              }}
+              onTrade={handleTrade}
               activeTokenId={coinId}
             />
 
@@ -259,14 +298,18 @@ function Home() {
               subtitle="Trade tokens directly on-chain with automated routing and ultra-low platform fees."
             />
             {/* Focused Swap Terminal */}
-            <DEXWidget coinId={coinId} />
+            <Suspense fallback={<TabSkeleton />}>
+              <DEXWidget coinId={coinId} />
+            </Suspense>
 
             <div className="pt-6 border-t border-border/60 space-y-3">
               <SectionHeader
                 title="Recent On-Chain Swaps & Transaction Log"
                 subtitle="Live history of executed swaps, fee earnings, status tracking, and receipts."
               />
-              <TransactionHistory />
+              <Suspense fallback={<TabSkeleton />}>
+                <TransactionHistory />
+              </Suspense>
             </div>
           </TabsContent>
 
@@ -275,11 +318,15 @@ function Home() {
               title="Multi-Chain Crypto Portfolio & Base Asset Vault"
               subtitle="Real-time on-chain token balance tracking, USD valuations, and asset breakdown for Base Chain and major Web3 networks."
             />
-            <GlobalWalletBalance />
+            <Suspense fallback={<TabSkeleton />}>
+              <GlobalWalletBalance />
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="whale" className="space-y-4 mt-0">
-            <WhaleAndNewsRadar />
+            <Suspense fallback={<TabSkeleton />}>
+              <WhaleAndNewsRadar />
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="calc" className="space-y-4 mt-0">
@@ -301,7 +348,9 @@ function Home() {
               title="NFT Digital Gallery & Collection Marketplace"
               subtitle="Explore on-chain collectible NFTs available for trading, minting, and physical merch creation. Click 'Create Custom Streetwear' on any NFT to load it in the Phygital Studio."
             />
-            <NFTGallery onSelectForMerch={handleSelectNFTForMerch} />
+            <Suspense fallback={<TabSkeleton />}>
+              <NFTGallery onSelectForMerch={handleSelectNFTForMerch} />
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="merch" className="space-y-6 mt-0">
@@ -309,10 +358,12 @@ function Home() {
               title="Phygital Web3 Studio & Printful Merch Configurator"
               subtitle="Preview and customize selected NFT artwork onto high quality apparel, mugs & canvases with automated Printful order fulfillment."
             />
-            <NFTMerchStore
-              selectedImageUrl={selectedMerchImage}
-              selectedNftTitle={selectedMerchTitle}
-            />
+            <Suspense fallback={<TabSkeleton />}>
+              <NFTMerchStore
+                selectedImageUrl={selectedMerchImage}
+                selectedNftTitle={selectedMerchTitle}
+              />
+            </Suspense>
           </TabsContent>
 
           {(isEditor || isAdmin) && (
@@ -321,7 +372,9 @@ function Home() {
                 title="Editor & Content Creation Studio"
                 subtitle="Exclusive portal for Editors to create, update, and manage news feeds, market alerts, and announcements."
               />
-              <EditorPanel />
+              <Suspense fallback={<TabSkeleton />}>
+                <EditorPanel />
+              </Suspense>
             </TabsContent>
           )}
 
@@ -331,7 +384,9 @@ function Home() {
                 title="System Activity & Audit Telemetry"
                 subtitle="Exclusive portal for Monitors to review live system logs, RPC API response latency, and authorization events."
               />
-              <MonitorLogsPanel />
+              <Suspense fallback={<TabSkeleton />}>
+                <MonitorLogsPanel />
+              </Suspense>
             </TabsContent>
           )}
         </Tabs>
@@ -384,7 +439,15 @@ function Home() {
   );
 }
 
-function TabTrig({ value, icon, label }: { value: string; icon: React.ReactNode; label: string }) {
+const TabTrig = memo(function TabTrig({
+  value,
+  icon,
+  label,
+}: {
+  value: string;
+  icon: React.ReactNode;
+  label: string;
+}) {
   return (
     <TabsTrigger
       value={value}
@@ -394,9 +457,15 @@ function TabTrig({ value, icon, label }: { value: string; icon: React.ReactNode;
       <span>{label}</span>
     </TabsTrigger>
   );
-}
+});
 
-function SectionHeader({ title, subtitle }: { title: string; subtitle: string }) {
+const SectionHeader = memo(function SectionHeader({
+  title,
+  subtitle,
+}: {
+  title: string;
+  subtitle: string;
+}) {
   return (
     <div className="text-center space-y-1">
       <h1 className="text-lg md:text-2xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
@@ -405,7 +474,7 @@ function SectionHeader({ title, subtitle }: { title: string; subtitle: string })
       <p className="text-[11px] md:text-xs text-muted-foreground">{subtitle}</p>
     </div>
   );
-}
+});
 
 function CalculatorTab({ coinId }: { coinId: string }) {
   const { lang } = useI18n();
@@ -481,20 +550,28 @@ function CalculatorTab({ coinId }: { coinId: string }) {
       </div>
 
       {calcMode === "position" ? (
-        <PositionSizeCalculator tokenSymbol={coin.symbol.toUpperCase()} livePriceUSD={priceUSD} />
+        <Suspense fallback={<TabSkeleton />}>
+          <PositionSizeCalculator tokenSymbol={coin.symbol.toUpperCase()} livePriceUSD={priceUSD} />
+        </Suspense>
       ) : (
         <>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <PnLCalculator
-              tokenId={coin.id}
-              tokenSymbol={coin.symbol}
-              livePriceUSD={priceUSD}
-              hideHistory
-              hideScenarios
-            />
-            <ScenariosTable tokenSymbol={coin.symbol} livePriceUSD={priceUSD} />
+            <Suspense fallback={<TabSkeleton />}>
+              <PnLCalculator
+                tokenId={coin.id}
+                tokenSymbol={coin.symbol}
+                livePriceUSD={priceUSD}
+                hideHistory
+                hideScenarios
+              />
+            </Suspense>
+            <Suspense fallback={<TabSkeleton />}>
+              <ScenariosTable tokenSymbol={coin.symbol} livePriceUSD={priceUSD} />
+            </Suspense>
           </div>
-          <PnLHistoryPanel />
+          <Suspense fallback={<TabSkeleton />}>
+            <PnLHistoryPanel />
+          </Suspense>
         </>
       )}
     </div>

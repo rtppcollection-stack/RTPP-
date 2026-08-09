@@ -39,7 +39,7 @@ export const Route = createFileRoute("/api/lifi-swap")({
               feeRecipient: ADMIN_FEE_WALLET,
               feePercentage: PLATFORM_FEE_PERCENTAGE,
             }),
-            { status: 500, headers: { "Content-Type": "application/json" } }
+            { status: 500, headers: { "Content-Type": "application/json" } },
           );
         }
       },
@@ -75,7 +75,7 @@ export const Route = createFileRoute("/api/lifi-swap")({
               feeRecipient: ADMIN_FEE_WALLET,
               feePercentage: PLATFORM_FEE_PERCENTAGE,
             }),
-            { status: 500, headers: { "Content-Type": "application/json" } }
+            { status: 500, headers: { "Content-Type": "application/json" } },
           );
         }
       },

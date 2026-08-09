@@ -3,9 +3,9 @@ export const PLATFORM_FEE_PERCENTAGE = 0.002; // 0.2% commission
 
 export interface LifiQuoteParams {
   fromChain: string; // Chain ID or key, e.g. "1", "137", "8453", "56", "solana"
-  toChain: string;   // Chain ID or key
+  toChain: string; // Chain ID or key
   fromToken: string; // Token contract address or symbol
-  toToken: string;   // Token contract address or symbol
+  toToken: string; // Token contract address or symbol
   fromAmountWei: string;
   fromAddress: string;
 }
@@ -81,9 +81,10 @@ export function mapChainToLifiChainId(chain: string): string {
 export async function getLifiSwapQuote(params: LifiQuoteParams): Promise<LifiQuoteResult> {
   const fromChain = mapChainToLifiChainId(params.fromChain);
   const toChain = mapChainToLifiChainId(params.toChain);
-  const takerAddress = params.fromAddress && params.fromAddress.startsWith("0x")
-    ? params.fromAddress
-    : ADMIN_FEE_WALLET;
+  const takerAddress =
+    params.fromAddress && params.fromAddress.startsWith("0x")
+      ? params.fromAddress
+      : ADMIN_FEE_WALLET;
 
   const queryParams = new URLSearchParams({
     fromChain,
@@ -125,10 +126,7 @@ export async function getLifiSwapQuote(params: LifiQuoteParams): Promise<LifiQuo
       const gasCosts: LifiGasCost[] = estimate.gasCosts || [];
       const feeCosts: LifiFeeCost[] = estimate.feeCosts || [];
 
-      const totalGasCostUSD = gasCosts.reduce(
-        (acc, g) => acc + (parseFloat(g.amountUSD) || 0),
-        0
-      );
+      const totalGasCostUSD = gasCosts.reduce((acc, g) => acc + (parseFloat(g.amountUSD) || 0), 0);
 
       return {
         id: data.id,
