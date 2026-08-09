@@ -29,6 +29,7 @@ import {
   PLATFORM_FEE_PERCENTAGE,
   LifiQuoteResult,
 } from "@/lib/lifiSwap";
+import { getAdminFeeWallet } from "@/lib/adminWallets";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -566,12 +567,12 @@ export function DEXWidget({ coinId: _coinId }: Props) {
     setPreSwapModalOpen(true);
   };
 
-  // Real MetaMask Execution via Li.Fi transactionRequest & eth_sendTransaction
+  // Real Web3 Execution via Li.Fi transactionRequest & eth_sendTransaction
   const confirmAndFinalizeSwap = async () => {
     setBusy(true);
     setLastTxHash(null);
 
-    const targetAdminWallet = ADMIN_FEE_WALLET;
+    const targetAdminWallet = getAdminFeeWallet(fromToken.chainId);
 
     try {
       toast.info(
@@ -1131,7 +1132,7 @@ export function DEXWidget({ coinId: _coinId }: Props) {
                 <ShieldCheck className="h-3.5 w-3.5 text-amber-400" /> Direct Platform Fee (0.25%):
               </span>
               <span className="font-bold text-amber-400">
-                ${platformFeeUSD.toFixed(2)} USD ({shortAddr(ADMIN_FEE_WALLET)})
+                ${platformFeeUSD.toFixed(2)} USD ({shortAddr(getAdminFeeWallet(fromToken.chainId))})
               </span>
             </div>
 
@@ -1376,7 +1377,9 @@ export function DEXWidget({ coinId: _coinId }: Props) {
             <div className="space-y-1.5 p-3 rounded-xl bg-surface/50 border border-border/40 text-[11px]">
               <div className="flex justify-between text-muted-foreground">
                 <span>Li.Fi Fee Recipient:</span>
-                <span className="text-amber-400 font-bold">{shortAddr(ADMIN_FEE_WALLET)}</span>
+                <span className="text-amber-400 font-bold">
+                  {shortAddr(getAdminFeeWallet(fromToken.chainId))}
+                </span>
               </div>
               <div className="flex justify-between text-muted-foreground">
                 <span>Platform Commission:</span>

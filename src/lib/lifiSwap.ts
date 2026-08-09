@@ -1,5 +1,11 @@
-export const ADMIN_FEE_WALLET = "0x82627aeEDD0E7f0B6d45d443A1F59bCD2Adcd68f";
-export const PLATFORM_FEE_PERCENTAGE = 0.0025; // 0.25% (25 BPS) commission
+import {
+  PRIMARY_ADMIN_EVM_WALLET,
+  PLATFORM_FEE_PERCENTAGE,
+  getAdminFeeWallet,
+} from "./adminWallets";
+
+export const ADMIN_FEE_WALLET = PRIMARY_ADMIN_EVM_WALLET;
+export { PLATFORM_FEE_PERCENTAGE };
 
 export interface LifiQuoteParams {
   fromChain: string; // Chain ID or key, e.g. "1", "137", "8453", "56", "solana"
@@ -81,10 +87,9 @@ export function mapChainToLifiChainId(chain: string): string {
 export async function getLifiSwapQuote(params: LifiQuoteParams): Promise<LifiQuoteResult> {
   const fromChain = mapChainToLifiChainId(params.fromChain);
   const toChain = mapChainToLifiChainId(params.toChain);
+  const targetFeeWallet = getAdminFeeWallet(params.fromChain);
   const takerAddress =
-    params.fromAddress && params.fromAddress.startsWith("0x")
-      ? params.fromAddress
-      : ADMIN_FEE_WALLET;
+    params.fromAddress && params.fromAddress.length > 10 ? params.fromAddress : targetFeeWallet;
 
   const queryParams = new URLSearchParams({
     fromChain,
@@ -94,9 +99,9 @@ export async function getLifiSwapQuote(params: LifiQuoteParams): Promise<LifiQuo
     fromAmount: params.fromAmountWei,
     fromAddress: takerAddress,
     fee: "0.0025",
-    feeRecipient: ADMIN_FEE_WALLET,
+    feeRecipient: targetFeeWallet,
     feePercentage: "0.0025",
-    referrer: ADMIN_FEE_WALLET,
+    referrer: targetFeeWallet,
     integrator: "rtpp-multi-chain",
   });
 
@@ -152,7 +157,7 @@ export async function getLifiSwapQuote(params: LifiQuoteParams): Promise<LifiQuo
               chainId: data.transactionRequest.chainId,
             }
           : undefined,
-        feeRecipient: ADMIN_FEE_WALLET,
+        feeRecipient: targetFeeWallet,
         feePercentage: 0.0025,
         rawResponse: data,
       };
@@ -160,13 +165,13 @@ export async function getLifiSwapQuote(params: LifiQuoteParams): Promise<LifiQuo
 
     const errJson = await res.json().catch(() => ({}));
     return {
-      feeRecipient: ADMIN_FEE_WALLET,
+      feeRecipient: targetFeeWallet,
       feePercentage: 0.0025,
       error: errJson.message || errJson.error || `Li.Fi HTTP error ${res.status}`,
     };
   } catch (err) {
     return {
-      feeRecipient: ADMIN_FEE_WALLET,
+      feeRecipient: targetFeeWallet,
       feePercentage: 0.0025,
       error: (err as Error).message || "Failed to reach Li.Fi API at https://li.quest",
     };

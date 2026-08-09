@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import { PRIMARY_ADMIN_EVM_WALLET } from "./adminWallets";
 
 type Eth = {
   request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
@@ -50,10 +51,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [connecting, setConnecting] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [hasProvider, setHasProvider] = useState(false);
-  const [feeWallet, setFeeWalletState] = useState<string>(
-    "0x82627aeEDD0E7f0B6d45d443A1F59bCD2Adcd68f",
-  );
-  const [feeBps, setFeeBpsState] = useState<number>(20);
+  const [feeWallet, setFeeWalletState] = useState<string>(PRIMARY_ADMIN_EVM_WALLET);
+  const [feeBps, setFeeBpsState] = useState<number>(25);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -62,9 +61,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       const savedBps = localStorage.getItem("rtpp_fee_rate_bps");
       if (savedBps) {
         const val = Number(savedBps);
-        setFeeBpsState(val > 0 ? val : 20);
+        setFeeBpsState(val > 0 ? val : 25);
       } else {
-        setFeeBpsState(20);
+        setFeeBpsState(25);
       }
     }
   }, []);
@@ -273,6 +272,6 @@ export function shortAddr(a: string | null) {
   return a.slice(0, 6) + "…" + a.slice(-4);
 }
 
-// Platform fee wallet (Base network) — transparent marketplace fee
-export const PLATFORM_FEE_WALLET = "0x82627aeEDD0E7f0B6d45d443A1F59bCD2Adcd68f";
-export const PLATFORM_FEE_PCT = 0.01; // 1%
+// Platform fee wallet (Base network & primary EVM)
+export const PLATFORM_FEE_WALLET = PRIMARY_ADMIN_EVM_WALLET;
+export const PLATFORM_FEE_PCT = 0.0025; // 0.25% (25 BPS)

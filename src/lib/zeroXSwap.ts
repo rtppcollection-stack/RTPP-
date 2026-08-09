@@ -1,8 +1,13 @@
 import { ethers } from "ethers";
+import {
+  PRIMARY_ADMIN_EVM_WALLET,
+  PLATFORM_FEE_PERCENTAGE,
+  getAdminFeeWallet,
+} from "./adminWallets";
 
-export const ADMIN_FEE_WALLET = "0x82627aeEDD0E7f0B6d45d443A1F59bCD2Adcd68f";
-export const PLATFORM_FEE_PERCENTAGE = 0.002; // 0.2% commission
-export const PLATFORM_FEE_BPS = 20; // 20 BPS
+export const ADMIN_FEE_WALLET = PRIMARY_ADMIN_EVM_WALLET;
+export { PLATFORM_FEE_PERCENTAGE };
+export const PLATFORM_FEE_BPS = 25; // 25 BPS (0.25%)
 
 export interface ZeroXQuoteParams {
   sellToken: string;
@@ -40,14 +45,16 @@ export async function get0xSwapQuote(params: ZeroXQuoteParams): Promise<ZeroXQuo
     baseUrl = "https://polygon.api.0x.org";
   }
 
+  const targetFeeWallet = getAdminFeeWallet(chainId);
+
   const queryParams = new URLSearchParams({
     sellToken,
     buyToken,
     sellAmount: sellAmountWei,
-    takerAddress: takerAddress || ADMIN_FEE_WALLET,
-    feeRecipient: ADMIN_FEE_WALLET,
-    buyTokenPercentageFee: "0.002",
-    affiliateAddress: ADMIN_FEE_WALLET,
+    takerAddress: takerAddress || targetFeeWallet,
+    feeRecipient: targetFeeWallet,
+    buyTokenPercentageFee: "0.0025",
+    affiliateAddress: targetFeeWallet,
   });
 
   const apiKey =
@@ -75,15 +82,15 @@ export async function get0xSwapQuote(params: ZeroXQuoteParams): Promise<ZeroXQuo
         buyAmount: data.buyAmount || "0",
         sellAmount: data.sellAmount || sellAmountWei,
         estimatedGas: data.estimatedGas || "210000",
-        buyTokenPercentageFee: 0.002,
-        feeRecipient: ADMIN_FEE_WALLET,
+        buyTokenPercentageFee: 0.0025,
+        feeRecipient: targetFeeWallet,
       };
     }
   } catch (err) {
     console.warn("0x API quote note:", err);
   }
 
-  // Robust fallback 0x transaction wrapper with 0.2% feeRecipient
+  // Robust fallback 0x transaction wrapper with 0.25% feeRecipient
   return {
     to: "0xdef1c0ded9bec7f1a1670819833240f027b25eff", // 0x Router / Exchange Proxy
     data: "0x",
@@ -91,8 +98,8 @@ export async function get0xSwapQuote(params: ZeroXQuoteParams): Promise<ZeroXQuo
     buyAmount: "0",
     sellAmount: sellAmountWei,
     estimatedGas: "210000",
-    buyTokenPercentageFee: 0.002,
-    feeRecipient: ADMIN_FEE_WALLET,
+    buyTokenPercentageFee: 0.0025,
+    feeRecipient: targetFeeWallet,
     isSimulated: true,
   };
 }

@@ -3,6 +3,7 @@ import { Bot, X, Send, Loader2, Sparkles, Trash2, Cpu } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { useWallet } from "@/lib/wallet";
 import { useI18n } from "@/lib/i18n";
+import { PRIMARY_ADMIN_EVM_WALLET, isAdminWallet } from "@/lib/adminWallets";
 
 interface Msg {
   role: "user" | "assistant";
@@ -10,7 +11,7 @@ interface Msg {
   isCached?: boolean;
 }
 
-const ADMIN_WALLET = "0x82627aeEDD0E7f0B6d45d443A1F59bCD2Adcd68f";
+const ADMIN_WALLET = PRIMARY_ADMIN_EVM_WALLET;
 const CLIENT_CACHE_KEY = "rtpp_chat_local_cache_v2";
 
 const QUICK_PROMPTS_EN = [
@@ -54,8 +55,7 @@ export function AIChat() {
     setHasMounted(true);
   }, []);
 
-  const isOwnerWallet =
-    hasMounted && mounted && (address || "").toLowerCase() === ADMIN_WALLET.toLowerCase();
+  const isOwnerWallet = hasMounted && mounted && isAdminWallet(address);
   const activeIsAdmin = isOwnerWallet || isAdminMode;
 
   const [messages, setMessages] = useState<Msg[]>(() => [

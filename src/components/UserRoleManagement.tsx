@@ -27,6 +27,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { UserRole } from "@/integrations/supabase/types";
 import { useWallet } from "@/lib/wallet";
 import { toast } from "sonner";
+import {
+  validateWalletAddress,
+  ADMIN_WALLETS_METAMASK,
+  ADMIN_WALLETS_PHANTOM,
+} from "@/lib/adminWallets";
 
 interface UserProfileItem {
   id: string; // wallet address or UUID
@@ -39,8 +44,38 @@ const STORAGE_KEY_ROLES = "rtpp_user_roles_override_v1";
 
 const DEFAULT_MOCK_USERS: UserProfileItem[] = [
   {
-    id: "0x82627aeEDD0E7f0B6d45d443A1F59bCD2Adcd68f",
-    username: "TreasuryAdmin",
+    id: ADMIN_WALLETS_METAMASK.ethereum,
+    username: "MetaMask Primary Admin (EVM / Base / Polygon / Linea)",
+    role: "admin",
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: ADMIN_WALLETS_METAMASK.solana,
+    username: "MetaMask Solana Treasury Admin",
+    role: "admin",
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: ADMIN_WALLETS_METAMASK.bitcoin,
+    username: "MetaMask Bitcoin Treasury Admin",
+    role: "admin",
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: ADMIN_WALLETS_PHANTOM.solana,
+    username: "Phantom Solana Treasury Admin",
+    role: "admin",
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: ADMIN_WALLETS_PHANTOM.ethereum,
+    username: "Phantom EVM & Robinhood Admin",
+    role: "admin",
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: ADMIN_WALLETS_PHANTOM.sui!,
+    username: "Phantom Sui Treasury Admin",
     role: "admin",
     created_at: new Date().toISOString(),
   },
@@ -136,8 +171,8 @@ export function UserRoleManagement() {
   const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
     const cleanId = newUserId.trim();
-    if (!cleanId) {
-      toast.error("Please enter a valid user ID or wallet address.");
+    if (!cleanId || (!validateWalletAddress(cleanId) && cleanId.length < 10)) {
+      toast.error("Please enter a valid wallet address (EVM, Solana, Bitcoin, Sui) or User ID.");
       return;
     }
 

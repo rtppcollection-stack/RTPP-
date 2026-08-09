@@ -1,4 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
+import { PRIMARY_ADMIN_EVM_WALLET, isAdminWallet } from "./adminWallets";
 
 export interface ChatMessage {
   role: "user" | "assistant" | "system";
@@ -12,7 +13,7 @@ export interface ChatRequest {
   lang?: string;
 }
 
-const ADMIN_WALLET = "0x82627aeEDD0E7f0B6d45d443A1F59bCD2Adcd68f";
+const ADMIN_WALLET = PRIMARY_ADMIN_EVM_WALLET;
 const COMMUNITY_TOKEN = "0x90f0712eddc36f4e42c0f8a6a6739ce5b113d9b8";
 const BASE_POOL_ADDRESS = "0xc59d51cbb9dc36d28315c0f75054ebcf5ad301304640a3d1bd3cbe746f7082aa";
 
@@ -500,7 +501,7 @@ export async function handleChatMessage(
   }
 
   const wallet = (req.walletAddress || "").toLowerCase();
-  const isAdmin = req.isAdmin || wallet === ADMIN_WALLET.toLowerCase();
+  const isAdmin = req.isAdmin || isAdminWallet(req.walletAddress);
   const rawLastMsg = messages[messages.length - 1]?.content || "";
   const lastMsg = cleanUserInput(rawLastMsg);
   const normalizedKey = `${isAdmin ? "admin" : "user"}:${req.lang || "en"}:${normalizeQuery(lastMsg)}`;

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { UserRole } from "@/integrations/supabase/types";
 import { useWallet } from "@/lib/wallet";
+import { isAdminWallet } from "@/lib/adminWallets";
 
 export function useUserRole() {
   const { address } = useWallet();
@@ -23,14 +24,8 @@ export function useUserRole() {
 
       const activeId = targetId.toLowerCase();
 
-      // Default Admin wallet address matching & developer unlock check
-      const isUnlocked =
-        typeof window !== "undefined" && localStorage.getItem("rtpp_admin_unlocked") === "true";
-      if (
-        isUnlocked ||
-        activeId === "0x82627aeedd0e7f0b6d45d443a1f59bcd2adcd68f" ||
-        activeId === "0x3f4e8912a453d867c828e12b4f2910488e3a8e12"
-      ) {
+      // Multi-Chain Admin wallet address matching & developer unlock check
+      if (isAdminWallet(targetId)) {
         if (mounted) {
           setRole("admin");
           setLoading(false);

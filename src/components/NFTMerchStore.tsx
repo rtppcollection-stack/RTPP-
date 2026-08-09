@@ -39,11 +39,12 @@ import { ethers } from "ethers";
 import { CATALOG_PRODUCTS, getVariantId, type NFTMerchProduct } from "@/lib/printful";
 import { useWallet, shortAddr } from "@/lib/wallet";
 import { supabase } from "@/integrations/supabase/client";
+import { PRIMARY_ADMIN_EVM_WALLET } from "@/lib/adminWallets";
 
 // Contract and Admin Wallet constants
 const RTPP_TOKEN_ADDRESS = "0x90f0712eddc36f4e42c0f8a6a6739ce5b113d9b8"; // Base Network
 const BASE_CHAIN_ID_HEX = "0x2105"; // 8453 in Hex
-const ADMIN_WALLET_ADDRESS = "0x82627aeEDD0E7f0B6d45d443A1F59bCD2Adcd68f"; // Admin Fee Receiver Wallet
+const ADMIN_WALLET_ADDRESS = PRIMARY_ADMIN_EVM_WALLET; // Admin Fee Receiver Wallet
 const UNISWAP_V3_ROUTER = "0x2626664c2603336E57B271c5C0b26F421741e481"; // Uniswap V3 Swap Router Contract on Base
 const PLATFORM_FEE_RATE = 0.025; // 2.5% Custom Platform Fee
 

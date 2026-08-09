@@ -1,5 +1,6 @@
 import { redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
+import { isAdminWallet } from "@/lib/adminWallets";
 
 /**
  * Route guard for TanStack Router to enforce Admin role access.
@@ -23,14 +24,8 @@ export async function adminGuard() {
       }
     }
 
-    // Allow admin access if unlocked or if any Web3 wallet is connected
-    const isUnlocked =
-      typeof window !== "undefined" && localStorage.getItem("rtpp_admin_unlocked") === "true";
-    if (
-      isUnlocked ||
-      (walletAddr && walletAddr.startsWith("0x")) ||
-      (walletAddr && walletAddr.toLowerCase() === "0x82627aeedd0e7f0b6d45d443a1f59bcd2adcd68f")
-    ) {
+    // Allow admin access if address belongs to authorized admin wallets or unlocked
+    if (isAdminWallet(walletAddr)) {
       return; // Admin access granted
     }
 

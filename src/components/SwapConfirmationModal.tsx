@@ -172,7 +172,7 @@ export function SwapConfirmationModal({
 
     setSwapping(true);
     const toastId = toast.loading(
-      `Routing 0x Swap & 0.2% Commission ($${platformFeeUSD.toFixed(2)}) to ${shortAddr(ADMIN_FEE_WALLET)}...`,
+      `Routing 0x Swap & 0.25% Commission ($${platformFeeUSD.toFixed(2)}) to ${shortAddr(ADMIN_FEE_WALLET)}...`,
     );
 
     try {
@@ -223,7 +223,7 @@ export function SwapConfirmationModal({
         `0x Swap Confirmed! Received ~${(receiveAmount || 0).toLocaleString("en-US", {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
-        })} ${sym}. 0.2% Commission collected to Admin Treasury (${shortAddr(ADMIN_FEE_WALLET)}).`,
+        })} ${sym}. 0.25% Commission collected to Admin Treasury (${shortAddr(ADMIN_FEE_WALLET)}).`,
       );
 
       if (onSwapSuccess) {

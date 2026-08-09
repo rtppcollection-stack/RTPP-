@@ -25,8 +25,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { AreaChart, Area, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { PRIMARY_ADMIN_EVM_WALLET, PLATFORM_FEE_PERCENTAGE } from "@/lib/adminWallets";
 
-const ADMIN_FEE_WALLET = "0x82627aeEDD0E7f0B6d45d443A1F59bCD2Adcd68f";
+const ADMIN_FEE_WALLET = PRIMARY_ADMIN_EVM_WALLET;
 
 interface QuickTradeInlineBoxProps {
   coin: MarketCoin;
@@ -102,7 +103,7 @@ function QuickTradeInlineBox({ coin, initialMode, onClose }: QuickTradeInlineBox
 
   const ethPriceUSD = 3450;
   const valueUSDIn = mode === "BUY" ? amtNum * ethPriceUSD : amtNum * tokenPriceUSD;
-  const commissionFeeUSD = valueUSDIn * 0.002; // 0.2% commission
+  const commissionFeeUSD = valueUSDIn * PLATFORM_FEE_PERCENTAGE; // 0.25% commission
   const netValueUSD = Math.max(0, valueUSDIn - commissionFeeUSD);
 
   const outputAmount =
@@ -158,7 +159,7 @@ function QuickTradeInlineBox({ coin, initialMode, onClose }: QuickTradeInlineBox
       })) as string;
 
       toast.success(
-        `⚡ 0x ${mode} Order Executed! 0.2% Commission ($${commissionFeeUSD.toFixed(2)}) routed to Fee Wallet. Tx: ${txHash.slice(0, 10)}…`,
+        `⚡ 0x ${mode} Order Executed! 0.25% Commission ($${commissionFeeUSD.toFixed(2)}) routed to Fee Wallet. Tx: ${txHash.slice(0, 10)}…`,
       );
       onClose();
     } catch (err: unknown) {
@@ -271,7 +272,7 @@ function QuickTradeInlineBox({ coin, initialMode, onClose }: QuickTradeInlineBox
           </div>
 
           <div className="flex items-center justify-between text-[11px]">
-            <span className="text-muted-foreground">0.2% Commission:</span>
+            <span className="text-muted-foreground">0.25% Commission:</span>
             <span className="font-mono text-amber-400 font-bold">
               ${commissionFeeUSD.toFixed(2)} USD
             </span>
