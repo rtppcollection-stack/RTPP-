@@ -491,11 +491,11 @@ export function DEXWidget({ coinId: _coinId }: Props) {
       const dec = toToken.decimals || 18;
       return Number(BigInt(lifiQuote.toAmount)) / Math.pow(10, dec);
     }
-    return toPrice > 0 ? (valueUSDIn * 0.998) / toPrice : 0;
+    return toPrice > 0 ? (valueUSDIn * 0.9975) / toPrice : 0;
   }, [lifiQuote, toToken.decimals, toPrice, valueUSDIn]);
 
   // Commission details
-  const commFeePct = PLATFORM_FEE_PERCENTAGE; // 0.002 = 0.2%
+  const commFeePct = PLATFORM_FEE_PERCENTAGE; // 0.0025 = 0.25% (25 BPS)
   const platformFeeUSD = valueUSDIn * commFeePct;
 
   // Flip tokens
@@ -575,7 +575,7 @@ export function DEXWidget({ coinId: _coinId }: Props) {
 
     try {
       toast.info(
-        `Fetching live Li.Fi route (feeRecipient: ${shortAddr(targetAdminWallet)}, 0.2% Fee)...`,
+        `Fetching live Li.Fi route (feeRecipient: ${shortAddr(targetAdminWallet)}, 0.25% Fee)...`,
       );
 
       const decIn = fromToken.decimals || 18;
@@ -733,7 +733,7 @@ export function DEXWidget({ coinId: _coinId }: Props) {
       setReceiptModalOpen(true);
 
       toast.success(
-        `Li.Fi Swap Executed! Tx Hash: ${shortAddr(executedTxHash)} (0.2% Commission routed to ${shortAddr(targetAdminWallet)}).`,
+        `Li.Fi Swap Executed! Tx Hash: ${shortAddr(executedTxHash)} (0.25% Commission routed to ${shortAddr(targetAdminWallet)}).`,
       );
     } catch (e) {
       toast.error((e as Error).message || "Swap execution failed.");
@@ -818,8 +818,8 @@ export function DEXWidget({ coinId: _coinId }: Props) {
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground font-mono">
-              Live cross-chain routing via official Li.Fi API (`https://li.quest`) with 0.2%
-              platform fee.
+              Live cross-chain routing via official Li.Fi API (`https://li.quest`) with 0.25%
+              platform fee (25 BPS).
             </p>
           </div>
         </div>
@@ -1115,7 +1115,7 @@ export function DEXWidget({ coinId: _coinId }: Props) {
               </div>
 
               <div className="flex items-center justify-between text-xs font-mono text-muted-foreground pt-1 border-t border-border/30">
-                <span>≈ ${formatCurrency(valueUSDIn * 0.998)} USD</span>
+                <span>≈ ${formatCurrency(valueUSDIn * 0.9975)} USD</span>
                 <span className="text-[11px] text-foreground font-bold">
                   1 {fromToken.symbol} ≈ {(fromToken.priceUSD / (toToken.priceUSD || 1)).toFixed(4)}{" "}
                   {toToken.symbol}
@@ -1128,7 +1128,7 @@ export function DEXWidget({ coinId: _coinId }: Props) {
           <div className="p-3 rounded-xl bg-surface/70 border border-border/60 space-y-2 font-mono text-xs">
             <div className="flex justify-between items-center">
               <span className="text-muted-foreground flex items-center gap-1">
-                <ShieldCheck className="h-3.5 w-3.5 text-amber-400" /> Direct Platform Fee (0.2%):
+                <ShieldCheck className="h-3.5 w-3.5 text-amber-400" /> Direct Platform Fee (0.25%):
               </span>
               <span className="font-bold text-amber-400">
                 ${platformFeeUSD.toFixed(2)} USD ({shortAddr(ADMIN_FEE_WALLET)})
@@ -1312,7 +1312,7 @@ export function DEXWidget({ coinId: _coinId }: Props) {
                     </div>
                     <div>
                       <span className="text-muted-foreground block text-[10px]">
-                        Admin Fee (0.2%):
+                        Admin Fee (0.25%):
                       </span>
                       <span className="font-bold text-amber-400">${sw.feeUSD.toFixed(2)} USD</span>
                     </div>
@@ -1381,7 +1381,7 @@ export function DEXWidget({ coinId: _coinId }: Props) {
               <div className="flex justify-between text-muted-foreground">
                 <span>Platform Commission:</span>
                 <span className="text-amber-400 font-bold">
-                  0.2% (${platformFeeUSD.toFixed(2)} USD)
+                  0.25% (${platformFeeUSD.toFixed(2)} USD)
                 </span>
               </div>
               <div className="flex justify-between text-muted-foreground">
@@ -1454,7 +1454,7 @@ export function DEXWidget({ coinId: _coinId }: Props) {
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Fee Recipient:</span>
                   <span className="font-bold text-amber-400">
-                    {shortAddr(latestReceipt.adminWallet)} (0.2%)
+                    {shortAddr(latestReceipt.adminWallet)} (0.25%)
                   </span>
                 </div>
                 <div className="flex justify-between items-center pt-2 border-t border-border/40">
