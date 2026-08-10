@@ -33,9 +33,22 @@ function NotFoundComponent() {
   );
 }
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+function ErrorComponent({ error, reset }: { error: Error; reset?: () => void }) {
   console.error(error);
-  const router = useRouter();
+
+  const handleReset = () => {
+    if (reset) {
+      try {
+        reset();
+        return;
+      } catch {
+        // fallback reload
+      }
+    }
+    if (typeof window !== "undefined") {
+      window.location.reload();
+    }
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -48,10 +61,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
-            onClick={() => {
-              router.invalidate();
-              reset();
-            }}
+            onClick={handleReset}
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
             Try again
@@ -137,8 +147,11 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+const fallbackQueryClient = new QueryClient();
+
 function RootComponent() {
-  const { queryClient } = Route.useRouteContext();
+  const context = Route.useRouteContext();
+  const queryClient = context?.queryClient ?? fallbackQueryClient;
 
   useEffect(() => {
     if (typeof window !== "undefined" && "serviceWorker" in navigator) {

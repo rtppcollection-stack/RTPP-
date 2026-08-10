@@ -7,10 +7,14 @@
   "nav": {
     "dashboard": "ပင်မစာမျက်နှာ",
     "swap": "DEX Swap",
+    "portfolio": "ပိုင်ဆိုင်မှုများ",
     "hero": "RTPP Token",
-    "mint": "NFT Mint",
+    "mint": "NFT Hub",
     "calculator": "တွက်ချက်ရန်",
     "radar": "Whale Radar",
+    "merch": "ကုန်ပစ္စည်း စတူဒီယို",
+    "editor": "အကြောင်းအရာ စတူဒီယို",
+    "monitor": "စနစ် မှတ်တမ်း",
     "markets": "စျေးကွက်",
     "news": "သတင်း"
   },

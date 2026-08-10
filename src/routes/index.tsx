@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useCallback, lazy, Suspense, memo } from "react";
+import { useState, useCallback, memo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { I18nProvider, useI18n } from "@/lib/i18n";
 import { WalletProvider } from "@/lib/wallet";
@@ -32,47 +32,18 @@ import {
 } from "lucide-react";
 import { toast, Toaster } from "sonner";
 
-// Lazy-loaded heavy modules for instant initial load & code-splitting
-const GlobalWalletBalance = lazy(() =>
-  import("@/components/GlobalWalletBalance").then((m) => ({ default: m.GlobalWalletBalance })),
-);
-const NFTGallery = lazy(() =>
-  import("@/components/NFTGallery").then((m) => ({ default: m.NFTGallery })),
-);
-const NFTMerchStore = lazy(() =>
-  import("@/components/NFTMerchStore").then((m) => ({ default: m.NFTMerchStore })),
-);
-const DEXWidget = lazy(() =>
-  import("@/components/DEXWidget").then((m) => ({ default: m.DEXWidget })),
-);
-const TransactionHistory = lazy(() =>
-  import("@/components/TransactionHistory").then((m) => ({ default: m.TransactionHistory })),
-);
-const WhaleAndNewsRadar = lazy(() =>
-  import("@/components/WhaleAndNewsRadar").then((m) => ({ default: m.WhaleAndNewsRadar })),
-);
-const AIChat = lazy(() => import("@/components/AIChat").then((m) => ({ default: m.AIChat })));
-const AppTour = lazy(() => import("@/components/AppTour").then((m) => ({ default: m.AppTour })));
-const PositionSizeCalculator = lazy(() =>
-  import("@/components/PositionSizeCalculator").then((m) => ({
-    default: m.PositionSizeCalculator,
-  })),
-);
-const PnLCalculator = lazy(() =>
-  import("@/components/PnLCalculator").then((m) => ({ default: m.PnLCalculator })),
-);
-const ScenariosTable = lazy(() =>
-  import("@/components/PnLCalculator").then((m) => ({ default: m.ScenariosTable })),
-);
-const PnLHistoryPanel = lazy(() =>
-  import("@/components/PnLCalculator").then((m) => ({ default: m.PnLHistoryPanel })),
-);
-const EditorPanel = lazy(() =>
-  import("@/components/EditorPanel").then((m) => ({ default: m.EditorPanel })),
-);
-const MonitorLogsPanel = lazy(() =>
-  import("@/components/MonitorLogsPanel").then((m) => ({ default: m.MonitorLogsPanel })),
-);
+import { GlobalWalletBalance } from "@/components/GlobalWalletBalance";
+import { NFTGallery } from "@/components/NFTGallery";
+import { NFTMerchStore } from "@/components/NFTMerchStore";
+import { DEXWidget } from "@/components/DEXWidget";
+import { TransactionHistory } from "@/components/TransactionHistory";
+import { WhaleAndNewsRadar } from "@/components/WhaleAndNewsRadar";
+import { AIChat } from "@/components/AIChat";
+import { AppTour } from "@/components/AppTour";
+import { PositionSizeCalculator } from "@/components/PositionSizeCalculator";
+import { PnLCalculator, ScenariosTable, PnLHistoryPanel } from "@/components/PnLCalculator";
+import { EditorPanel } from "@/components/EditorPanel";
+import { MonitorLogsPanel } from "@/components/MonitorLogsPanel";
 
 function AppToaster() {
   const { theme } = useTheme();
@@ -85,6 +56,20 @@ function TabSkeleton() {
       <Loader2 className="h-7 w-7 animate-spin text-primary" />
       <span className="text-xs font-mono">Loading module...</span>
     </div>
+  );
+}
+
+function IndexRouteComponent() {
+  return (
+    <ThemeProvider>
+      <I18nProvider>
+        <WalletProvider>
+          <Home />
+          <AIChat />
+          <AppToaster />
+        </WalletProvider>
+      </I18nProvider>
+    </ThemeProvider>
   );
 }
 
@@ -107,19 +92,7 @@ export const Route = createFileRoute("/")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: () => (
-    <ThemeProvider>
-      <I18nProvider>
-        <WalletProvider>
-          <Home />
-          <Suspense fallback={null}>
-            <AIChat />
-          </Suspense>
-          <AppToaster />
-        </WalletProvider>
-      </I18nProvider>
-    </ThemeProvider>
-  ),
+  component: IndexRouteComponent,
 });
 
 function Home() {
@@ -183,9 +156,7 @@ function Home() {
             <div className="flex items-center gap-1 sm:gap-1.5">
               <ThemeToggle />
               <div className="hidden md:block">
-                <Suspense fallback={null}>
-                  <AppTour currentTab={tab} onTabChange={setTab} />
-                </Suspense>
+                <AppTour currentTab={tab} onTabChange={setTab} />
               </div>
               <WalletButton />
               <LanguageSwitcher />
@@ -206,12 +177,12 @@ function Home() {
               <TabTrig
                 value="swap"
                 icon={<ArrowLeftRight className="h-4 w-4 text-emerald-400" />}
-                label={t("nav.swap") || "DEX Swap"}
+                label={t("nav.swap")}
               />
               <TabTrig
                 value="portfolio"
                 icon={<Wallet className="h-4 w-4 text-cyan-400" />}
-                label={t("nav.portfolio") || "Portfolio"}
+                label={t("nav.portfolio")}
               />
               <TabTrig
                 value="whale"
@@ -226,12 +197,12 @@ function Home() {
               <TabTrig
                 value="nft"
                 icon={<Images className="h-4 w-4 text-rose-400" />}
-                label={t("nav.mint") || "NFT Hub"}
+                label={t("nav.mint")}
               />
               <TabTrig
                 value="merch"
                 icon={<Shirt className="h-4 w-4 text-cyan-400" />}
-                label="👕 Phygital Studio"
+                label={t("nav.merch")}
               />
 
               {/* Editor Role Navigation Feature */}
@@ -239,7 +210,7 @@ function Home() {
                 <TabTrig
                   value="editor"
                   icon={<FileEdit className="h-4 w-4 text-emerald-400" />}
-                  label="Content Studio"
+                  label={t("nav.editor")}
                 />
               )}
 
@@ -248,7 +219,7 @@ function Home() {
                 <TabTrig
                   value="monitor"
                   icon={<Activity className="h-4 w-4 text-cyan-400" />}
-                  label="System Logs"
+                  label={t("nav.monitor")}
                 />
               )}
             </TabsList>
@@ -298,18 +269,14 @@ function Home() {
               subtitle="Trade tokens directly on-chain with automated routing and ultra-low platform fees."
             />
             {/* Focused Swap Terminal */}
-            <Suspense fallback={<TabSkeleton />}>
-              <DEXWidget coinId={coinId} />
-            </Suspense>
+            <DEXWidget coinId={coinId} />
 
             <div className="pt-6 border-t border-border/60 space-y-3">
               <SectionHeader
                 title="Recent On-Chain Swaps & Transaction Log"
                 subtitle="Live history of executed swaps, fee earnings, status tracking, and receipts."
               />
-              <Suspense fallback={<TabSkeleton />}>
-                <TransactionHistory />
-              </Suspense>
+              <TransactionHistory />
             </div>
           </TabsContent>
 
@@ -318,15 +285,11 @@ function Home() {
               title="Multi-Chain Crypto Portfolio & Base Asset Vault"
               subtitle="Real-time on-chain token balance tracking, USD valuations, and asset breakdown for Base Chain and major Web3 networks."
             />
-            <Suspense fallback={<TabSkeleton />}>
-              <GlobalWalletBalance />
-            </Suspense>
+            <GlobalWalletBalance />
           </TabsContent>
 
           <TabsContent value="whale" className="space-y-4 mt-0">
-            <Suspense fallback={<TabSkeleton />}>
-              <WhaleAndNewsRadar />
-            </Suspense>
+            <WhaleAndNewsRadar />
           </TabsContent>
 
           <TabsContent value="calc" className="space-y-4 mt-0">
@@ -348,9 +311,7 @@ function Home() {
               title="NFT Digital Gallery & Collection Marketplace"
               subtitle="Explore on-chain collectible NFTs available for trading, minting, and physical merch creation. Click 'Create Custom Streetwear' on any NFT to load it in the Phygital Studio."
             />
-            <Suspense fallback={<TabSkeleton />}>
-              <NFTGallery onSelectForMerch={handleSelectNFTForMerch} />
-            </Suspense>
+            <NFTGallery onSelectForMerch={handleSelectNFTForMerch} />
           </TabsContent>
 
           <TabsContent value="merch" className="space-y-6 mt-0">
@@ -358,12 +319,10 @@ function Home() {
               title="Phygital Web3 Studio & Printful Merch Configurator"
               subtitle="Preview and customize selected NFT artwork onto high quality apparel, mugs & canvases with automated Printful order fulfillment."
             />
-            <Suspense fallback={<TabSkeleton />}>
-              <NFTMerchStore
-                selectedImageUrl={selectedMerchImage}
-                selectedNftTitle={selectedMerchTitle}
-              />
-            </Suspense>
+            <NFTMerchStore
+              selectedImageUrl={selectedMerchImage}
+              selectedNftTitle={selectedMerchTitle}
+            />
           </TabsContent>
 
           {(isEditor || isAdmin) && (
@@ -372,9 +331,7 @@ function Home() {
                 title="Editor & Content Creation Studio"
                 subtitle="Exclusive portal for Editors to create, update, and manage news feeds, market alerts, and announcements."
               />
-              <Suspense fallback={<TabSkeleton />}>
-                <EditorPanel />
-              </Suspense>
+              <EditorPanel />
             </TabsContent>
           )}
 
@@ -384,9 +341,7 @@ function Home() {
                 title="System Activity & Audit Telemetry"
                 subtitle="Exclusive portal for Monitors to review live system logs, RPC API response latency, and authorization events."
               />
-              <Suspense fallback={<TabSkeleton />}>
-                <MonitorLogsPanel />
-              </Suspense>
+              <MonitorLogsPanel />
             </TabsContent>
           )}
         </Tabs>
@@ -454,7 +409,7 @@ const TabTrig = memo(function TabTrig({
       className="flex items-center justify-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-mono font-bold whitespace-nowrap shrink-0 text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow transition-all"
     >
       {icon}
-      <span>{label}</span>
+      <span suppressHydrationWarning>{label}</span>
     </TabsTrigger>
   );
 });
@@ -550,28 +505,20 @@ function CalculatorTab({ coinId }: { coinId: string }) {
       </div>
 
       {calcMode === "position" ? (
-        <Suspense fallback={<TabSkeleton />}>
-          <PositionSizeCalculator tokenSymbol={coin.symbol.toUpperCase()} livePriceUSD={priceUSD} />
-        </Suspense>
+        <PositionSizeCalculator tokenSymbol={coin.symbol.toUpperCase()} livePriceUSD={priceUSD} />
       ) : (
         <>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <Suspense fallback={<TabSkeleton />}>
-              <PnLCalculator
-                tokenId={coin.id}
-                tokenSymbol={coin.symbol}
-                livePriceUSD={priceUSD}
-                hideHistory
-                hideScenarios
-              />
-            </Suspense>
-            <Suspense fallback={<TabSkeleton />}>
-              <ScenariosTable tokenSymbol={coin.symbol} livePriceUSD={priceUSD} />
-            </Suspense>
+            <PnLCalculator
+              tokenId={coin.id}
+              tokenSymbol={coin.symbol}
+              livePriceUSD={priceUSD}
+              hideHistory
+              hideScenarios
+            />
+            <ScenariosTable tokenSymbol={coin.symbol} livePriceUSD={priceUSD} />
           </div>
-          <Suspense fallback={<TabSkeleton />}>
-            <PnLHistoryPanel />
-          </Suspense>
+          <PnLHistoryPanel />
         </>
       )}
     </div>

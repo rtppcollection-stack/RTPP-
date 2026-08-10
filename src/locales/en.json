@@ -7,10 +7,14 @@
   "nav": {
     "dashboard": "Dashboard",
     "swap": "DEX Swap",
+    "portfolio": "Portfolio",
     "hero": "RTPP Token",
-    "mint": "NFT Mint",
+    "mint": "NFT Hub",
     "calculator": "Calculator",
     "radar": "Whale Radar",
+    "merch": "Phygital Studio",
+    "editor": "Content Studio",
+    "monitor": "System Logs",
     "markets": "Markets",
     "news": "News"
   },

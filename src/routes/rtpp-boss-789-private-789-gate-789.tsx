@@ -15,15 +15,8 @@ function AppToaster() {
   return <Toaster position="top-right" theme={theme} richColors />;
 }
 
-export const Route = createFileRoute("/rtpp-boss-789-private-789-gate-789")({
-  beforeLoad: adminGuard,
-  head: () => ({
-    meta: [
-      { title: "RTPP Private Admin Boss Gate" },
-      { name: "robots", content: "noindex, nofollow" },
-    ],
-  }),
-  component: () => (
+function BossGateRouteComponent() {
+  return (
     <ThemeProvider>
       <I18nProvider>
         <WalletProvider>
@@ -32,7 +25,18 @@ export const Route = createFileRoute("/rtpp-boss-789-private-789-gate-789")({
         </WalletProvider>
       </I18nProvider>
     </ThemeProvider>
-  ),
+  );
+}
+
+export const Route = createFileRoute("/rtpp-boss-789-private-789-gate-789")({
+  beforeLoad: adminGuard,
+  head: () => ({
+    meta: [
+      { title: "RTPP Private Admin Boss Gate" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
+  component: BossGateRouteComponent,
 });
 
 function AdminGatePage() {

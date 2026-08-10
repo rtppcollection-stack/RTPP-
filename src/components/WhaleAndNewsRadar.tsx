@@ -459,7 +459,7 @@ export function WhaleAndNewsRadar() {
   }, []);
 
   // Filters & Search
-  const [whaleMinVal, setWhaleMinVal] = useState<number>(10000000); // Default $10M+
+  const [whaleMinVal, setWhaleMinVal] = useState<number>(1000000); // Default $1M+
   const [whaleChainFilter, setWhaleChainFilter] = useState<string>("all");
   const [whaleSentimentFilter, setWhaleSentimentFilter] = useState<string>("all");
   const [newsCategoryFilter, setNewsCategoryFilter] = useState<string>("all");

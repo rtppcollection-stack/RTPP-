@@ -15,15 +15,8 @@ function AppToaster() {
   return <Toaster position="top-right" theme={theme} richColors />;
 }
 
-export const Route = createFileRoute("/admin")({
-  beforeLoad: adminGuard,
-  head: () => ({
-    meta: [
-      { title: "RTPP Private Admin Portal" },
-      { name: "robots", content: "noindex, nofollow" },
-    ],
-  }),
-  component: () => (
+function AdminRouteComponent() {
+  return (
     <ThemeProvider>
       <I18nProvider>
         <WalletProvider>
@@ -32,7 +25,18 @@ export const Route = createFileRoute("/admin")({
         </WalletProvider>
       </I18nProvider>
     </ThemeProvider>
-  ),
+  );
+}
+
+export const Route = createFileRoute("/admin")({
+  beforeLoad: adminGuard,
+  head: () => ({
+    meta: [
+      { title: "RTPP Private Admin Portal" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
+  component: AdminRouteComponent,
 });
 
 function AdminGatePage() {

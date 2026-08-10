@@ -15,26 +15,36 @@ const ADMIN_WALLET = PRIMARY_ADMIN_EVM_WALLET;
 const CLIENT_CACHE_KEY = "rtpp_chat_local_cache_v2";
 
 const QUICK_PROMPTS_EN = [
+  {
+    label: "💬 General Q&A",
+    prompt:
+      "Hello! Can I ask you general questions about crypto, technology, or general knowledge?",
+  },
+  {
+    label: "🔒 Security Advice",
+    prompt: "How do I safely connect my Web3 wallet and protect my assets?",
+  },
   { label: "💡 About Platform", prompt: "Tell me about this platform and its features" },
   { label: "🛍️ Printful Merch", prompt: "How to order physical merch with RTPP or crypto?" },
   { label: "🔥 Token Contract", prompt: "Tell me about RTPP Token and Base Pool address" },
   { label: "⚡ DEX Swap Fees", prompt: "How do DEX Swaps and fee routing work?" },
-  { label: "🔒 Security Advice", prompt: "How to safely connect my wallet and stay secure?" },
-  { label: "📊 P2P Calculator", prompt: "How does the P2P profit calculator work?" },
 ];
 
 const QUICK_PROMPTS_MY = [
-  { label: "💡 ဒီ Web အကြောင်း", prompt: "ဒီ web အကြောင်းရှင်းပြပေးပါ" },
+  {
+    label: "💬 အထွေထွေ မေးမြန်းရန်",
+    prompt: "မင်္ဂလာပါ၊ အထွေထွေ ဗဟုသုတနှင့် မေးခွန်းများ မေးမြန်းလို့ရပါသလား?",
+  },
+  {
+    label: "🔒 လုံခြုံရေး အကြံပြုချက်",
+    prompt: "Wallet ချိတ်ဆက်ရာတွင် မည်သို့လုံခြုံအောင် ထိန်းသိမ်းရမည်နည်း?",
+  },
+  { label: "💡 ဒီ Web အကြောင်း", prompt: "ဒီ web platform အကြောင်းရှင်းပြပေးပါ" },
   {
     label: "🛍️ Merch မှာယူမှု",
     prompt: "အင်္ကျီနှင့် ပစ္စည်းများ Crypto ဖြင့် မည်သို့မှာယူရမည်နည်း?",
   },
   { label: "🔥 RTPP Token", prompt: "RTPP Token address နှင့် Base Pool အကြောင်းပြောပြပါ" },
-  { label: "⚡ DEX Swap Fees", prompt: "DEX Swap ဖြင့် token မည်သို့လဲလှယ်ရမည်နည်း?" },
-  {
-    label: "🔒 လုံခြုံရေး အကြံပြုချက်",
-    prompt: "Wallet ချိတ်ဆက်ရာတွင် မည်သို့လုံခြုံအောင်နေရမည်နည်း?",
-  },
   { label: "📊 P2P Calculator", prompt: "P2P အရှုံး/အမြတ် တွက်ချက်နည်း ရှင်းပြပါ" },
 ];
 
@@ -172,17 +182,17 @@ export function AIChat() {
       let reply = "";
       if (
         !activeIsAdmin &&
-        (normQ.includes("code") ||
-          normQ.includes("source") ||
-          normQ.includes("key") ||
-          normQ.includes("secret") ||
-          normQ.includes("backend") ||
-          normQ.includes("database"))
+        (normQ.includes("private key") ||
+          normQ.includes("seed phrase") ||
+          normQ.includes("recovery phrase") ||
+          normQ.includes("secret key") ||
+          normQ.includes("database password") ||
+          normQ.includes("backend secret"))
       ) {
         reply =
           isBurmese || /[\u1000-\u109F]/.test(normQ)
-            ? "🔒 **လုံခြုံရေး သတိပေးချက်:**\n\nစနစ်၏ သော့ချက်များနှင့် မူရင်း Code များကို အုပ်ချုပ်သူ Admin သာ ကြည့်ရှုခွင့်ရှိပါသည်။ အခြား DEX Swaps, P2P Calculator, NFT Minting သို့မဟုတ် ဈေးနှုန်းများကို မေးမြန်းနိုင်ပါသည်။"
-            : "🔒 **Security Notice:**\n\nSystem source code, database architecture, and backend secrets are restricted to RTPP Administrators. Please feel free to ask about DEX Swaps, P2P Calculator, NFT Minting, or live token charts.";
+            ? "🔒 **လုံခြုံရေး သတိပေးချက်:**\n\nစနစ်၏ သော့ချက်များနှင့် မူရင်း Backend Secrets များကို လုံခြုံရေးအတွက် ထိန်းသိမ်းထားပါသည်။ သင့် Wallet ၏ Private Key သို့မဟုတ် Seed Phrase များကို မည်သူ့ကိုမျှ မပေးပါနှင့်။ အခြား အထွေထွေ ဗဟုသုတ၊ DEX Swaps, P2P Calculator သို့မဟုတ် ဈေးနှုန်းများကို မေးမြန်းနိုင်ပါသည်။"
+            : "🔒 **Security Notice:**\n\nSystem backend secrets and server environment variables are protected for security. Please never share your wallet private key or recovery phrase with anyone. You can freely ask any general questions, DEX swap guidance, or market analysis!";
       } else if (
         normQ.includes("about") ||
         normQ.includes("platform") ||
@@ -195,8 +205,8 @@ export function AIChat() {
       ) {
         reply =
           isBurmese || /[\u1000-\u109F]/.test(normQ)
-            ? `💡 **RTPP Web Platform အကြောင်း (၁၀၀% အခမဲ့ AI လမ်းညွှန်):**\n\nဤ Web App တွင် အောက်ပါ Feature များကို အခမဲ့ အသုံးပြုနိုင်ပါသည် -\n\n1. ⚡ **DEX Swap & Bridge:** EVM ၅ လိုင်းစလုံးတွင် Token ချိန်းနိုင်ခြင်း။\n2. 🔥 **RTPP Token & Live Chart:** Base Pool \`0xc59d51cbb...\` ဖြင့် GeckoTerminal တိုက်ရိုက် Live ဇယားကြည့်နိုင်ခြင်း။\n3. 🎨 **Free NFT Lazy Minting:** Gas Fee လုံးဝ မကုန်ဘဲ NFT ရောင်းရန် တိုက်ရိုက် Lazy Mint လုပ်နိုင်ခြင်း။\n4. 📊 **P2P Profit/Loss Calculator:** P2P ကုန်သွယ်မှုတွင် မြတ်/ရှုံး ရာခိုင်နှုန်းနှင့် အကျိုးအမြတ် တွက်ချက်နိုင်ခြင်း။\n5. 🐋 **Whale Alert Radar:** Live Mempool နှင့် DEX ငွေလွှဲမှုများကို Block Explorer တွင် တိုက်ရိုက် စစ်ဆေးနိုင်ခြင်း။`
-            : `💡 **About RTPP Web Platform:**\n\nThis platform provides 100% free Web3 & crypto tools:\n\n1. ⚡ **DEX Swap & Bridge:** Swap tokens across 5 EVM chains with 0.30% fee routing.\n2. 🔥 **RTPP Token & Live Chart:** Real-time GeckoTerminal candlestick charts for Base pool \`0xc59d...\`.\n3. 🎨 **Free NFT Lazy Minting:** Gasless 0-upfront NFT minting and marketplace listing.\n4. 📊 **P2P Profit/Loss Calculator:** Calculate ROI, breakeven, exit targets, and exchange fees.\n5. 🐋 **Whale Alert Radar:** Track live Bitcoin mempool and DEX transactions.`;
+            ? `💡 **RTPP Web Platform အကြောင်း (၁၀၀% အခမဲ့ AI လမ်းညွှန်):**\n\nမင်္ဂလာပါ! အထွေထွေ ဗဟုသုတနှင့် Web3 ဝန်ဆောင်မှုများကို လွတ်လပ်စွာ အခမဲ့ မေးမြန်းနိုင်ပါသည် -\n\n1. 💬 **အထွေထွေ ဗဟုသုတ မေးမြန်းခြင်း:** Crypto, Web3, နည်းပညာ၊ သင်ခန်းစာများနှင့် မေးခွန်းများ။\n2. ⚡ **DEX Swap & Bridge:** EVM ၅ လိုင်းစလုံးတွင် Token ချိန်းနိုင်ခြင်း။\n3. 🔥 **RTPP Token & Live Chart:** Base Pool \`0xc59d51cbb...\` ဖြင့် GeckoTerminal တိုက်ရိုက် Live ဇယားကြည့်နိုင်ခြင်း။\n4. 🎨 **Free NFT Lazy Minting:** Gas Fee လုံးဝ မကုန်ဘဲ NFT ရောင်းရန် တိုက်ရိုက် Lazy Mint လုပ်နိုင်ခြင်း။\n5. 📊 **P2P Profit/Loss Calculator:** P2P ကုန်သွယ်မှုတွင် မြတ်/ရှုံး ရာခိုင်နှုန်းနှင့် အကျိုးအမြတ် တွက်ချက်နိုင်ခြင်း။`
+            : `💡 **About RTPP Web Platform & General AI:**\n\nHello! You can ask any general questions or platform queries 100% free:\n\n1. 💬 **General Knowledge & Q&A:** Ask anything about Crypto, Blockchain, Coding, or Technology.\n2. ⚡ **DEX Swap & Bridge:** Swap tokens across 5 EVM chains with transparent 0.30% fee routing.\n3. 🔥 **RTPP Token & Live Chart:** Real-time GeckoTerminal candlestick charts for Base pool \`0xc59d...\`.\n4. 🎨 **Free NFT Lazy Minting:** Gasless 0-upfront NFT minting and marketplace listing.\n5. 📊 **P2P Profit/Loss Calculator:** Calculate ROI, breakeven, exit targets, and exchange fees.`;
       } else if (
         normQ.includes("rtpp") ||
         normQ.includes("token") ||
@@ -218,7 +228,10 @@ export function AIChat() {
       } else if (normQ.includes("p2p") || normQ.includes("pnl") || normQ.includes("profit")) {
         reply = `📊 **P2P Profit/Loss Calculator:**\n\n• Calculates net profit, ROI %, target exit sell price, breakeven threshold, and exchange fee deductions in USD and local currencies (MMK).`;
       } else {
-        reply = `🤖 **RTPP AI Assistant:**\n\nI can assist you with:\n1. ⚡ **DEX Swaps & Cross-Chain Bridges**\n2. 🔥 **RTPP Token & GeckoTerminal Charts**\n3. 🎨 **Free NFT Lazy Minting & Marketplace**\n4. 🐋 **Whale Radar & Block Explorer Inspector**\n5. 📊 **P2P Profit & Loss Calculator**\n6. ⛽ **Network Gas Tracker (5 EVM Chains)**`;
+        reply =
+          isBurmese || /[\u1000-\u109F]/.test(normQ)
+            ? `🤖 **RTPP AI အကူအညီ:**\n\nမင်္ဂလာပါ! အထွေထွေ ဗဟုသုတ၊ နည်းပညာနှင့် Web3/Crypto မေးခွန်းများကို လွတ်လပ်စွာ အခမဲ့ မေးမြန်းနိုင်ပါသည် -\n\n• **မေးမြန်းနိုင်သည်များ:** အထွေထွေ ဗဟုသုတ၊ Wallet လုံခြုံရေး၊ DEX Swaps, P2P Calculator, သို့မဟုတ် RTPP Token မေးခွန်းများ။\n\n🔒 *သတိပြုရန်: RTPP AI သည် Private Key သို့မဟုတ် Seed Phrase များကို မည်သည့်အခါမျှ မတောင်းဆိုပါ။*`
+            : `🤖 **RTPP AI Assistant:**\n\nHello! Feel free to ask any general questions or Web3 / Crypto topics safely and 100% free:\n\n• **You Can Ask About:** General knowledge, technology, wallet security, DEX Swaps, P2P Calculator, or market analysis.\n\n🔒 *Security Note: RTPP AI will NEVER ask for your private key or recovery seed phrase.*`;
       }
 
       saveClientCache(normQ, reply);
@@ -237,6 +250,8 @@ export function AIChat() {
     }
   };
 
+  if (!hasMounted) return null;
+
   return (
     <>
       {/* Floating button */}
@@ -247,7 +262,7 @@ export function AIChat() {
           className="fixed bottom-5 right-5 z-50 group flex items-center gap-2 rounded-full bg-primary px-4 py-3 text-primary-foreground shadow-[0_10px_40px_-10px_rgba(20,184,166,0.7)] hover:bg-primary/90 transition"
         >
           <Sparkles className="h-4 w-4" />
-          <span className="text-sm font-semibold hidden sm:inline">
+          <span className="text-sm font-semibold hidden sm:inline" suppressHydrationWarning>
             {activeIsAdmin ? "RTPP Admin AI" : isBurmese ? "RTPP Support AI" : "RTPP Support AI"}
           </span>
           <Bot className="h-4 w-4 sm:hidden" />
@@ -355,10 +370,10 @@ export function AIChat() {
                 rows={1}
                 placeholder={
                   activeIsAdmin
-                    ? "Ask about codebase, fee engine, netlify setup..."
+                    ? "Ask about codebase, fee engine, system setup..."
                     : isBurmese
-                      ? "ဒီ web အကြောင်း သို့မဟုတ် မေးချင်ရာမေးပါ..."
-                      : "Ask anything about RTPP DEX, NFT, Calculator..."
+                      ? "အထွေထွေ မေးခွန်းများ၊ Crypto သို့မဟုတ် လိုရာ မေးမြန်းပါ..."
+                      : "Ask anything freely (General Q&A, Crypto, Web3, DEX)..."
                 }
                 disabled={busy}
                 className="flex-1 resize-none rounded-md border border-border bg-surface px-2.5 py-1.5 text-xs font-mono focus:border-primary focus:outline-none disabled:opacity-50"
