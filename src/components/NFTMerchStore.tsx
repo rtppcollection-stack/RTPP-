@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { fetchSimplePrice } from "@/lib/coingecko";
 import {
   Package,
   Upload,
@@ -577,20 +578,15 @@ export function NFTMerchStore({ selectedImageUrl }: NFTMerchStoreProps = {}) {
   const fetchLivePrices = useCallback(async () => {
     setFetchingPrices(true);
     try {
-      const res = await fetch(
-        "https://api.coingecko.com/api/v3/simple/price?ids=ethereum,tether&vs_currencies=usd",
-      );
-      if (res.ok) {
-        const data = await res.json();
-        const ethPrice = data.ethereum?.usd || 3250.0;
-        const usdtPrice = data.tether?.usd || 1.0;
-        setPrices({
-          ETH: ethPrice,
-          USDT: usdtPrice,
-          RTPP: 0.15, // RTPP Ecosystem Utility Token
-          lastUpdated: new Date(),
-        });
-      }
+      const data = await fetchSimplePrice("ethereum,tether", "usd");
+      const ethPrice = data.ethereum?.usd || 3250.0;
+      const usdtPrice = data.tether?.usd || 1.0;
+      setPrices({
+        ETH: ethPrice,
+        USDT: usdtPrice,
+        RTPP: 0.15, // RTPP Ecosystem Utility Token
+        lastUpdated: new Date(),
+      });
     } catch {
       setPrices((prev) => ({ ...prev, lastUpdated: new Date() }));
     } finally {

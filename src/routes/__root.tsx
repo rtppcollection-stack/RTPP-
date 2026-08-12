@@ -7,7 +7,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { Component, useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 
@@ -133,15 +133,79 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
+function SafeHeadContent() {
+  return (
+    <SafeHeadBoundary>
+      <HeadContent />
+    </SafeHeadBoundary>
+  );
+}
+
+function SafeScripts() {
+  return (
+    <SafeHeadBoundary>
+      <Scripts />
+    </SafeHeadBoundary>
+  );
+}
+
+class SafeHeadBoundary extends Component<{ children: ReactNode }> {
+  state = { hasError: false };
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error: unknown) {
+    console.warn("HeadContent error caught gracefully:", error);
+  }
+  render() {
+    if (this.state.hasError) return null;
+    return this.props.children;
+  }
+}
+
 function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head suppressHydrationWarning>
-        <HeadContent />
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>RTPP · Crypto Dashboard, Swap & P2P Calculator</title>
+        <meta
+          name="description"
+          content="Free multi-chain crypto dashboard: live prices, DEX swap & bridge, real-time P2P profit/loss calculator, and NFT marketplace."
+        />
+        <meta name="author" content="RTPP" />
+        <meta property="og:title" content="RTPP · Crypto Dashboard, Swap & P2P Calculator" />
+        <meta
+          property="og:description"
+          content="Free multi-chain crypto dashboard: live prices, DEX swap & bridge, real-time P2P profit/loss calculator, and NFT marketplace."
+        />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="RTPP · Crypto Dashboard, Swap & P2P Calculator" />
+        <meta
+          name="twitter:description"
+          content="Free multi-chain crypto dashboard: live prices, DEX swap & bridge, real-time P2P profit/loss calculator, and NFT marketplace."
+        />
+        <meta
+          property="og:image"
+          content="https://storage.googleapis.com/gpt-engineer-file-uploads/lrfCS7WIpaVyu6RZXaBYW7mkVF62/social-images/social-1783431702267-RTPP-logo.-1x1-400px.webp"
+        />
+        <meta
+          name="twitter:image"
+          content="https://storage.googleapis.com/gpt-engineer-file-uploads/lrfCS7WIpaVyu6RZXaBYW7mkVF62/social-images/social-1783431702267-RTPP-logo.-1x1-400px.webp"
+        />
+        <link rel="stylesheet" href={appCss} />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/favicon.png" type="image/png" />
+        <link rel="shortcut icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="manifest" href="/manifest.json" />
+        <SafeHeadContent />
       </head>
       <body suppressHydrationWarning>
         {children}
-        <Scripts />
+        <SafeScripts />
       </body>
     </html>
   );

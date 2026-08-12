@@ -23,7 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency, formatNumber } from "@/lib/fx";
-import { fetchCoinDetail } from "@/lib/coingecko";
+import { fetchCoinDetail, fetchSimplePrice } from "@/lib/coingecko";
 import { toast } from "sonner";
 
 export interface BaseTokenAsset {
@@ -208,11 +208,10 @@ async function fetchBaseNativeEth(userAddress: string): Promise<number> {
 // Fetch live token prices for multi-chain assets
 async function fetchMultiChainPrices() {
   try {
-    const res = await fetch(
-      "https://api.coingecko.com/api/v3/simple/price?ids=ethereum,coinbase-wrapper-btc,usd-coin,aerodrome-finance,brett,degen-base,binancecoin,polygon-ecosystem-token,solana&vs_currencies=usd&include_24hr_change=true",
+    return await fetchSimplePrice(
+      "ethereum,coinbase-wrapper-btc,usd-coin,aerodrome-finance,brett,degen-base,binancecoin,polygon-ecosystem-token,solana",
+      "usd",
     );
-    if (!res.ok) throw new Error("Price fetch failed");
-    return await res.json();
   } catch {
     return {
       ethereum: { usd: 3450.0, usd_24h_change: 2.15 },

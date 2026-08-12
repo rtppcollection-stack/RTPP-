@@ -21,7 +21,7 @@ import {
   Fuel,
   GitBranch,
 } from "lucide-react";
-import { fetchCoinDetail } from "@/lib/coingecko";
+import { fetchCoinDetail, fetchSimplePrice } from "@/lib/coingecko";
 import { useWallet, shortAddr } from "@/lib/wallet";
 import {
   getLifiSwapQuote,
@@ -336,13 +336,10 @@ export function DEXWidget({ coinId: _coinId }: Props) {
   const fetchLiveTokenPrices = useCallback(async () => {
     setIsFetchingPrices(true);
     try {
-      const res = await fetch(
-        "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,wrapped-bitcoin,coinbase-wrapper-btc,ethereum,solana,binancecoin,polygon-ecosystem-token,tether,usd-coin,aerodrome-finance,uniswap&vs_currencies=usd",
+      const cgData = await fetchSimplePrice(
+        "bitcoin,wrapped-bitcoin,coinbase-wrapper-btc,ethereum,solana,binancecoin,polygon-ecosystem-token,tether,usd-coin,aerodrome-finance,uniswap",
+        "usd",
       );
-      let cgData: Record<string, { usd: number }> = {};
-      if (res.ok) {
-        cgData = await res.json();
-      }
 
       let rtppPrice = 0.00000616;
       try {
