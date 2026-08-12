@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useCallback, memo } from "react";
+import { useState, useCallback, Suspense, memo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { I18nProvider, useI18n } from "@/lib/i18n";
 import { WalletProvider } from "@/lib/wallet";
@@ -65,7 +65,9 @@ function IndexRouteComponent() {
       <I18nProvider>
         <WalletProvider>
           <Home />
-          <AIChat />
+          <Suspense fallback={null}>
+            <AIChat />
+          </Suspense>
           <AppToaster />
         </WalletProvider>
       </I18nProvider>
@@ -156,7 +158,9 @@ function Home() {
             <div className="flex items-center gap-1 sm:gap-1.5">
               <ThemeToggle />
               <div className="hidden md:block">
-                <AppTour currentTab={tab} onTabChange={setTab} />
+                <Suspense fallback={null}>
+                  <AppTour currentTab={tab} onTabChange={setTab} />
+                </Suspense>
               </div>
               <WalletButton />
               <LanguageSwitcher />
@@ -269,14 +273,18 @@ function Home() {
               subtitle="Trade tokens directly on-chain with automated routing and ultra-low platform fees."
             />
             {/* Focused Swap Terminal */}
-            <DEXWidget coinId={coinId} />
+            <Suspense fallback={<TabSkeleton />}>
+              <DEXWidget coinId={coinId} />
+            </Suspense>
 
             <div className="pt-6 border-t border-border/60 space-y-3">
               <SectionHeader
                 title="Recent On-Chain Swaps & Transaction Log"
                 subtitle="Live history of executed swaps, fee earnings, status tracking, and receipts."
               />
-              <TransactionHistory />
+              <Suspense fallback={<TabSkeleton />}>
+                <TransactionHistory />
+              </Suspense>
             </div>
           </TabsContent>
 
@@ -285,11 +293,15 @@ function Home() {
               title="Multi-Chain Crypto Portfolio & Base Asset Vault"
               subtitle="Real-time on-chain token balance tracking, USD valuations, and asset breakdown for Base Chain and major Web3 networks."
             />
-            <GlobalWalletBalance />
+            <Suspense fallback={<TabSkeleton />}>
+              <GlobalWalletBalance />
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="whale" className="space-y-4 mt-0">
-            <WhaleAndNewsRadar />
+            <Suspense fallback={<TabSkeleton />}>
+              <WhaleAndNewsRadar />
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="calc" className="space-y-4 mt-0">
@@ -311,7 +323,9 @@ function Home() {
               title="NFT Digital Gallery & Collection Marketplace"
               subtitle="Explore on-chain collectible NFTs available for trading, minting, and physical merch creation. Click 'Create Custom Streetwear' on any NFT to load it in the Phygital Studio."
             />
-            <NFTGallery onSelectForMerch={handleSelectNFTForMerch} />
+            <Suspense fallback={<TabSkeleton />}>
+              <NFTGallery onSelectForMerch={handleSelectNFTForMerch} />
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="merch" className="space-y-6 mt-0">
@@ -319,10 +333,12 @@ function Home() {
               title="Phygital Web3 Studio & Printful Merch Configurator"
               subtitle="Preview and customize selected NFT artwork onto high quality apparel, mugs & canvases with automated Printful order fulfillment."
             />
-            <NFTMerchStore
-              selectedImageUrl={selectedMerchImage}
-              selectedNftTitle={selectedMerchTitle}
-            />
+            <Suspense fallback={<TabSkeleton />}>
+              <NFTMerchStore
+                selectedImageUrl={selectedMerchImage}
+                selectedNftTitle={selectedMerchTitle}
+              />
+            </Suspense>
           </TabsContent>
 
           {(isEditor || isAdmin) && (
@@ -331,7 +347,9 @@ function Home() {
                 title="Editor & Content Creation Studio"
                 subtitle="Exclusive portal for Editors to create, update, and manage news feeds, market alerts, and announcements."
               />
-              <EditorPanel />
+              <Suspense fallback={<TabSkeleton />}>
+                <EditorPanel />
+              </Suspense>
             </TabsContent>
           )}
 
@@ -341,7 +359,9 @@ function Home() {
                 title="System Activity & Audit Telemetry"
                 subtitle="Exclusive portal for Monitors to review live system logs, RPC API response latency, and authorization events."
               />
-              <MonitorLogsPanel />
+              <Suspense fallback={<TabSkeleton />}>
+                <MonitorLogsPanel />
+              </Suspense>
             </TabsContent>
           )}
         </Tabs>
@@ -505,20 +525,28 @@ function CalculatorTab({ coinId }: { coinId: string }) {
       </div>
 
       {calcMode === "position" ? (
-        <PositionSizeCalculator tokenSymbol={coin.symbol.toUpperCase()} livePriceUSD={priceUSD} />
+        <Suspense fallback={<TabSkeleton />}>
+          <PositionSizeCalculator tokenSymbol={coin.symbol.toUpperCase()} livePriceUSD={priceUSD} />
+        </Suspense>
       ) : (
         <>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <PnLCalculator
-              tokenId={coin.id}
-              tokenSymbol={coin.symbol}
-              livePriceUSD={priceUSD}
-              hideHistory
-              hideScenarios
-            />
-            <ScenariosTable tokenSymbol={coin.symbol} livePriceUSD={priceUSD} />
+            <Suspense fallback={<TabSkeleton />}>
+              <PnLCalculator
+                tokenId={coin.id}
+                tokenSymbol={coin.symbol}
+                livePriceUSD={priceUSD}
+                hideHistory
+                hideScenarios
+              />
+            </Suspense>
+            <Suspense fallback={<TabSkeleton />}>
+              <ScenariosTable tokenSymbol={coin.symbol} livePriceUSD={priceUSD} />
+            </Suspense>
           </div>
-          <PnLHistoryPanel />
+          <Suspense fallback={<TabSkeleton />}>
+            <PnLHistoryPanel />
+          </Suspense>
         </>
       )}
     </div>

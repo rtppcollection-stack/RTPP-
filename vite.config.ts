@@ -7,7 +7,35 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 export default defineConfig({
+  vite: {
+    resolve: {
+      dedupe: [
+        "react",
+        "react-dom",
+        "react/jsx-runtime",
+        "react/jsx-dev-runtime",
+        "use-sync-external-store",
+        "@tanstack/react-store",
+        "@tanstack/react-router",
+        "@tanstack/react-query",
+      ],
+    },
+    optimizeDeps: {
+      include: [
+        "react",
+        "react-dom",
+        "react-dom/client",
+        "react/jsx-runtime",
+        "react/jsx-dev-runtime",
+        "use-sync-external-store/shim/with-selector",
+        "@tanstack/react-store",
+        "@tanstack/react-router",
+        "@tanstack/react-query",
+      ],
+    },
+  },
   tanstackStart: {
+    client: { entry: "client" },
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this
     server: { entry: "server" },
