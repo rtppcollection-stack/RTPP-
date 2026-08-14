@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0066ff" />
+      <stop offset="100%" stop-color="#0033cc" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#ffffff" flood-opacity="0.8" />
+    </filter>
+  </defs>
+  
+  <!-- Outer Blue Circle Background -->
+  <circle cx="256" cy="256" r="240" fill="url(#blueGrad)" />
+  
+  <!-- White Crescent Arc Swoosh on Left -->
+  <path d="M 120 70 A 210 210 0 0 0 120 442 A 235 235 0 0 1 120 70 Z" fill="#ffffff" />
+  
+  <!-- Main RTPP Text -->
+  <text x="268" y="270" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="900" font-size="108" fill="#000000" letter-spacing="2" style="filter: drop-shadow(0px 2px 4px rgba(255,255,255,0.7));">
+    RTPP
+  </text>
+  
+  <!-- collection Subtitle Text -->
+  <text x="268" y="345" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="800" font-size="52" fill="#000000" letter-spacing="1">
+    collection
+  </text>
+</svg>

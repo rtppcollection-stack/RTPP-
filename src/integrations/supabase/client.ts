@@ -31,10 +31,31 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
 
 function createSupabaseClient() {
   // Use import.meta.env for client-side (Vite build-time replacement)
-  // Fall back to process.env for SSR (server-side rendering)
-  const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+  // Fall back to process.env for SSR (server-side rendering) and all Vercel variable aliases
+  const SUPABASE_URL =
+    import.meta.env.VITE_SUPABASE_URL ||
+    (import.meta.env as unknown as { NEXT_PUBLIC_SUPABASE_URL?: string })
+      .NEXT_PUBLIC_SUPABASE_URL ||
+    (typeof process !== "undefined"
+      ? process.env.VITE_SUPABASE_URL ||
+        process.env.NEXT_PUBLIC_SUPABASE_URL ||
+        process.env.SUPABASE_URL
+      : undefined);
+
   const SUPABASE_PUBLISHABLE_KEY =
-    import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY;
+    import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+    (import.meta.env as unknown as { VITE_SUPABASE_ANON_KEY?: string }).VITE_SUPABASE_ANON_KEY ||
+    (import.meta.env as unknown as { NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?: string })
+      .NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+    (import.meta.env as unknown as { NEXT_PUBLIC_SUPABASE_ANON_KEY?: string })
+      .NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    (typeof process !== "undefined"
+      ? process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+        process.env.SUPABASE_PUBLISHABLE_KEY ||
+        process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+        process.env.SUPABASE_ANON_KEY
+      : undefined);
 
   if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
     console.warn("[Supabase] Missing environment variable(s) — returning mock client");

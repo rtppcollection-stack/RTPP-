@@ -3,23 +3,15 @@
 //   - tanstackStart, viteReact, tailwindcss, tsConfigPaths, nitro (build-only using cloudflare as a default target),
 //     componentTagger (dev-only), VITE_* env injection, @ path alias, React/TanStack dedupe,
 //     error logger plugins, and sandbox detection (port/host/strictPort).
-// You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 export default defineConfig({
+  tanstackStart: {
+    client: { entry: "client" },
+    // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
+    server: { entry: "server" },
+  },
   vite: {
-    resolve: {
-      dedupe: [
-        "react",
-        "react-dom",
-        "react/jsx-runtime",
-        "react/jsx-dev-runtime",
-        "use-sync-external-store",
-        "@tanstack/react-store",
-        "@tanstack/react-router",
-        "@tanstack/react-query",
-      ],
-    },
     optimizeDeps: {
       include: [
         "react",
@@ -27,17 +19,19 @@ export default defineConfig({
         "react-dom/client",
         "react/jsx-runtime",
         "react/jsx-dev-runtime",
-        "use-sync-external-store/shim/with-selector",
-        "@tanstack/react-store",
-        "@tanstack/react-router",
         "@tanstack/react-query",
+        "@tanstack/query-core",
+        "lucide-react",
+        "clsx",
+        "tailwind-merge",
+        "class-variance-authority",
+        "sonner",
+        "ethers",
+        "@supabase/supabase-js",
+        "@google/genai",
+        "recharts",
+        "cmdk",
       ],
     },
-  },
-  tanstackStart: {
-    client: { entry: "client" },
-    // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
-    // nitro/vite builds from this
-    server: { entry: "server" },
   },
 });

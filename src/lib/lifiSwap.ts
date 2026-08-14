@@ -132,6 +132,61 @@ export async function getLifiSwapQuote(params: LifiQuoteParams): Promise<LifiQuo
       (import.meta as unknown as { env?: Record<string, string> }).env?.VITE_LIFI_API_KEY) ||
     "";
 
+  // 1. Try serverless backend proxy endpoint (/api/lifi-swap) first
+  try {
+    const localRes = await fetch(`/api/lifi-swap?${queryParams.toString()}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (localRes.ok) {
+      const data = await localRes.json();
+      if (data && (data.estimate || data.transactionRequest || data.tool)) {
+        const estimate = data.estimate || {};
+        const gasCosts: LifiGasCost[] = estimate.gasCosts || [];
+        const feeCosts: LifiFeeCost[] = estimate.feeCosts || [];
+        const totalGasCostUSD = gasCosts.reduce(
+          (acc, g) => acc + (parseFloat(g.amountUSD) || 0),
+          0,
+        );
+
+        return {
+          id: data.id,
+          tool: data.tool,
+          toolName: data.toolDetails?.name || data.tool || "Li.Fi Auto Route",
+          fromChainId: data.action?.fromChainId || fromChain,
+          toChainId: data.action?.toChainId || toChain,
+          fromAmount: estimate.fromAmount || params.fromAmountWei,
+          toAmount: estimate.toAmount || "0",
+          toAmountMin: estimate.toAmountMin || "0",
+          approvalAddress: estimate.approvalAddress || data.transactionRequest?.to,
+          executionDuration: estimate.executionDuration || 30,
+          gasCosts,
+          feeCosts,
+          totalGasCostUSD,
+          transactionRequest: data.transactionRequest
+            ? {
+                to: data.transactionRequest.to,
+                data: data.transactionRequest.data,
+                value: data.transactionRequest.value || "0x0",
+                gasLimit: data.transactionRequest.gasLimit,
+                gasPrice: data.transactionRequest.gasPrice,
+                chainId: data.transactionRequest.chainId,
+              }
+            : undefined,
+          feeRecipient: targetFeeWallet,
+          feePercentage: 0.0025,
+          rawResponse: data,
+        };
+      }
+    }
+  } catch {
+    // Proxy attempt failed, fall back to direct Li.Fi endpoint
+  }
+
+  // 2. Direct Li.Fi API request fallback
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
@@ -156,7 +211,7 @@ export async function getLifiSwapQuote(params: LifiQuoteParams): Promise<LifiQuo
       return {
         id: data.id,
         tool: data.tool,
-        toolName: data.toolDetails?.name || data.tool,
+        toolName: data.toolDetails?.name || data.tool || "Li.Fi Auto Route",
         fromChainId: data.action?.fromChainId || fromChain,
         toChainId: data.action?.toChainId || toChain,
         fromAmount: estimate.fromAmount || params.fromAmountWei,
@@ -187,13 +242,13 @@ export async function getLifiSwapQuote(params: LifiQuoteParams): Promise<LifiQuo
     return {
       feeRecipient: targetFeeWallet,
       feePercentage: 0.0025,
-      error: errJson.message || errJson.error || `Li.Fi HTTP error ${res.status}`,
+      error: errJson.message || errJson.error || "Route quote currently unavailable for this pair",
     };
   } catch (err) {
     return {
       feeRecipient: targetFeeWallet,
       feePercentage: 0.0025,
-      error: (err as Error).message || "Failed to reach Li.Fi API at https://li.quest",
+      error: (err as Error).message || "Li.Fi service route optimizing...",
     };
   }
 }

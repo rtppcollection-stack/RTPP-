@@ -1,5 +1,22 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { ADMIN_FEE_WALLET, mapChainToLifiChainId } from "../src/lib/lifiSwap.js";
+
+const ADMIN_FEE_WALLET = "0x82627aeEDD0E7f0B6d45d443A1F59bCD2Adcd68f";
+
+function mapChainToLifiChainId(chain: string): string {
+  const c = String(chain || "")
+    .toLowerCase()
+    .trim();
+  if (c === "bitcoin" || c === "btc") return "btc";
+  if (c === "ethereum" || c === "eth" || c === "0x1" || c === "1") return "1";
+  if (c === "polygon" || c === "pol" || c === "0x89" || c === "137") return "137";
+  if (c === "base" || c === "0x2105" || c === "8453") return "8453";
+  if (c === "bsc" || c === "binance" || c === "0x38" || c === "56") return "56";
+  if (c === "solana" || c === "sol") return "SOL";
+  if (c === "arbitrum" || c === "0xa4b1" || c === "42161") return "42161";
+  if (c === "optimism" || c === "0xa" || c === "10") return "10";
+  if (c === "avalanche" || c === "0xa86a" || c === "43114") return "43114";
+  return chain || "1";
+}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -25,7 +42,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const fromAmount = body.fromAmount || body.fromAmountWei || "100000000000000000";
     const fromAddress = body.fromAddress || body.takerAddress || ADMIN_FEE_WALLET;
 
-    const apiKey = process.env.LIFI_API_KEY || process.env.VITE_LIFI_API_KEY || "";
+    const apiKey =
+      process.env.LIFI_API_KEY ||
+      process.env.VITE_LIFI_API_KEY ||
+      process.env.NEXT_PUBLIC_LIFI_API_KEY ||
+      "";
 
     const queryParams = new URLSearchParams({
       fromChain,
@@ -34,11 +55,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       toToken,
       fromAmount,
       fromAddress: fromAddress.startsWith("0x") ? fromAddress : ADMIN_FEE_WALLET,
-      fee: "0.002",
+      fee: "0.0025",
       feeRecipient: ADMIN_FEE_WALLET,
-      feePercentage: "0.002",
+      feePercentage: "0.0025",
       referrer: ADMIN_FEE_WALLET,
-      integrator: "rtpp-multi-chain",
+      integrator: "rtpp",
     });
 
     const headers: Record<string, string> = {
@@ -60,16 +81,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const errData = await response.json().catch(() => ({}));
     return res.status(response.status || 400).json({
-      error: errData.message || errData.error || "Li.Fi API fetch failed",
+      error: errData.message || errData.error || "Li.Fi route quote not available",
       feeRecipient: ADMIN_FEE_WALLET,
-      feePercentage: 0.002,
+      feePercentage: 0.0025,
       details: errData,
     });
   } catch (err) {
     return res.status(500).json({
       error: (err as Error).message || "Internal server error connecting to Li.Fi",
       feeRecipient: ADMIN_FEE_WALLET,
-      feePercentage: 0.002,
+      feePercentage: 0.0025,
     });
   }
 }

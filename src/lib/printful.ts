@@ -6,8 +6,16 @@
 const DEFAULT_PRINTFUL_TOKEN = "xYlGICnznkfiTLg9HPXpu2LFK2I1OKJpZOYCAVVQ";
 
 export function getPrintfulApiKey(): string {
-  if (typeof process !== "undefined" && process.env && process.env.PRINTFUL_API_KEY) {
-    return process.env.PRINTFUL_API_KEY;
+  if (typeof process !== "undefined" && process.env) {
+    if (process.env.PRINTFUL_API_KEY) return process.env.PRINTFUL_API_KEY;
+    if (process.env.VITE_PRINTFUL_API_KEY) return process.env.VITE_PRINTFUL_API_KEY;
+    if (process.env.NEXT_PUBLIC_PRINTFUL_API_KEY) return process.env.NEXT_PUBLIC_PRINTFUL_API_KEY;
+  }
+  if (
+    typeof import.meta !== "undefined" &&
+    (import.meta as unknown as { env?: Record<string, string> }).env?.VITE_PRINTFUL_API_KEY
+  ) {
+    return (import.meta as unknown as { env: Record<string, string> }).env.VITE_PRINTFUL_API_KEY;
   }
   return DEFAULT_PRINTFUL_TOKEN;
 }

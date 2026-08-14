@@ -157,17 +157,26 @@ class GeminiKeyPoolManager {
       rawKeys.push(...splitKeys);
     }
 
-    // 2. Check process.env.GEMINI_API_KEY
-    if (process.env.GEMINI_API_KEY) {
-      const splitKeys = process.env.GEMINI_API_KEY.split(/[,;\s]+/)
-        .map((k) => k.trim())
-        .filter(Boolean);
-      rawKeys.push(...splitKeys);
+    // 2. Check process.env.GEMINI_API_KEY and aliases
+    const singleKeys = [
+      process.env.GEMINI_API_KEY,
+      process.env.VITE_GEMINI_API_KEY,
+      process.env.GEMINI_KEY,
+      process.env.NEXT_PUBLIC_GEMINI_API_KEY,
+    ];
+    for (const sk of singleKeys) {
+      if (sk) {
+        const splitKeys = sk
+          .split(/[,;\s]+/)
+          .map((k) => k.trim())
+          .filter(Boolean);
+        rawKeys.push(...splitKeys);
+      }
     }
 
     // 3. Check process.env.GEMINI_API_KEY_1 to GEMINI_API_KEY_10
     for (let i = 1; i <= 10; i++) {
-      const k = process.env[`GEMINI_API_KEY_${i}`];
+      const k = process.env[`GEMINI_API_KEY_${i}`] || process.env[`VITE_GEMINI_API_KEY_${i}`];
       if (k && k.trim()) {
         rawKeys.push(k.trim());
       }
@@ -471,13 +480,23 @@ export async function handleChatMessage(
               },
             },
           });
-          const response = await ai.models.generateContent({
-            model: "gemini-3.6-flash",
-            contents,
-            config: { systemInstruction: systemPrompt },
-          });
-
-          return response.text;
+          const modelName = "gemini-2.5-flash";
+          try {
+            const response = await ai.models.generateContent({
+              model: modelName,
+              contents,
+              config: { systemInstruction: systemPrompt },
+            });
+            return response.text;
+          } catch (modelErr) {
+            // Fallback to gemini-2.0-flash if 2.5 is unavailable
+            const fallbackResponse = await ai.models.generateContent({
+              model: "gemini-2.0-flash",
+              contents,
+              config: { systemInstruction: systemPrompt },
+            });
+            return fallbackResponse.text;
+          }
         });
 
         if (responseText) {
