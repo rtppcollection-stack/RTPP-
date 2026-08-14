@@ -61,17 +61,13 @@ function TabSkeleton() {
 
 function IndexRouteComponent() {
   return (
-    <ThemeProvider>
-      <I18nProvider>
-        <WalletProvider>
-          <Home />
-          <Suspense fallback={null}>
-            <AIChat />
-          </Suspense>
-          <AppToaster />
-        </WalletProvider>
-      </I18nProvider>
-    </ThemeProvider>
+    <>
+      <Home />
+      <Suspense fallback={null}>
+        <AIChat />
+      </Suspense>
+      <AppToaster />
+    </>
   );
 }
 

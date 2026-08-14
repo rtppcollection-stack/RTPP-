@@ -3,33 +3,37 @@ import {
   Outlet,
   Link,
   createRootRouteWithContext,
-  useRouter,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { Component, useEffect, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
+import { ThemeProvider } from "@/lib/theme";
+import { I18nProvider } from "@/lib/i18n";
+import { WalletProvider } from "@/lib/wallet";
 
 import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
-        </p>
-        <div className="mt-6">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Go home
-          </Link>
+    <RootDocument>
+      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+        <div className="max-w-md text-center">
+          <h1 className="text-7xl font-bold text-foreground">404</h1>
+          <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            The page you're looking for doesn't exist or has been moved.
+          </p>
+          <div className="mt-6">
+            <Link
+              to="/"
+              className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              Go home
+            </Link>
+          </div>
         </div>
       </div>
-    </div>
+    </RootDocument>
   );
 }
 
@@ -51,30 +55,32 @@ function ErrorComponent({ error, reset }: { error: Error; reset?: () => void }) 
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
-        </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
-          <button
-            onClick={handleReset}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Try again
-          </button>
-          <a
-            href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
-          >
-            Go home
-          </a>
+    <RootDocument>
+      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+        <div className="max-w-md text-center">
+          <h1 className="text-xl font-semibold tracking-tight text-foreground">
+            This page didn't load
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Something went wrong on our end. You can try refreshing or head back home.
+          </p>
+          <div className="mt-6 flex flex-wrap justify-center gap-2">
+            <button
+              onClick={handleReset}
+              className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              Try again
+            </button>
+            <a
+              href="/"
+              className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+            >
+              Go home
+            </a>
+          </div>
         </div>
       </div>
-    </div>
+    </RootDocument>
   );
 }
 
@@ -127,85 +133,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "manifest", href: "/manifest.json" },
     ],
   }),
-  shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
   errorComponent: ErrorComponent,
 });
 
-function SafeHeadContent() {
-  return (
-    <SafeHeadBoundary>
-      <HeadContent />
-    </SafeHeadBoundary>
-  );
-}
-
-function SafeScripts() {
-  return (
-    <SafeHeadBoundary>
-      <Scripts />
-    </SafeHeadBoundary>
-  );
-}
-
-class SafeHeadBoundary extends Component<{ children: ReactNode }> {
-  state = { hasError: false };
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-  componentDidCatch(error: unknown) {
-    console.warn("HeadContent error caught gracefully:", error);
-  }
-  render() {
-    if (this.state.hasError) return null;
-    return this.props.children;
-  }
-}
-
-function RootShell({ children }: { children: ReactNode }) {
+function RootDocument({ children }: { children: ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head suppressHydrationWarning>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>RTPP · Crypto Dashboard, Swap & P2P Calculator</title>
-        <meta
-          name="description"
-          content="Free multi-chain crypto dashboard: live prices, DEX swap & bridge, real-time P2P profit/loss calculator, and NFT marketplace."
-        />
-        <meta name="author" content="RTPP" />
-        <meta property="og:title" content="RTPP · Crypto Dashboard, Swap & P2P Calculator" />
-        <meta
-          property="og:description"
-          content="Free multi-chain crypto dashboard: live prices, DEX swap & bridge, real-time P2P profit/loss calculator, and NFT marketplace."
-        />
-        <meta property="og:type" content="website" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="RTPP · Crypto Dashboard, Swap & P2P Calculator" />
-        <meta
-          name="twitter:description"
-          content="Free multi-chain crypto dashboard: live prices, DEX swap & bridge, real-time P2P profit/loss calculator, and NFT marketplace."
-        />
-        <meta
-          property="og:image"
-          content="https://storage.googleapis.com/gpt-engineer-file-uploads/lrfCS7WIpaVyu6RZXaBYW7mkVF62/social-images/social-1783431702267-RTPP-logo.-1x1-400px.webp"
-        />
-        <meta
-          name="twitter:image"
-          content="https://storage.googleapis.com/gpt-engineer-file-uploads/lrfCS7WIpaVyu6RZXaBYW7mkVF62/social-images/social-1783431702267-RTPP-logo.-1x1-400px.webp"
-        />
-        <link rel="stylesheet" href={appCss} />
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="icon" href="/favicon.png" type="image/png" />
-        <link rel="shortcut icon" href="/favicon.ico" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <link rel="manifest" href="/manifest.json" />
-        <SafeHeadContent />
+        <HeadContent />
       </head>
       <body suppressHydrationWarning>
         {children}
-        <SafeScripts />
+        <Scripts />
       </body>
     </html>
   );
@@ -226,9 +167,17 @@ function RootComponent() {
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
-    </QueryClientProvider>
+    <RootDocument>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <I18nProvider>
+            <WalletProvider>
+              {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+              <Outlet />
+            </WalletProvider>
+          </I18nProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </RootDocument>
   );
 }

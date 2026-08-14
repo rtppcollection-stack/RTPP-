@@ -17,14 +17,10 @@ function AppToaster() {
 
 function AdminRouteComponent() {
   return (
-    <ThemeProvider>
-      <I18nProvider>
-        <WalletProvider>
-          <AdminGatePage />
-          <AppToaster />
-        </WalletProvider>
-      </I18nProvider>
-    </ThemeProvider>
+    <>
+      <AdminGatePage />
+      <AppToaster />
+    </>
   );
 }
 
